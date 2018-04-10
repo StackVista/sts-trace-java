@@ -11,12 +11,10 @@ lombok { // optional: values below are the defaults
   sha256 = "c5178b18caaa1a15e17b99ba5e4023d2de2ebc18b58cde0f5a04ca4b31c10e6d"
 }
 
-if (JavaVersion.current().isJava8Compatible()) {
-  apply plugin: "net.ltgt.errorprone"
-  tasks.withType(JavaCompile) {
-    // workaround for: https://github.com/google/error-prone/issues/780
-    options.compilerArgs += ['-Xep:ParameterName:OFF']
-  }
+apply plugin: "net.ltgt.errorprone"
+tasks.withType(JavaCompile) {
+  // workaround for: https://github.com/google/error-prone/issues/780
+  options.compilerArgs += ['-Xep:ParameterName:OFF']
 }
 
 apply plugin: "eclipse"
@@ -27,7 +25,7 @@ eclipse {
   }
 }
 if (configurations.find { it.name == 'jmh' }) {
-  eclipse.classpath.plusConfigurations += [ configurations.jmh ]
+  eclipse.classpath.plusConfigurations += [configurations.jmh]
 }
 
 task packageSources(type: Jar) {
@@ -111,22 +109,45 @@ if (project.hasProperty("removeJarVersionNumbers") && removeJarVersionNumbers) {
   }
 }
 
+
+project.ext.testJava8Only = []
+project.ext.testJava8Minimum = []
+
+tasks.withType(Test) {
+  if (name.endsWith("Java7") || name.endsWith("Java9")) {
+    return
+  }
+
+  def cloned = it
+  def j7 = task "${cloned.name}Java7"(type: cloned.class) {
+    description "Runs $cloned.name under java 7"
+    // TODO: Pull from environment variable:
+    executable = "/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home/bin/java"
+    afterEvaluate {
+      exclude project.testJava8Only
+      exclude project.testJava8Minimum
+    }
+  }
+  def j9 = task "${cloned.name}Java9"(type: cloned.class) {
+    description "Runs $cloned.name under java 9"
+    // TODO: Pull from environment variable:
+    executable = "/Library/Java/JavaVirtualMachines/jdk-9.0.4.jdk/Contents/Home/bin/java"
+    jvmArgs '--add-opens'
+    jvmArgs 'java.base/jdk.internal.loader=ALL-UNNAMED'
+    project.afterEvaluate {
+      exclude project.testJava8Only
+    }
+  }
+  tasks.check.dependsOn(j7, j9)
+}
+
 apply from: "$rootDir/gradle/checkstyle.gradle"
 apply from: "$rootDir/gradle/codenarc.gradle"
-
 
 plugins.withType(BasePlugin) {
   project.afterEvaluate {
     def deleteTasks = tasks.withType(Delete) + project.tasks.findByPath('clean')
     def otherTasks = tasks - deleteTasks
     otherTasks*.mustRunAfter deleteTasks
-  }
-}
-
-if (JavaVersion.current().isJava9Compatible()) {
-  // required to allow reflection into java9 for testing
-  test {
-    jvmArgs '--add-opens'
-    jvmArgs 'java.base/jdk.internal.loader=ALL-UNNAMED'
   }
 }

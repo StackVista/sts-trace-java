@@ -14,36 +14,6 @@ cache_keys: &cache_keys
     - dd-trace-java-{{ checksum "dd-trace-java.gradle" }}
     - dd-trace-java
 
-test_job: &test_job
-  steps:
-    - checkout
-
-    - restore_cache:
-        <<: *cache_keys
-
-    - run:
-        name: Fix EC parameters error # (ref https://github.com/travis-ci/travis-ci/issues/8503)
-        command: |
-            if [ "${CIRCLE_JOB}" == "test_7" ]; then
-              wget "https://downloads.bouncycastle.org/java/bcprov-ext-jdk15on-158.jar" -O "${JAVA_HOME}"/jre/lib/ext/bcprov-ext-jdk15on-158.jar && \
-              perl -pi.bak -e 's/^(security\.provider\.)([0-9]+)/$1.($2+1)/ge' /etc/java-7-openjdk/security/java.security && \
-              echo "security.provider.1=org.bouncycastle.jce.provider.BouncyCastleProvider" | tee -a /etc/java-7-openjdk/security/java.security
-            fi
-
-    - run:
-        name: Run Tests
-        command: GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2G -Xms512M" ./gradlew compileJava compileScala compileGroovy compileTestJava compileTestScala compileTestGroovy shadowJar --stacktrace --no-daemon && GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2G -Xms512M" ./gradlew test --parallel --stacktrace --no-daemon --max-workers=3
-
-    - run:
-        name: Save Artifacts to (project-root)/build
-        when: always
-        command: .circleci/save_artifacts.sh
-
-    - store_test_results:
-        path: build/test-results
-
-    - store_artifacts:
-        path: build
 
 jobs:
   build:
@@ -59,30 +29,45 @@ jobs:
 
       - run:
           name: Build Project
-          command: GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2G -Xms512M" ./gradlew clean check -x test --parallel --stacktrace --no-daemon --max-workers=6
+          command: GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2G -Xms512M" ./gradlew clean compileTestGroovy compileTestScala compileTestJava check -x test -x testJava7 -x testJava9 -x traceAgentTest -x traceAgentTestJava7 -x traceAgentTestJava9 --parallel --stacktrace --no-daemon --max-workers=6
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - workspace
 
       - save_cache:
           key: dd-trace-java-{{ checksum "dd-trace-java.gradle" }}-{{ .Branch }}-{{ .Revision }}
           paths: ~/.gradle
           background: true
 
-  test_7:
+  test:
     <<: *defaults
-    <<: *test_job
-    docker:
-      - image: openjdk:7-jdk
+    steps:
+      - checkout
 
-  test_8:
-    <<: *defaults
-    <<: *test_job
-    docker:
-      - image: circleci/openjdk:8-jdk
+      # TODO: Need to install Java 7 and 9.
 
-  test_9:
-    <<: *defaults
-    <<: *test_job
-    docker:
-      - image: circleci/openjdk:9-jdk
+      - attach_workspace:
+          at: .
+
+      - restore_cache:
+          <<: *cache_keys
+
+      - run:
+          name: Run Tests
+          command: GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2G -Xms512M" ./gradlew test -PdisableCompile=true --parallel --stacktrace --no-daemon --max-workers=3
+
+      - run:
+          name: Collect Artifacts
+          when: always
+          command: .circleci/collect_artifacts.sh
+
+      - store_test_results:
+          path: ./reports
+
+      - store_artifacts:
+          path: ./artifacts
 
   agent_integration_tests:
     <<: *defaults
@@ -95,6 +80,9 @@ jobs:
           - DD_API_KEY=invalid_key_but_this_is_fine
     steps:
       - checkout
+
+      - attach_workspace:
+          at: .
 
       - restore_cache:
           # Reset the cache approx every release
@@ -109,12 +97,12 @@ jobs:
           command: ./gradlew traceAgentTest --parallel --stacktrace --no-daemon --max-workers=6
 
       - run:
-          name: Save Artifacts to (project-root)/build
+          name: Collect Artifacts
           when: always
-          command: .circleci/save_artifacts.sh
+          command: .circleci/collect_artifacts.sh
 
       - store_test_results:
-          path: build/test-results
+          path: ./reports
 
   scan_versions:
     <<: *defaults
@@ -132,15 +120,15 @@ jobs:
           command: ./gradlew verifyVersionScan --parallel --stacktrace --no-daemon --max-workers=6
 
       - run:
-          name: Save Artifacts to (project-root)/build
+          name: Collect Artifacts
           when: always
-          command: .circleci/save_artifacts.sh
+          command: .circleci/collect_artifacts.sh
 
       - store_test_results:
-          path: build/test-results
+          path: ./reports
 
       - store_artifacts:
-          path: build
+          path: ./artifacts
 
       - save_cache:
           key: dd-trace-java-version-scan-{{ checksum "dd-trace-java.gradle" }}
@@ -150,6 +138,9 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+
+      - attach_workspace:
+          at: .
 
       - restore_cache:
           <<: *cache_keys
@@ -183,19 +174,7 @@ workflows:
             tags:
               only: /.*/
 
-      - test_7:
-          requires:
-            - build
-          filters:
-            tags:
-              only: /.*/
-      - test_8:
-          requires:
-            - build
-          filters:
-            tags:
-              only: /.*/
-      - test_9:
+      - test:
           requires:
             - build
           filters:
@@ -218,9 +197,7 @@ workflows:
 
       - publish_master:
           requires:
-            - test_7
-            - test_8
-            - test_9
+            - test
             - agent_integration_tests
           filters:
             branches:
@@ -230,9 +207,7 @@ workflows:
 
       - publish_tag:
           requires:
-            - test_7
-            - test_8
-            - test_9
+            - test
             - agent_integration_tests
           filters:
             branches:
