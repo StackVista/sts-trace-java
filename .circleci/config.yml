@@ -59,7 +59,7 @@ jobs:
 
       - run:
           name: Build Project
-          command: GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx4G -Xms512M" ./gradlew clean check -x test --stacktrace --no-daemon --max-workers=1
+          command: GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx1G -Xms512M" ./gradlew clean check -x test --stacktrace --no-daemon --max-workers=1
 
       - save_cache:
           key: sts-trace-java-{{ checksum "sts-trace-java.gradle" }}-{{ .Branch }}-{{ .Revision }}
