@@ -32,7 +32,7 @@ test_job: &test_job
 
     - run:
         name: Run Tests
-        command: GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2G -Xms512M" ./gradlew compileJava compileScala compileGroovy compileTestJava compileTestScala compileTestGroovy shadowJar --stacktrace --no-daemon && GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2G -Xms512M" ./gradlew test --parallel --stacktrace --no-daemon --max-workers=3
+        command: GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2G -Xms512M" ./gradlew compileJava compileScala compileGroovy compileTestJava compileTestScala compileTestGroovy shadowJar --stacktrace --no-daemon && GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2G -Xms512M" ./gradlew test --stacktrace --no-daemon --max-workers=1
 
     - run:
         name: Save Artifacts to (project-root)/build
@@ -59,7 +59,7 @@ jobs:
 
       - run:
           name: Build Project
-          command: GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2G -Xms512M" ./gradlew clean check -x test --parallel --stacktrace --no-daemon --max-workers=6
+          command: GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2G -Xms512M" ./gradlew clean check -x test --stacktrace --no-daemon --max-workers=1
 
       - save_cache:
           key: sts-trace-java-{{ checksum "sts-trace-java.gradle" }}-{{ .Branch }}-{{ .Revision }}
@@ -106,7 +106,7 @@ jobs:
 
       - run:
           name: Run Trace Agent Tests
-          command: ./gradlew traceAgentTest --parallel --stacktrace --no-daemon --max-workers=6
+          command: ./gradlew traceAgentTest --stacktrace --no-daemon --max-workers=1
 
       - run:
           name: Save Artifacts to (project-root)/build
@@ -129,7 +129,7 @@ jobs:
 
       - run:
           name: Verify Version Scan
-          command: ./gradlew verifyVersionScan --parallel --stacktrace --no-daemon --max-workers=6
+          command: ./gradlew verifyVersionScan --stacktrace --no-daemon --max-workers=1
 
       - run:
           name: Save Artifacts to (project-root)/build
