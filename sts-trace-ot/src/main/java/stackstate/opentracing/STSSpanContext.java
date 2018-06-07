@@ -2,6 +2,7 @@ package stackstate.opentracing;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.opentracing.tag.Tags;
+import java.net.InetAddress;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,9 @@ public class STSSpanContext implements io.opentracing.SpanContext {
   // Additional Metadata
   private final String threadName = Thread.currentThread().getName();
   private final long threadId = Thread.currentThread().getId();
+
+  private final String hostName = STSSpanContext.getHostName();
+  private final long pid = STSSpanContext.getPID();
 
   public STSSpanContext(
       final long traceId,
@@ -275,6 +279,8 @@ public class STSSpanContext implements io.opentracing.SpanContext {
   public synchronized Map<String, Object> getTags() {
     tags.put(STSTags.THREAD_NAME, threadName);
     tags.put(STSTags.THREAD_ID, threadId);
+    tags.put(STSTags.SPAN_HOSTNAME, hostName);
+    tags.put(STSTags.SPAN_PID, pid);
     final String spanType = getSpanType();
     if (spanType != null) {
       tags.put(STSTags.SPAN_TYPE, spanType);
@@ -308,5 +314,27 @@ public class STSSpanContext implements io.opentracing.SpanContext {
       s.append(" tags=").append(new TreeMap(tags));
     }
     return s.toString();
+  }
+
+  private static long getPID() {
+    // todo: support java 9 natively
+    // https://docs.oracle.com/javase/9/docs/api/java/lang/ProcessHandle.html
+    try {
+      String processName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+      return Long.parseLong(processName.split("@")[0]);
+    } catch (Exception e) {
+      log.debug(
+          "Failed to detect pid java.lang.management.ManagementFactory.getRuntimeMXBean().getName()");
+      return 0;
+    }
+  }
+
+  private static String getHostName() {
+    try {
+      return InetAddress.getLocalHost().getHostName();
+    } catch (Exception e) {
+      log.debug("Failed to detect hostname from InetAddress.getLocalHost().getHostName()");
+      return "";
+    }
   }
 }
