@@ -239,10 +239,18 @@ class STSSpanBuilderTest extends Specification {
     setup:
     System.setProperty("sts.trace.span.tags", tagString)
     tracer = new STSTracer(writer)
-    def span = tracer.buildSpan("op name").withServiceName("foo").start()
+    def fakePidProvider = [getPid: {-> return (Long)42}] as ISTSSpanContextPidProvider
+    def fakeHostNameProvider = [getHostName: {-> return "fakehost"}] as ISTSSpanContextHostNameProvider
+    def span = tracer.buildSpan("op name")
+      .withServiceName("foo")
+      .withPidProvider(fakePidProvider)
+      .withHostNameProvider(fakeHostNameProvider)
+      .start()
     tags.putAll([
       (STSTags.THREAD_NAME): Thread.currentThread().getName(),
       (STSTags.THREAD_ID)  : Thread.currentThread().getId(),
+      (STSTags.SPAN_HOSTNAME): "fakehost",
+      (STSTags.THREAD_ID)  : (Long) 42
     ])
 
     expect:
