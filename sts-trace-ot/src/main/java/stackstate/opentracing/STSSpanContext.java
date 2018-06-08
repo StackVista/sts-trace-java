@@ -3,6 +3,7 @@ package stackstate.opentracing;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.opentracing.tag.Tags;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,23 @@ import lombok.extern.slf4j.Slf4j;
 import stackstate.opentracing.decorators.AbstractDecorator;
 import stackstate.trace.api.STSTags;
 import stackstate.trace.common.sampling.PrioritySampling;
+
+class STSSpanContextPidProvider implements ISTSSpanContextPidProvider {
+
+  @Override
+  public long getPid() {
+    String processName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+    return Long.parseLong(processName.split("@")[0]);
+  }
+}
+
+class STSSpanContextHostnameProvider implements ISTSSpanContextHostNameProvider {
+
+  @Override
+  public String getHostName() throws UnknownHostException {
+    return InetAddress.getLocalHost().getHostName();
+  }
+}
 
 /**
  * SpanContext represents Span state that must propagate to descendant Spans and across process
@@ -38,9 +56,14 @@ public class STSSpanContext implements io.opentracing.SpanContext {
   private final long traceId;
   private final long spanId;
   private final long parentId;
+  private long pid = 0;
+  private String hostName = "";
 
   /** Tags are associated to the current span, they will not propagate to the children span */
   private final Map<String, Object> tags = new ConcurrentHashMap<>();
+
+  private ISTSSpanContextPidProvider pidProvider;
+  private ISTSSpanContextHostNameProvider hostNameProvider;
 
   /** The service name is required, otherwise the span are dropped by the agent */
   private volatile String serviceName;
@@ -60,9 +83,6 @@ public class STSSpanContext implements io.opentracing.SpanContext {
   // Additional Metadata
   private final String threadName = Thread.currentThread().getName();
   private final long threadId = Thread.currentThread().getId();
-
-  private final String hostName = STSSpanContext.getHostName();
-  private final long pid = STSSpanContext.getPID();
 
   public STSSpanContext(
       final long traceId,
@@ -104,6 +124,9 @@ public class STSSpanContext implements io.opentracing.SpanContext {
     this.samplingPriority = samplingPriority;
     this.errorFlag = errorFlag;
     this.spanType = spanType;
+
+    this.pidProvider = new STSSpanContextPidProvider();
+    this.hostNameProvider = new STSSpanContextHostnameProvider();
   }
 
   public long getTraceId() {
@@ -171,6 +194,14 @@ public class STSSpanContext implements io.opentracing.SpanContext {
       }
     }
   }
+
+  public void setPidProvider(final ISTSSpanContextPidProvider provider) {
+    this.pidProvider = provider;
+  };
+
+  public void setHostNameProvider(final ISTSSpanContextHostNameProvider provider) {
+    this.hostNameProvider = provider;
+  };
 
   public int getSamplingPriority() {
     return samplingPriority;
@@ -279,8 +310,8 @@ public class STSSpanContext implements io.opentracing.SpanContext {
   public synchronized Map<String, Object> getTags() {
     tags.put(STSTags.THREAD_NAME, threadName);
     tags.put(STSTags.THREAD_ID, threadId);
-    tags.put(STSTags.SPAN_HOSTNAME, hostName);
-    tags.put(STSTags.SPAN_PID, pid);
+    tags.put(STSTags.SPAN_HOSTNAME, getHostName());
+    tags.put(STSTags.SPAN_PID, getPID());
     final String spanType = getSpanType();
     if (spanType != null) {
       tags.put(STSTags.SPAN_TYPE, spanType);
@@ -316,25 +347,25 @@ public class STSSpanContext implements io.opentracing.SpanContext {
     return s.toString();
   }
 
-  private static long getPID() {
-    // todo: support java 9 natively
-    // https://docs.oracle.com/javase/9/docs/api/java/lang/ProcessHandle.html
-    try {
-      String processName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
-      return Long.parseLong(processName.split("@")[0]);
-    } catch (Exception e) {
-      log.debug(
-          "Failed to detect pid java.lang.management.ManagementFactory.getRuntimeMXBean().getName()");
-      return 0;
+  private long getPID() {
+    if (this.pid == 0) {
+      try {
+        this.pid = this.pidProvider.getPid();
+      } catch (Exception e) {
+        log.debug("Failed to detect pid");
+      }
     }
+    return this.pid;
   }
 
-  private static String getHostName() {
-    try {
-      return InetAddress.getLocalHost().getHostName();
-    } catch (Exception e) {
-      log.debug("Failed to detect hostname from InetAddress.getLocalHost().getHostName()");
-      return "";
+  private String getHostName() {
+    if (this.hostName.equals("")) {
+      try {
+        this.hostName = this.hostNameProvider.getHostName();
+      } catch (Exception e) {
+        log.debug("Failed to detect hostname");
+      }
     }
+    return this.hostName;
   }
 }

@@ -412,6 +412,21 @@ public class STSTracer implements io.opentracing.Tracer {
       return this;
     }
 
+    public STSSpanBuilder withPidProvider(final ISTSSpanContextPidProvider provider) {
+      if (this.parent instanceof STSSpanContext) {
+        ((STSSpanContext) this.parent).setPidProvider(provider);
+      }
+      return this;
+    }
+
+    public STSSpanBuilder withHostNameProvider(final ISTSSpanContextHostNameProvider provider) {
+      if (this.parent instanceof STSSpanContext) {
+        ((STSSpanContext) this.parent).setHostNameProvider(provider);
+      }
+      return this;
+    }
+
+
     public STSSpanBuilder withResourceName(final String resourceName) {
       this.resourceName = resourceName;
       return this;

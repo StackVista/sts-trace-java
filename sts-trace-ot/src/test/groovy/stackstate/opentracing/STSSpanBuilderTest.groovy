@@ -12,6 +12,10 @@ class STSSpanBuilderTest extends Specification {
   def writer = new ListWriter()
   def tracer = new STSTracer(writer)
 
+  def fakePidProvider = [getPid: {-> return 42}] as ISTSSpanContextPidProvider
+  def fakeHostNameProvider = [getHostName: {-> return "fakehost"}] as ISTSSpanContextHostNameProvider
+
+
   def "build simple span"() {
     setup:
     final STSSpan span = tracer.buildSpan("op name").withServiceName("foo").start()
@@ -32,6 +36,8 @@ class STSSpanBuilderTest extends Specification {
     STSTracer.STSSpanBuilder builder = tracer
       .buildSpan(expectedName)
       .withServiceName("foo")
+      .withHostNameProvider(fakeHostNameProvider)
+      .withPidProvider(fakePidProvider)
     tags.each {
       builder = builder.withTag(it.key, it.value)
     }
@@ -51,6 +57,8 @@ class STSSpanBuilderTest extends Specification {
     span.getTags() == [
       (STSTags.THREAD_NAME): Thread.currentThread().getName(),
       (STSTags.THREAD_ID)  : Thread.currentThread().getId(),
+      (STSTags.SPAN_HOSTNAME): fakeHostNameProvider.getHostName(),
+      (STSTags.SPAN_PID): fakePidProvider.getPid()
     ]
 
     when:
