@@ -12,7 +12,7 @@ class STSSpanBuilderTest extends Specification {
   def writer = new ListWriter()
   def tracer = new STSTracer(writer)
 
-  def fakePidProvider = [getPid: {-> return 42}] as ISTSSpanContextPidProvider
+  def fakePidProvider = [getPid: {-> return (Long)42}] as ISTSSpanContextPidProvider
   def fakeHostNameProvider = [getHostName: {-> return "fakehost"}] as ISTSSpanContextHostNameProvider
 
 
