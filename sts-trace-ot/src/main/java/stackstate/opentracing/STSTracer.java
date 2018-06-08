@@ -426,7 +426,6 @@ public class STSTracer implements io.opentracing.Tracer {
       return this;
     }
 
-
     public STSSpanBuilder withResourceName(final String resourceName) {
       this.resourceName = resourceName;
       return this;
