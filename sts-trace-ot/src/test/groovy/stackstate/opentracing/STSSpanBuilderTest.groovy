@@ -51,7 +51,12 @@ class STSSpanBuilderTest extends Specification {
 
 
     when:
-    span = tracer.buildSpan(expectedName).withServiceName("foo").start()
+    span = tracer
+      .buildSpan(expectedName)
+      .withServiceName("foo")
+      .withHostNameProvider(fakeHostNameProvider)
+      .withPidProvider(fakePidProvider)
+      .start()
 
     then:
     span.getTags() == [
