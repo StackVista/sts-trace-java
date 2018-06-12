@@ -21,8 +21,6 @@ class STSSpanSerializationTest extends Specification {
     baggage.put("a-baggage", "value")
     final Map<String, Object> tags = new HashMap<>()
     baggage.put("k1", "v1")
-    baggage.put(STSTags.SPAN_HOSTNAME, "fakehost")
-    baggage.put(STSTags.SPAN_PID, 42l)
 
     Map<String, Object> expected = Maps.newHashMap()
     expected.put("meta", baggage)
@@ -59,6 +57,8 @@ class STSSpanSerializationTest extends Specification {
         tracer)
     context.setHostNameProvider(fakeHostNameProvider)
     context.setPidProvider(fakePidProvider)
+    baggage.put(STSTags.SPAN_HOSTNAME, "fakehost")
+    baggage.put(STSTags.SPAN_PID, "42")
     baggage.put(STSTags.THREAD_NAME, Thread.currentThread().getName())
     baggage.put(STSTags.THREAD_ID, String.valueOf(Thread.currentThread().getId()))
     baggage.put(STSTags.SPAN_TYPE, context.getSpanType())
