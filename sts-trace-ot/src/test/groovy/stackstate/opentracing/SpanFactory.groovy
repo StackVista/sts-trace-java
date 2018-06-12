@@ -92,8 +92,8 @@ class SpanFactory {
       new PendingTrace(tracer, 1L),
       tracer)
     context.setTag("env", envName)
-    context.setPidProvider(fakePidProvider);
-    context.setHostNameProvider(fakeHostNameProvider);
+    context.setPidProvider(fakePidProvider)
+    context.setHostNameProvider(fakeHostNameProvider)
     return new STSSpan(0l, context)
   }
 }
