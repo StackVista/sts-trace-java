@@ -254,7 +254,7 @@ class STSSpanBuilderTest extends Specification {
       (STSTags.THREAD_NAME): Thread.currentThread().getName(),
       (STSTags.THREAD_ID)  : Thread.currentThread().getId(),
       (STSTags.SPAN_HOSTNAME): "fakehost",
-      (STSTags.THREAD_ID)  : (Long) 42
+      (STSTags.SPAN_PID)  : (Long) 42
     ])
 
     expect:
