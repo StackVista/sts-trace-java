@@ -51,9 +51,11 @@ class OkHttp3Test extends AgentTestRunner {
 
     def tags1 = span1.context().tags
     tags1["component"] == "okhttp"
+    tags1["span.hostname"] != null
+    tags1["span.pid"] != 0l
     tags1["thread.name"] != null
     tags1["thread.id"] != null
-    tags1.size() == 3
+    tags1.size() == 5
 
     and: // span 1
     def span2 = trace[1]
