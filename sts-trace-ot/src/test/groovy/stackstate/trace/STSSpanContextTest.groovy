@@ -31,10 +31,10 @@ class STSSpanContextTest extends Specification {
 
     where:
     name                  | extra             | tags
-    STSTags.SERVICE_NAME  | "some.tag=asdf, " | ["some.tag": "asdf", (STSTags.SPAN_TYPE):"fakeType", (STSTags.THREAD_NAME): Thread.currentThread().name, (STSTags.THREAD_ID): Thread.currentThread().id]
-    STSTags.RESOURCE_NAME | "some.tag=asdf, " | ["some.tag": "asdf", (STSTags.SPAN_TYPE):"fakeType", (STSTags.THREAD_NAME): Thread.currentThread().name, (STSTags.THREAD_ID): Thread.currentThread().id]
-    STSTags.SPAN_TYPE     | "some.tag=asdf, " | ["some.tag": "asdf", (STSTags.SPAN_TYPE):"fakeType", (STSTags.THREAD_NAME): Thread.currentThread().name, (STSTags.THREAD_ID): Thread.currentThread().id]
-    "some.tag"            | ""                | [(STSTags.SPAN_TYPE):"fakeType", (STSTags.THREAD_NAME): Thread.currentThread().name, (STSTags.THREAD_ID): Thread.currentThread().id]
+    STSTags.SERVICE_NAME  | "some.tag=asdf, " | ["some.tag": "asdf", (STSTags.SPAN_HOSTNAME):"fakehost", (STSTags.SPAN_PID):42l, (STSTags.SPAN_TYPE):"fakeType", (STSTags.THREAD_NAME): Thread.currentThread().name, (STSTags.THREAD_ID): Thread.currentThread().id]
+    STSTags.RESOURCE_NAME | "some.tag=asdf, " | ["some.tag": "asdf", (STSTags.SPAN_HOSTNAME):"fakehost", (STSTags.SPAN_PID):42l, (STSTags.SPAN_TYPE):"fakeType", (STSTags.THREAD_NAME): Thread.currentThread().name, (STSTags.THREAD_ID): Thread.currentThread().id]
+    STSTags.SPAN_TYPE     | "some.tag=asdf, " | ["some.tag": "asdf", (STSTags.SPAN_HOSTNAME):"fakehost", (STSTags.SPAN_PID):42l, (STSTags.SPAN_TYPE):"fakeType", (STSTags.THREAD_NAME): Thread.currentThread().name, (STSTags.THREAD_ID): Thread.currentThread().id]
+    "some.tag"            | ""                | [(STSTags.SPAN_TYPE):"fakeType", (STSTags.SPAN_HOSTNAME):"fakehost", (STSTags.SPAN_PID):42l, (STSTags.THREAD_NAME): Thread.currentThread().name, (STSTags.THREAD_ID): Thread.currentThread().id]
   }
 
   def "special tags set certain values"() {
