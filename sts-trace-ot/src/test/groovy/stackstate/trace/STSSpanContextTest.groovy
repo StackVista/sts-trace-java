@@ -27,7 +27,7 @@ class STSSpanContextTest extends Specification {
     context.serviceName == "fakeService"
     context.resourceName == "fakeResource"
     context.spanType == "fakeType"
-    context.toString() == "Span [ t_id=1, s_id=1, p_id=0] trace=fakeService/fakeOperation/fakeResource *errored* tags={${extra}span.type=${context.getSpanType()}, thread.id=${Thread.currentThread().id}, thread.name=${Thread.currentThread().name}}"
+    context.toString() == "Span [ t_id=1, s_id=1, p_id=0] trace=fakeService/fakeOperation/fakeResource *errored* tags={${extra}span.hostname=fakehost, span.pid=42, span.type=${context.getSpanType()}, thread.id=${Thread.currentThread().id}, thread.name=${Thread.currentThread().name}}"
 
     where:
     name                  | extra             | tags
