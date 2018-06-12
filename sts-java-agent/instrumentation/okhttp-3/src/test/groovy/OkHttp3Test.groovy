@@ -76,9 +76,11 @@ class OkHttp3Test extends AgentTestRunner {
     tags2[Tags.PEER_HOSTNAME.key] == "localhost"
     tags2[Tags.PEER_PORT.key] == server.address.port
     tags2[Tags.PEER_HOST_IPV4.key] != null
+    tags2[STSTags.SPAN_HOSTNAME] != ""
+    tags2[STSTags.SPAN_PID] != 0l
     tags2[STSTags.THREAD_NAME] != null
     tags2[STSTags.THREAD_ID] != null
-    tags2.size() == 11
+    tags2.size() == 13
 
     receivedHeaders.get().get("x-stackstate-trace-id") == "$span2.traceId"
     receivedHeaders.get().get("x-stackstate-parent-id") == "$span2.spanId"
