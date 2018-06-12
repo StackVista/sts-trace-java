@@ -80,6 +80,8 @@ class STSSpanBuilderTest extends Specification {
         .withServiceName(expectedService)
         .withErrorFlag()
         .withSpanType(expectedType)
+        .withHostNameProvider(fakeHostNameProvider)
+        .withPidProvider(fakePidProvider)
         .start()
 
     final STSSpanContext context = span.context()
