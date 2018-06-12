@@ -85,6 +85,8 @@ class STSSpanBuilderTest extends Specification {
         .start()
 
     final STSSpanContext context = span.context()
+    context.setHostNameProvider(fakeHostNameProvider)
+    context.setPidProvider(fakePidProvider)
 
     then:
     context.getResourceName() == expectedResource
