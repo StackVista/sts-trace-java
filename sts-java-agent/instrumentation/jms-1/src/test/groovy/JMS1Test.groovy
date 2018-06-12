@@ -268,7 +268,7 @@ class JMS1Test extends AgentTestRunner {
     consumerTags["span.pid"] != 0l
     consumerTags["thread.name"] != null
     consumerTags["thread.id"] != null
-    consumerTags.size() == 6
+    consumerTags.size() == 8
 
     cleanup:
     producer.close()
