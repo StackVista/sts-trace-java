@@ -18,6 +18,21 @@ class STSSpanContextPidProvider implements ISTSSpanContextPidProvider {
 
   @Override
   public long getPid() {
+    // The class ManagementFactory in the package java.lang.management provides access to the
+    // "managed bean for the runtime system of the Java virtual machine".
+    // The getName() method of this class is described as:
+    //  Returns the name representing the running Java virtual machine.
+    //  This name, as it happens, contains the process id in the Sun/Oracle JVM implementation
+    // of this methods in a format such as: PID@host ,
+    // Not guaranteed to work on all JVM implementations
+    // Further options:
+    // todo: support java 9 natively
+    // https://docs.oracle.com/javase/9/docs/api/java/lang/ProcessHandle.html
+    // public interface CLibrary extends Library {
+    //     CLibrary INSTANCE = (CLibrary)Native.loadLibrary("c", CLibrary.class);
+    //       int getpid ();
+    // }
+
     String processName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
     return Long.parseLong(processName.split("@")[0]);
   }
