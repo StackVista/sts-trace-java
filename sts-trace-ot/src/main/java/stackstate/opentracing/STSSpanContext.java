@@ -326,7 +326,10 @@ public class STSSpanContext implements io.opentracing.SpanContext {
     tags.put(STSTags.THREAD_NAME, threadName);
     tags.put(STSTags.THREAD_ID, threadId);
     tags.put(STSTags.SPAN_HOSTNAME, getHostName());
-    tags.put(STSTags.SPAN_PID, getPID());
+    long pid = getPID();
+    if (pid != (long)0) {
+      tags.put(STSTags.SPAN_PID, pid);
+    }
     final String spanType = getSpanType();
     if (spanType != null) {
       tags.put(STSTags.SPAN_TYPE, spanType);
