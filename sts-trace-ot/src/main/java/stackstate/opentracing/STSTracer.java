@@ -335,6 +335,8 @@ public class STSTracer implements io.opentracing.Tracer {
             ? Collections.<String, Object>emptyMap()
             : new HashMap<String, Object>(spanTags);
     private long timestampMicro;
+    private ISTSSpanContextPidProvider pidProvider;
+    private ISTSSpanContextHostNameProvider hostNameProvider;
     private SpanContext parent;
     private String serviceName;
     private String resourceName;
@@ -405,6 +407,22 @@ public class STSTracer implements io.opentracing.Tracer {
 
     public STSSpanBuilder withServiceName(final String serviceName) {
       this.serviceName = serviceName;
+      return this;
+    }
+
+    public STSSpanBuilder withPidProvider(final ISTSSpanContextPidProvider provider) {
+      this.pidProvider = provider;
+      if (this.parent instanceof STSSpanContext) {
+        ((STSSpanContext) this.parent).setPidProvider(provider);
+      }
+      return this;
+    }
+
+    public STSSpanBuilder withHostNameProvider(final ISTSSpanContextHostNameProvider provider) {
+      this.hostNameProvider = provider;
+      if (this.parent instanceof STSSpanContext) {
+        ((STSSpanContext) this.parent).setHostNameProvider(provider);
+      }
       return this;
     }
 
@@ -570,6 +588,14 @@ public class STSTracer implements io.opentracing.Tracer {
         if (!addTag) {
           context.setTag(tag.getKey(), null);
         }
+      }
+
+      if (this.pidProvider != null) {
+        context.setPidProvider(this.pidProvider);
+      }
+
+      if (this.hostNameProvider != null) {
+        context.setHostNameProvider(this.hostNameProvider);
       }
 
       return context;
