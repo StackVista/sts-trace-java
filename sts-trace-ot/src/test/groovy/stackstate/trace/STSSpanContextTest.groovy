@@ -27,7 +27,7 @@ class STSSpanContextTest extends Specification {
     context.serviceName == "fakeService"
     context.resourceName == "fakeResource"
     context.spanType == "fakeType"
-    context.toString() == "Span [ t_id=1, s_id=1, p_id=0] trace=fakeService/fakeOperation/fakeResource *errored* tags={${extra}span.hostname=fakehost, span.pid=42, span.type=${context.getSpanType()}, thread.id=${Thread.currentThread().id}, thread.name=${Thread.currentThread().name}}"
+    context.toString() == "Span [ t_id=1, s_id=1, p_id=0] trace=fakeService/fakeOperation/fakeResource metrics={} *errored* tags={${extra}span.hostname=fakehost, span.pid=42, span.type=${context.getSpanType()}, thread.id=${Thread.currentThread().id}, thread.name=${Thread.currentThread().name}}"
 
     where:
     name                  | extra             | tags
@@ -48,7 +48,7 @@ class STSSpanContextTest extends Specification {
     def thread = Thread.currentThread()
 
     def expectedTags = [(STSTags.THREAD_NAME): thread.name, (STSTags.THREAD_ID): thread.id, (STSTags.SPAN_TYPE): context.getSpanType(), (STSTags.SPAN_PID)  : (Long)42, (STSTags.SPAN_HOSTNAME)  : "fakehost" ]
-    def expectedTrace = "Span [ t_id=1, s_id=1, p_id=0] trace=$details tags={span.hostname=fakehost, span.pid=42, span.type=${context.getSpanType()}, thread.id=$thread.id, thread.name=$thread.name}"
+    def expectedTrace = "Span [ t_id=1, s_id=1, p_id=0] trace=$details metrics={} tags={span.hostname=fakehost, span.pid=42, span.type=${context.getSpanType()}, thread.id=$thread.id, thread.name=$thread.name}"
 
     expect:
     context.getTags() == expectedTags
@@ -82,7 +82,7 @@ class STSSpanContextTest extends Specification {
       (STSTags.SPAN_PID)  : (Long)42,
       (STSTags.SPAN_HOSTNAME)  : "fakehost"
     ]
-    context.toString() == "Span [ t_id=1, s_id=1, p_id=0] trace=fakeService/fakeOperation/fakeResource tags={span.hostname=fakehost, span.pid=42, span.type=${context.getSpanType()}, $name=$value, thread.id=$thread.id, thread.name=$thread.name}"
+    context.toString() == "Span [ t_id=1, s_id=1, p_id=0] trace=fakeService/fakeOperation/fakeResource metrics={} tags={span.hostname=fakehost, span.pid=42, span.type=${context.getSpanType()}, $name=$value, thread.id=$thread.id, thread.name=$thread.name}"
 
     where:
     name             | value
