@@ -1,7 +1,7 @@
-package datadog.trace.agent.tooling.muzzle;
+package stackstate.trace.agent.tooling.muzzle;
 
-import datadog.trace.agent.tooling.HelperInjector;
-import datadog.trace.agent.tooling.Instrumenter;
+import stackstate.trace.agent.tooling.HelperInjector;
+import stackstate.trace.agent.tooling.Instrumenter;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.ServiceLoader;

@@ -1,7 +1,7 @@
-package datadog.trace.instrumentation.ratpack.impl;
+package stackstate.trace.instrumentation.ratpack.impl;
 
-import datadog.trace.api.DDSpanTypes;
-import datadog.trace.api.DDTags;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
@@ -32,7 +32,7 @@ public final class TracingHandler implements Handler {
             .asChildOf(extractedContext)
             .withTag(Tags.COMPONENT.getKey(), "handler")
             .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
-            .withTag(DDTags.SPAN_TYPE, DDSpanTypes.WEB_SERVLET)
+            .withTag(STSTags.SPAN_TYPE, STSSpanTypes.WEB_SERVLET)
             .withTag(Tags.HTTP_METHOD.getKey(), request.getMethod().getName())
             .withTag(Tags.HTTP_URL.getKey(), request.getUri())
             .startActive(true);
@@ -41,7 +41,7 @@ public final class TracingHandler implements Handler {
         .beforeSend(
             response -> {
               Span span = scope.span();
-              span.setTag(DDTags.RESOURCE_NAME, getResourceName(ctx));
+              span.setTag(STSTags.RESOURCE_NAME, getResourceName(ctx));
               Status status = response.getStatus();
               if (status != null) {
                 if (status.is5xx()) {

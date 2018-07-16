@@ -1,5 +1,5 @@
-import datadog.opentracing.DDSpan
-import datadog.trace.agent.test.AgentTestRunner
+import stackstate.opentracing.STSSpan
+import stackstate.trace.agent.test.AgentTestRunner
 
 class ScalaInstrumentationTest extends AgentTestRunner {
 
@@ -8,7 +8,7 @@ class ScalaInstrumentationTest extends AgentTestRunner {
     ScalaConcurrentTests scalaTest = new ScalaConcurrentTests()
     int expectedNumberOfSpans = scalaTest.traceWithFutureAndCallbacks()
     TEST_WRITER.waitForTraces(1)
-    List<DDSpan> trace = TEST_WRITER.get(0)
+    List<STSSpan> trace = TEST_WRITER.get(0)
 
     expect:
     trace.size() == expectedNumberOfSpans
@@ -24,7 +24,7 @@ class ScalaInstrumentationTest extends AgentTestRunner {
     ScalaConcurrentTests scalaTest = new ScalaConcurrentTests()
     int expectedNumberOfSpans = scalaTest.tracedAcrossThreadsWithNoTrace()
     TEST_WRITER.waitForTraces(1)
-    List<DDSpan> trace = TEST_WRITER.get(0)
+    List<STSSpan> trace = TEST_WRITER.get(0)
 
     expect:
     trace.size() == expectedNumberOfSpans
@@ -37,7 +37,7 @@ class ScalaInstrumentationTest extends AgentTestRunner {
     ScalaConcurrentTests scalaTest = new ScalaConcurrentTests()
     int expectedNumberOfSpans = scalaTest.traceWithPromises()
     TEST_WRITER.waitForTraces(1)
-    List<DDSpan> trace = TEST_WRITER.get(0)
+    List<STSSpan> trace = TEST_WRITER.get(0)
 
     expect:
     TEST_WRITER.size() == 1
@@ -53,7 +53,7 @@ class ScalaInstrumentationTest extends AgentTestRunner {
     ScalaConcurrentTests scalaTest = new ScalaConcurrentTests()
     int expectedNumberOfSpans = scalaTest.tracedWithFutureFirstCompletions()
     TEST_WRITER.waitForTraces(1)
-    List<DDSpan> trace = TEST_WRITER.get(0)
+    List<STSSpan> trace = TEST_WRITER.get(0)
 
     expect:
     TEST_WRITER.size() == 1
@@ -63,8 +63,8 @@ class ScalaInstrumentationTest extends AgentTestRunner {
     findSpan(trace, "timeout3").context().getParentId() == trace[0].context().getSpanId()
   }
 
-  private DDSpan findSpan(List<DDSpan> trace, String opName) {
-    for (DDSpan span : trace) {
+  private STSSpan findSpan(List<STSSpan> trace, String opName) {
+    for (STSSpan span : trace) {
       if (span.getOperationName() == opName) {
         return span
       }

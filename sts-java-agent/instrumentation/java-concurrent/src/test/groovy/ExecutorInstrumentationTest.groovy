@@ -1,7 +1,7 @@
-import datadog.opentracing.DDSpan
-import datadog.opentracing.scopemanager.ContinuableScope
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.api.Trace
+import stackstate.opentracing.STSSpan
+import stackstate.opentracing.scopemanager.ContinuableScope
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.api.Trace
 import io.opentracing.util.GlobalTracer
 import spock.lang.Shared
 
@@ -24,7 +24,7 @@ class ExecutorInstrumentationTest extends AgentTestRunner {
   Method executeMethod
 
   static {
-    System.setProperty("dd.integration.java_concurrent.enabled", "true")
+    System.setProperty("sts.integration.java_concurrent.enabled", "true")
   }
 
   def setupSpec() {
@@ -52,7 +52,7 @@ class ExecutorInstrumentationTest extends AgentTestRunner {
     }.run()
 
     TEST_WRITER.waitForTraces(1)
-    List<DDSpan> trace = TEST_WRITER.get(0)
+    List<STSSpan> trace = TEST_WRITER.get(0)
 
     expect:
     TEST_WRITER.size() == 1

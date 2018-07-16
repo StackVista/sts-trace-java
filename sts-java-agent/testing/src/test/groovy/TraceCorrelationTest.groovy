@@ -1,6 +1,6 @@
-import datadog.opentracing.DDSpan
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.api.CorrelationIdentifier
+import stackstate.opentracing.STSSpan
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.api.CorrelationIdentifier
 import io.opentracing.Scope
 import io.opentracing.util.GlobalTracer
 
@@ -9,7 +9,7 @@ class TraceCorrelationTest extends AgentTestRunner {
   def "access trace correlation only under trace" () {
     when:
     Scope scope = GlobalTracer.get().buildSpan("myspan").startActive(true)
-    DDSpan span = (DDSpan) scope.span()
+    STSSpan span = (STSSpan) scope.span()
 
     then:
     CorrelationIdentifier.traceId == span.traceId

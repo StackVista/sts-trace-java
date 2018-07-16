@@ -1,6 +1,6 @@
-package datadog.trace.instrumentation.trace_annotation;
+package stackstate.trace.instrumentation.trace_annotation;
 
-import static datadog.trace.instrumentation.trace_annotation.TraceConfigInstrumentation.PACKAGE_CLASS_NAME_REGEX;
+import static stackstate.trace.instrumentation.trace_annotation.TraceConfigInstrumentation.PACKAGE_CLASS_NAME_REGEX;
 import static net.bytebuddy.matcher.ElementMatchers.declaresMethod;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.is;
@@ -9,8 +9,8 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 
 import com.google.auto.service.AutoService;
 import com.google.common.collect.Sets;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.api.Trace;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.Trace;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +23,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 @Slf4j
 @AutoService(Instrumenter.class)
 public final class TraceAnnotationsInstrumentation extends Instrumenter.Default {
-  private static final String CONFIG_NAME = "dd.trace.annotations";
+  private static final String CONFIG_NAME = "sts.trace.annotations";
 
   static final String CONFIG_FORMAT =
       "(?:\\s*"

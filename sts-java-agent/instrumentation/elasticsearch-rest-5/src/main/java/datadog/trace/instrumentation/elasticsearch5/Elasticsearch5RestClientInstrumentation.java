@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.elasticsearch5;
+package stackstate.trace.instrumentation.elasticsearch5;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.isInterface;
@@ -10,8 +10,8 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.api.DDTags;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -37,7 +37,7 @@ public class Elasticsearch5RestClientInstrumentation extends Instrumenter.Defaul
 
   @Override
   public String[] helperClassNames() {
-    return new String[] {"datadog.trace.instrumentation.elasticsearch5.RestResponseListener"};
+    return new String[] {"stackstate.trace.instrumentation.elasticsearch5.RestResponseListener"};
   }
 
   @Override
@@ -71,7 +71,7 @@ public class Elasticsearch5RestClientInstrumentation extends Instrumenter.Defaul
       final Scope scope =
           GlobalTracer.get()
               .buildSpan("elasticsearch.rest.query")
-              .withTag(DDTags.SERVICE_NAME, "elasticsearch")
+              .withTag(STSTags.SERVICE_NAME, "elasticsearch")
               .withTag(Tags.HTTP_METHOD.getKey(), method)
               .withTag(Tags.HTTP_URL.getKey(), endpoint)
               .withTag(Tags.COMPONENT.getKey(), "elasticsearch-java")

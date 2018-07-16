@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /** List writer used by tests mostly */
-public class ListWriter extends CopyOnWriteArrayList<List<DDSpan>> implements Writer {
+public class ListWriter extends CopyOnWriteArrayList<List<STSSpan>> implements Writer {
   private final List<CountDownLatch> latches = new ArrayList<>();
 
   public List<STSSpan> firstTrace() {

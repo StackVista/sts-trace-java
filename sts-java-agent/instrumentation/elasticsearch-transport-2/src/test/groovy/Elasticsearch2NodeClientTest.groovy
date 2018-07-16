@@ -1,5 +1,5 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TestUtils
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
 import io.opentracing.tag.Tags
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest
 import org.elasticsearch.common.io.FileSystemUtils
@@ -9,11 +9,11 @@ import org.elasticsearch.node.Node
 import org.elasticsearch.node.NodeBuilder
 import spock.lang.Shared
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class Elasticsearch2NodeClientTest extends AgentTestRunner {
   static {
-    System.setProperty("dd.integration.elasticsearch.enabled", "true")
+    System.setProperty("sts.integration.elasticsearch.enabled", "true")
   }
 
   static final int HTTP_PORT = TestUtils.randomOpenPort()

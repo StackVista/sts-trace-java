@@ -17,7 +17,7 @@ import javax.jms.TextMessage
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicReference
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class JMS1Test extends AgentTestRunner {
   @Shared
@@ -56,12 +56,12 @@ class JMS1Test extends AgentTestRunner {
           serviceName "jms"
           operationName "jms.consume"
           resourceName "Consumed from $jmsResourceName"
-          spanType DDSpanTypes.MESSAGE_PRODUCER
+          spanType STSSpanTypes.MESSAGE_PRODUCER
           errored false
 
           tags {
             defaultTags()
-            "${DDTags.SPAN_TYPE}" DDSpanTypes.MESSAGE_CONSUMER
+            "${STSTags.SPAN_TYPE}" STSSpanTypes.MESSAGE_CONSUMER
             "${Tags.COMPONENT.key}" "jms1"
             "${Tags.SPAN_KIND.key}" "consumer"
             "span.origin.type" ActiveMQMessageConsumer.name
@@ -108,12 +108,12 @@ class JMS1Test extends AgentTestRunner {
           serviceName "jms"
           operationName "jms.onMessage"
           resourceName "Received from $jmsResourceName"
-          spanType DDSpanTypes.MESSAGE_PRODUCER
+          spanType STSSpanTypes.MESSAGE_PRODUCER
           errored false
 
           tags {
             defaultTags()
-            "${DDTags.SPAN_TYPE}" DDSpanTypes.MESSAGE_CONSUMER
+            "${STSTags.SPAN_TYPE}" STSSpanTypes.MESSAGE_CONSUMER
             "${Tags.COMPONENT.key}" "jms1"
             "${Tags.SPAN_KIND.key}" "consumer"
             "span.origin.type" { t -> t.contains("JMS1Test") }

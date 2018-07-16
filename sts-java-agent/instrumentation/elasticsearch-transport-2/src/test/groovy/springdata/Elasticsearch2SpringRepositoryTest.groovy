@@ -1,16 +1,16 @@
 package springdata
 
-import datadog.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.AgentTestRunner
 import io.opentracing.tag.Tags
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import spock.lang.Shared
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class Elasticsearch2SpringRepositoryTest extends AgentTestRunner {
   static {
-    System.setProperty("dd.integration.elasticsearch.enabled", "true")
+    System.setProperty("sts.integration.elasticsearch.enabled", "true")
   }
 
   @Shared

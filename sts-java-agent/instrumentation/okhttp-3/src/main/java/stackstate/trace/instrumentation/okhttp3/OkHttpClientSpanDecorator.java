@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.okhttp3;
+package stackstate.trace.instrumentation.okhttp3;
 
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;

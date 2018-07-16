@@ -1,10 +1,10 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.api.DDSpanTypes
-import datadog.trace.api.DDTags
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.api.STSSpanTypes
+import stackstate.trace.api.STSTags
 import io.opentracing.tag.Tags
 import spock.lang.Shared
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class SlickTest extends AgentTestRunner {
 
@@ -40,7 +40,7 @@ class SlickTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "java-jdbc-prepared_statement"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.SQL
+            "$STSTags.SPAN_TYPE" STSSpanTypes.SQL
 
             "$Tags.DB_TYPE.key" SlickUtils.Driver()
             "$Tags.DB_USER.key" SlickUtils.Username()

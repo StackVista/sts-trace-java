@@ -1,7 +1,7 @@
 package stackstate.trace.agent.tooling;
 
-import datadog.trace.bootstrap.DatadogClassLoader;
-import datadog.trace.bootstrap.DatadogClassLoader.BootstrapClassLoaderProxy;
+import stackstate.trace.bootstrap.StackstateClassLoader;
+import stackstate.trace.bootstrap.StackstateClassLoader.BootstrapClassLoaderProxy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;

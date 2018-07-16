@@ -1,11 +1,11 @@
-package datadog.trace.agent.test
+package stackstate.trace.agent.test
 
-import datadog.opentracing.DDSpan
+import stackstate.opentracing.STSSpan
 
-import static datadog.trace.agent.test.SpanAssert.assertSpan
+import static stackstate.trace.agent.test.SpanAssert.assertSpan
 
 class TraceAssert {
-  private final List<DDSpan> trace
+  private final List<STSSpan> trace
   private final int size
   private final Set<Integer> assertedIndexes = new HashSet<>()
 
@@ -14,7 +14,7 @@ class TraceAssert {
     size = trace.size()
   }
 
-  static void assertTrace(List<DDSpan> trace, int expectedSize,
+  static void assertTrace(List<STSSpan> trace, int expectedSize,
                           @DelegatesTo(value = File, strategy = Closure.DELEGATE_FIRST) Closure spec) {
     assert trace.size() == expectedSize
     def asserter = new TraceAssert(trace)
@@ -26,7 +26,7 @@ class TraceAssert {
     asserter
   }
 
-  DDSpan span(int index) {
+  STSSpan span(int index) {
     trace.get(index)
   }
 

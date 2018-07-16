@@ -1,6 +1,6 @@
 package stackstate.trace.instrumentation.servlet3;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.failSafe;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
@@ -56,8 +56,8 @@ public final class FilterChain3Instrumentation extends Instrumenter.Default {
   @Override
   public String[] helperClassNames() {
     return new String[] {
-      "datadog.trace.instrumentation.servlet3.HttpServletRequestExtractAdapter",
-      "datadog.trace.instrumentation.servlet3.HttpServletRequestExtractAdapter$MultivaluedMapFlatIterator",
+      "stackstate.trace.instrumentation.servlet3.HttpServletRequestExtractAdapter",
+      "stackstate.trace.instrumentation.servlet3.HttpServletRequestExtractAdapter$MultivaluedMapFlatIterator",
       FilterChain3Advice.class.getName() + "$TagSettingAsyncListener"
     };
   }

@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.ratpack.impl;
+package stackstate.trace.instrumentation.ratpack.impl;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 

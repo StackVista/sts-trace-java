@@ -22,11 +22,11 @@ import org.msgpack.jackson.dataformat.MessagePackFactory;
 /** The API pointing to a STS agent */
 @Slf4j
 public class STSApi {
-  private static final String STACKSTATE_META_LANG = "Datadog-Meta-Lang";
-  private static final String STACKSTATE_META_LANG_VERSION = "Datadog-Meta-Lang-Version";
-  private static final String STACKSTATE_META_LANG_INTERPRETER = "Datadog-Meta-Lang-Interpreter";
-  private static final String STACKSTATE_META_TRACER_VERSION = "Datadog-Meta-Tracer-Version";
-  private static final String X_STACKSTATE_TRACE_COUNT = "X-Datadog-Trace-Count";
+  private static final String STACKSTATE_META_LANG = "Stackstate-Meta-Lang";
+  private static final String STACKSTATE_META_LANG_VERSION = "Stackstate-Meta-Lang-Version";
+  private static final String STACKSTATE_META_LANG_INTERPRETER = "Stackstate-Meta-Lang-Interpreter";
+  private static final String STACKSTATE_META_TRACER_VERSION = "Stackstate-Meta-Tracer-Version";
+  private static final String X_STACKSTATE_TRACE_COUNT = "X-Stackstate-Trace-Count";
 
   private static final String TRACES_ENDPOINT_V3 = "/v0.3/traces";
   private static final String TRACES_ENDPOINT_V4 = "/v0.4/traces";

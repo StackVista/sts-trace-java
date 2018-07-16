@@ -26,7 +26,7 @@ import javax.jms.TextMessage
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicReference
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class JMS2Test extends AgentTestRunner {
   @Shared

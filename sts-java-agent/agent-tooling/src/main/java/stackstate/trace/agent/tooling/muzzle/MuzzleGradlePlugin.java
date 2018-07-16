@@ -1,6 +1,6 @@
-package datadog.trace.agent.tooling.muzzle;
+package stackstate.trace.agent.tooling.muzzle;
 
-import datadog.trace.agent.tooling.Instrumenter;
+import stackstate.trace.agent.tooling.Instrumenter;
 import net.bytebuddy.build.Plugin;
 import net.bytebuddy.description.type.TypeDefinition;
 import net.bytebuddy.description.type.TypeDescription;

@@ -1,1 +1,1 @@
-enableCustomAnnotationTracingOver: ["datadog.benchmark"]
+enableCustomAnnotationTracingOver: ["stackstate.benchmark"]

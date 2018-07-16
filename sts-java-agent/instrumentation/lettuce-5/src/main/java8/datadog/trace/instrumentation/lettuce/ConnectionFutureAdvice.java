@@ -1,6 +1,6 @@
-package datadog.trace.instrumentation.lettuce;
+package stackstate.trace.instrumentation.lettuce;
 
-import datadog.trace.api.DDTags;
+import stackstate.trace.api.STSTags;
 import io.lettuce.core.ConnectionFuture;
 import io.lettuce.core.RedisURI;
 import io.opentracing.Scope;
@@ -29,9 +29,9 @@ public class ConnectionFutureAdvice {
     final String url = redisHost + ":" + redisPort + "/" + redisURI.getDatabase();
     span.setTag("db.redis.url", url);
     span.setTag("db.redis.dbIndex", redisURI.getDatabase());
-    span.setTag(DDTags.RESOURCE_NAME, "CONNECT:" + url);
-    span.setTag(DDTags.SERVICE_NAME, LettuceInstrumentationUtil.SERVICE_NAME);
-    span.setTag(DDTags.SPAN_TYPE, LettuceInstrumentationUtil.SERVICE_NAME);
+    span.setTag(STSTags.RESOURCE_NAME, "CONNECT:" + url);
+    span.setTag(STSTags.SERVICE_NAME, LettuceInstrumentationUtil.SERVICE_NAME);
+    span.setTag(STSTags.SPAN_TYPE, LettuceInstrumentationUtil.SERVICE_NAME);
 
     return scope;
   }

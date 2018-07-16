@@ -1,6 +1,6 @@
-package datadog.trace.instrumentation.elasticsearch6;
+package stackstate.trace.instrumentation.elasticsearch6;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.isInterface;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
@@ -9,8 +9,8 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.api.DDTags;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -61,7 +61,7 @@ public class Elasticsearch6TransportClientInstrumentation extends Instrumenter.D
       "com.google.common.base.Joiner$1",
       "com.google.common.base.Joiner$2",
       "com.google.common.base.Joiner$MapJoiner",
-      "datadog.trace.instrumentation.elasticsearch6.TransportActionListener"
+      "stackstate.trace.instrumentation.elasticsearch6.TransportActionListener"
     };
   }
 
@@ -90,8 +90,8 @@ public class Elasticsearch6TransportClientInstrumentation extends Instrumenter.D
       final Scope scope =
           GlobalTracer.get()
               .buildSpan("elasticsearch.query")
-              .withTag(DDTags.SERVICE_NAME, "elasticsearch")
-              .withTag(DDTags.RESOURCE_NAME, action.getClass().getSimpleName())
+              .withTag(STSTags.SERVICE_NAME, "elasticsearch")
+              .withTag(STSTags.RESOURCE_NAME, action.getClass().getSimpleName())
               .withTag(Tags.COMPONENT.getKey(), "elasticsearch-java")
               .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
               .withTag("elasticsearch.action", action.getClass().getSimpleName())

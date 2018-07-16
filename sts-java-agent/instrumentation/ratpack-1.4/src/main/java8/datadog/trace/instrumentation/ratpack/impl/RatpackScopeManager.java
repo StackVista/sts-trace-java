@@ -1,6 +1,6 @@
-package datadog.trace.instrumentation.ratpack.impl;
+package stackstate.trace.instrumentation.ratpack.impl;
 
-import datadog.opentracing.scopemanager.ScopeContext;
+import stackstate.opentracing.scopemanager.ScopeContext;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import ratpack.exec.Execution;

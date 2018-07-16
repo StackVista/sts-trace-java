@@ -85,7 +85,7 @@ class STSApiTest extends Specification {
     requestHeaders.get().get("Stackstate-Meta-Lang") == "java"
     requestHeaders.get().get("Stackstate-Meta-Lang-Version") == System.getProperty("java.version", "unknown")
     requestHeaders.get().get("Stackstate-Meta-Tracer-Version") == "Stubbed-Test-Version"
-    requestHeaders.get().get("X-Datadog-Trace-Count") == "${traces.size()}"
+    requestHeaders.get().get("X-Stackstate-Trace-Count") == "${traces.size()}"
     convertList(requestBody.get()) == expectedRequestBody
 
     cleanup:
@@ -150,10 +150,10 @@ class STSApiTest extends Specification {
     client.sendTraces([])
     then:
     agentResponse.get() == '{"hello":"test"}'
-    requestHeaders.get().get("Datadog-Meta-Lang") == "java"
-    requestHeaders.get().get("Datadog-Meta-Lang-Version") == System.getProperty("java.version", "unknown")
-    requestHeaders.get().get("Datadog-Meta-Tracer-Version") == "Stubbed-Test-Version"
-    requestHeaders.get().get("X-Datadog-Trace-Count") == "3" // false data shows the value provided via traceCounter.
+    requestHeaders.get().get("Stackstate-Meta-Lang") == "java"
+    requestHeaders.get().get("Stackstate-Meta-Lang-Version") == System.getProperty("java.version", "unknown")
+    requestHeaders.get().get("Stackstate-Meta-Tracer-Version") == "Stubbed-Test-Version"
+    requestHeaders.get().get("X-Stackstate-Trace-Count") == "3" // false data shows the value provided via traceCounter.
     traceCounter.get() == 0
 
     cleanup:

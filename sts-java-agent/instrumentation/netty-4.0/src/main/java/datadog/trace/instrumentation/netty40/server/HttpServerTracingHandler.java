@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.netty40.server;
+package stackstate.trace.instrumentation.netty40.server;
 
 import io.netty.channel.CombinedChannelDuplexHandler;
 import io.netty.util.AttributeKey;

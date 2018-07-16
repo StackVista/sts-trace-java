@@ -4,8 +4,8 @@ import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.HttpMethods.GET
 import akka.stream.ActorMaterializer
-import datadog.trace.agent.test.TestUtils
-import datadog.trace.api.Trace
+import stackstate.trace.agent.test.TestUtils
+import stackstate.trace.api.Trace
 
 import scala.concurrent.{Await, Future}
 

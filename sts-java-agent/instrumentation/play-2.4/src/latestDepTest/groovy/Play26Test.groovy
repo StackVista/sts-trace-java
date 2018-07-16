@@ -1,16 +1,16 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TestUtils
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import play.api.test.TestServer
 import play.test.Helpers
 import spock.lang.Shared
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class Play26Test extends AgentTestRunner {
   static {
-    System.setProperty("dd.integration.akka-http-server.enabled", "true")
+    System.setProperty("sts.integration.akka-http-server.enabled", "true")
   }
 
   @Shared
@@ -32,8 +32,8 @@ class Play26Test extends AgentTestRunner {
     OkHttpClient client = new OkHttpClient.Builder().build()
     def request = new Request.Builder()
       .url("http://localhost:$port/helloplay/spock")
-      .header("x-datadog-trace-id", "123")
-      .header("x-datadog-parent-id", "456")
+      .header("x-stackstate-trace-id", "123")
+      .header("x-stackstate-parent-id", "456")
       .get()
       .build()
     def response = client.newCall(request).execute()

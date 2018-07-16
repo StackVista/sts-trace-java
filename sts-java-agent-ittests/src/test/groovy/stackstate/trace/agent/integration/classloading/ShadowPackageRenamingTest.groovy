@@ -2,7 +2,7 @@ package stackstate.trace.agent.integration.classloading
 
 import com.google.common.collect.MapMaker
 import com.google.common.reflect.ClassPath
-import datadog.trace.agent.test.IntegrationTestUtils
+import stackstate.trace.agent.test.IntegrationTestUtils
 import io.opentracing.util.GlobalTracer
 import spock.lang.Specification
 

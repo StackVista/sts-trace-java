@@ -1,4 +1,4 @@
-import datadog.trace.api.Trace;
+import stackstate.trace.api.Trace;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;

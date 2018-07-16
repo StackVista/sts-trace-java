@@ -1,6 +1,6 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TestUtils
-import datadog.trace.api.DDSpanTypes
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
+import stackstate.trace.api.STSSpanTypes
 import okhttp3.OkHttpClient
 import org.eclipse.jetty.continuation.Continuation
 import org.eclipse.jetty.continuation.ContinuationSupport
@@ -13,12 +13,12 @@ import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class JettyHandlerTest extends AgentTestRunner {
 
   static {
-    System.setProperty("dd.integration.jetty.enabled", "true")
+    System.setProperty("sts.integration.jetty.enabled", "true")
   }
 
   int port = TestUtils.randomOpenPort()
@@ -68,7 +68,7 @@ class JettyHandlerTest extends AgentTestRunner {
     context.serviceName == "unnamed-java-app"
     context.operationName == "jetty.request"
     context.resourceName == "GET ${handler.class.name}"
-    context.spanType == DDSpanTypes.WEB_SERVLET
+    context.spanType == STSSpanTypes.WEB_SERVLET
     !context.getErrorFlag()
     context.parentId == 0
     def tags = context.tags
@@ -156,7 +156,7 @@ class JettyHandlerTest extends AgentTestRunner {
     context.serviceName == "unnamed-java-app"
     context.operationName == "jetty.request"
     context.resourceName == "GET ${handler.class.name}"
-    context.spanType == DDSpanTypes.WEB_SERVLET
+    context.spanType == STSSpanTypes.WEB_SERVLET
     context.getErrorFlag()
     context.parentId == 0
     def tags = context.tags

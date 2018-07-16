@@ -11,8 +11,8 @@ import java.lang.reflect.Method
 class MuzzlePlugin implements Plugin<Project> {
   @Override
   void apply(Project project) {
-    def bootstrapProject = project.rootProject.getChildProjects().get('dd-java-agent').getChildProjects().get('agent-bootstrap')
-    def toolingProject = project.rootProject.getChildProjects().get('dd-java-agent').getChildProjects().get('agent-tooling')
+    def bootstrapProject = project.rootProject.getChildProjects().get('sts-java-agent').getChildProjects().get('agent-bootstrap')
+    def toolingProject = project.rootProject.getChildProjects().get('sts-java-agent').getChildProjects().get('agent-tooling')
     project.extensions.create("muzzle", MuzzleExtension)
     def muzzle = project.task('muzzle') {
       group = 'Muzzle'
@@ -43,7 +43,7 @@ class MuzzlePlugin implements Plugin<Project> {
 
         final ClassLoader agentCL = new URLClassLoader(ddUrls.toArray(new URL[0]), (ClassLoader) null)
         // find all instrumenters, get muzzle, and assert
-        Method assertionMethod = agentCL.loadClass('datadog.trace.agent.tooling.muzzle.MuzzleVersionScanPlugin')
+        Method assertionMethod = agentCL.loadClass('stackstate.trace.agent.tooling.muzzle.MuzzleVersionScanPlugin')
           .getMethod('assertInstrumentationNotMuzzled', ClassLoader.class)
         assertionMethod.invoke(null, userCL)
       }

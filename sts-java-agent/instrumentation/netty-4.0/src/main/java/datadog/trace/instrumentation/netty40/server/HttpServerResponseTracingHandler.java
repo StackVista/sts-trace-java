@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.netty40.server;
+package stackstate.trace.instrumentation.netty40.server;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 

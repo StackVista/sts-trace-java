@@ -1,7 +1,7 @@
-package datadog.trace.instrumentation.lettuce.rx;
+package stackstate.trace.instrumentation.lettuce.rx;
 
-import datadog.trace.api.DDTags;
-import datadog.trace.instrumentation.lettuce.LettuceInstrumentationUtil;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.instrumentation.lettuce.LettuceInstrumentationUtil;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -97,10 +97,10 @@ public class LettuceFluxTerminationRunnable implements Consumer<Signal>, Runnabl
 
       // should be command name only, but use workaround to prepend string to agent crashing commands
       span.setTag(
-          DDTags.RESOURCE_NAME,
+          STSTags.RESOURCE_NAME,
           LettuceInstrumentationUtil.getCommandResourceName(this.commandName));
-      span.setTag(DDTags.SERVICE_NAME, LettuceInstrumentationUtil.SERVICE_NAME);
-      span.setTag(DDTags.SPAN_TYPE, LettuceInstrumentationUtil.SERVICE_NAME);
+      span.setTag(STSTags.SERVICE_NAME, LettuceInstrumentationUtil.SERVICE_NAME);
+      span.setTag(STSTags.SPAN_TYPE, LettuceInstrumentationUtil.SERVICE_NAME);
       scope.close();
     }
   }

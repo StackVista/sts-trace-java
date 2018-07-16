@@ -43,14 +43,14 @@ class OkHttp3Test extends AgentTestRunner {
     span1.context().operationName == "okhttp.http"
     span1.serviceName == "okhttp"
     span1.resourceName == "okhttp.http"
-    span1.type == DDSpanTypes.WEB_SERVLET
+    span1.type == STSSpanTypes.WEB_SERVLET
     !span1.context().getErrorFlag()
     span1.context().parentId == 0
 
 
     def tags1 = span1.context().tags
     tags1["component"] == "okhttp"
-    tags1["span.type"] == DDSpanTypes.WEB_SERVLET
+    tags1["span.type"] == STSSpanTypes.WEB_SERVLET
     tags1["span.hostname"] != null
     tags1["span.pid"] != 0l
     tags1["thread.name"] != null

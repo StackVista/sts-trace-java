@@ -1,11 +1,11 @@
-package datadog.trace.instrumentation.ratpack;
+package stackstate.trace.instrumentation.ratpack;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithMethod;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithMethod;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.instrumentation.ratpack.impl.RatpackServerAdvice;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.instrumentation.ratpack.impl.RatpackServerAdvice;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,15 +49,15 @@ public final class RatpackInstrumentation extends Instrumenter.Default {
   public String[] helperClassNames() {
     return new String[] {
       // core helpers
-      "datadog.opentracing.scopemanager.ContextualScopeManager",
-      "datadog.opentracing.scopemanager.ScopeContext",
+      "stackstate.opentracing.scopemanager.ContextualScopeManager",
+      "stackstate.opentracing.scopemanager.ScopeContext",
       // service registry helpers
-      "datadog.trace.instrumentation.ratpack.impl.RatpackRequestExtractAdapter",
-      "datadog.trace.instrumentation.ratpack.impl.RatpackScopeManager",
-      "datadog.trace.instrumentation.ratpack.impl.RatpackScopeManager$RatpackScope",
-      "datadog.trace.instrumentation.ratpack.impl.RatpackServerAdvice",
-      "datadog.trace.instrumentation.ratpack.impl.RatpackServerAdvice$RatpackServerRegistryAdvice",
-      "datadog.trace.instrumentation.ratpack.impl.TracingHandler"
+      "stackstate.trace.instrumentation.ratpack.impl.RatpackRequestExtractAdapter",
+      "stackstate.trace.instrumentation.ratpack.impl.RatpackScopeManager",
+      "stackstate.trace.instrumentation.ratpack.impl.RatpackScopeManager$RatpackScope",
+      "stackstate.trace.instrumentation.ratpack.impl.RatpackServerAdvice",
+      "stackstate.trace.instrumentation.ratpack.impl.RatpackServerAdvice$RatpackServerRegistryAdvice",
+      "stackstate.trace.instrumentation.ratpack.impl.TracingHandler"
     };
   }
 
@@ -96,11 +96,11 @@ public final class RatpackInstrumentation extends Instrumenter.Default {
     public String[] helperClassNames() {
       return new String[] {
         // core helpers
-        "datadog.opentracing.scopemanager.ContextualScopeManager",
-        "datadog.opentracing.scopemanager.ScopeContext",
+        "stackstate.opentracing.scopemanager.ContextualScopeManager",
+        "stackstate.opentracing.scopemanager.ScopeContext",
         // exec helpers
-        "datadog.trace.instrumentation.ratpack.impl.RatpackServerAdvice$ExecStarterAdvice",
-        "datadog.trace.instrumentation.ratpack.impl.RatpackServerAdvice$ExecStarterAction"
+        "stackstate.trace.instrumentation.ratpack.impl.RatpackServerAdvice$ExecStarterAdvice",
+        "stackstate.trace.instrumentation.ratpack.impl.RatpackServerAdvice$ExecStarterAction"
       };
     }
 
@@ -141,8 +141,8 @@ public final class RatpackInstrumentation extends Instrumenter.Default {
     public String[] helperClassNames() {
       return new String[] {
         // exec helpers
-        "datadog.trace.instrumentation.ratpack.impl.RatpackServerAdvice$ExecStarterAdvice",
-        "datadog.trace.instrumentation.ratpack.impl.RatpackServerAdvice$ExecStarterAction"
+        "stackstate.trace.instrumentation.ratpack.impl.RatpackServerAdvice$ExecStarterAdvice",
+        "stackstate.trace.instrumentation.ratpack.impl.RatpackServerAdvice$ExecStarterAction"
       };
     }
 

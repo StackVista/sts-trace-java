@@ -1,6 +1,6 @@
-package datadog.trace.instrumentation.lettuce;
+package stackstate.trace.instrumentation.lettuce;
 
-import datadog.trace.api.DDTags;
+import stackstate.trace.api.STSTags;
 import io.lettuce.core.protocol.AsyncCommand;
 import io.lettuce.core.protocol.RedisCommand;
 import io.opentracing.Scope;
@@ -27,9 +27,9 @@ public class LettuceAsyncCommandsAdvice {
     Tags.COMPONENT.set(span, LettuceInstrumentationUtil.COMPONENT_NAME);
 
     span.setTag(
-        DDTags.RESOURCE_NAME, LettuceInstrumentationUtil.getCommandResourceName(commandName));
-    span.setTag(DDTags.SERVICE_NAME, LettuceInstrumentationUtil.SERVICE_NAME);
-    span.setTag(DDTags.SPAN_TYPE, LettuceInstrumentationUtil.SERVICE_NAME);
+        STSTags.RESOURCE_NAME, LettuceInstrumentationUtil.getCommandResourceName(commandName));
+    span.setTag(STSTags.SERVICE_NAME, LettuceInstrumentationUtil.SERVICE_NAME);
+    span.setTag(STSTags.SPAN_TYPE, LettuceInstrumentationUtil.SERVICE_NAME);
 
     return scope;
   }

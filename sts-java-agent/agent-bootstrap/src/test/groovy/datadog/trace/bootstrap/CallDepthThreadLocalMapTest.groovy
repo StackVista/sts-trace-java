@@ -1,4 +1,4 @@
-package datadog.trace.bootstrap
+package stackstate.trace.bootstrap
 
 import spock.lang.Specification
 

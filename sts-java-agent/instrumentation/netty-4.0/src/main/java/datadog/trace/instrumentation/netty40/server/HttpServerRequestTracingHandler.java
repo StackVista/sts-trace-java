@@ -1,11 +1,11 @@
-package datadog.trace.instrumentation.netty40.server;
+package stackstate.trace.instrumentation.netty40.server;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.HOST;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 
-import datadog.trace.api.DDSpanTypes;
-import datadog.trace.api.DDTags;
-import datadog.trace.context.TraceScope;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.context.TraceScope;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.HttpRequest;
@@ -47,7 +47,7 @@ public class HttpServerRequestTracingHandler extends ChannelInboundHandlerAdapte
             .withTag(Tags.HTTP_METHOD.getKey(), request.getMethod().name())
             .withTag(Tags.HTTP_URL.getKey(), url)
             .withTag(Tags.COMPONENT.getKey(), "netty")
-            .withTag(DDTags.SPAN_TYPE, DDSpanTypes.WEB_SERVLET)
+            .withTag(STSTags.SPAN_TYPE, STSSpanTypes.WEB_SERVLET)
             .startActive(false);
 
     if (scope instanceof TraceScope) {

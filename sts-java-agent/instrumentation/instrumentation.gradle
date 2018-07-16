@@ -20,7 +20,7 @@ subprojects { subProj ->
       transformation {
         // Applying NoOp optimizes build by applying bytebuddy plugin to only compileJava task
         tasks = ['compileJava']
-        plugin = 'datadog.trace.agent.tooling.muzzle.MuzzleGradlePlugin$NoOp'
+        plugin = 'stackstate.trace.agent.tooling.muzzle.MuzzleGradlePlugin$NoOp'
       }
     }
 
@@ -28,8 +28,8 @@ subprojects { subProj ->
       subProj.byteBuddy {
         transformation {
           tasks = ['compileJava']
-          plugin = 'datadog.trace.agent.tooling.muzzle.MuzzleGradlePlugin'
-          classPath = project(':dd-java-agent:agent-tooling').configurations.instrumentationMuzzle + subProj.configurations.compile + subProj.sourceSets.main.output
+          plugin = 'stackstate.trace.agent.tooling.muzzle.MuzzleGradlePlugin'
+          classPath = project(':sts-java-agent:agent-tooling').configurations.instrumentationMuzzle + subProj.configurations.compile + subProj.sourceSets.main.output
         }
       }
     }
@@ -40,7 +40,7 @@ subprojects { subProj ->
   }
 }
 
-excludedClassesConverage += [ 'datadog.trace.instrumentation.*' ]
+excludedClassesConverage += [ 'stackstate.trace.instrumentation.*' ]
 
 dependencies {
   compile(project(':sts-java-agent:agent-tooling')) {

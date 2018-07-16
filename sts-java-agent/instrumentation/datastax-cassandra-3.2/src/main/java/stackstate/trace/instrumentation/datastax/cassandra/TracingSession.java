@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package datadog.trace.instrumentation.datastax.cassandra;
+package stackstate.trace.instrumentation.datastax.cassandra;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.CloseFuture;

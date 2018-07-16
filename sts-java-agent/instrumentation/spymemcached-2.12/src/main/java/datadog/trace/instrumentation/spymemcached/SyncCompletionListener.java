@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.spymemcached;
+package stackstate.trace.instrumentation.spymemcached;
 
 import io.opentracing.Span;
 import io.opentracing.Tracer;

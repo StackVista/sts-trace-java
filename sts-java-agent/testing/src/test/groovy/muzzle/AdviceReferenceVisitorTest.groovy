@@ -1,10 +1,10 @@
 package muzzle
 
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TestUtils
-import datadog.trace.agent.tooling.muzzle.ReferenceCreator
-import datadog.trace.agent.tooling.muzzle.ReferenceMatcher
-import datadog.trace.agent.tooling.muzzle.Reference
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
+import stackstate.trace.agent.tooling.muzzle.ReferenceCreator
+import stackstate.trace.agent.tooling.muzzle.ReferenceMatcher
+import stackstate.trace.agent.tooling.muzzle.Reference
 
 class AdviceReferenceVisitorTest extends AgentTestRunner {
 

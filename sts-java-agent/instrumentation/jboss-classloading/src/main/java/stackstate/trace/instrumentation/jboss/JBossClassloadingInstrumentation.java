@@ -24,7 +24,7 @@ public final class JBossClassloadingInstrumentation extends Instrumenter.Default
             if (super.matches(target)) {
               // This instrumentation modifies no bytes.
               // Instead it sets a system prop to tell jboss to delegate
-              // classloads for datadog bootstrap classes
+              // classloads for stackstate bootstrap classes
               StringBuilder stsPrefixes = new StringBuilder("");
               for (int i = 0; i < Utils.BOOTSTRAP_PACKAGE_PREFIXES.length; ++i) {
                 if (i > 0) {

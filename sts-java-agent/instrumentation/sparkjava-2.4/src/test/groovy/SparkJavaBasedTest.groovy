@@ -1,6 +1,6 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TestUtils
-import datadog.trace.api.DDSpanTypes
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
+import stackstate.trace.api.STSSpanTypes
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import spark.Spark
@@ -9,8 +9,8 @@ import spark.embeddedserver.jetty.JettyHandler
 class SparkJavaBasedTest extends AgentTestRunner {
 
   static {
-    System.setProperty("dd.integration.jetty.enabled", "true")
-    System.setProperty("dd.integration.sparkjava.enabled", "true")
+    System.setProperty("sts.integration.jetty.enabled", "true")
+    System.setProperty("sts.integration.sparkjava.enabled", "true")
   }
   static final int PORT = TestUtils.randomOpenPort()
 
@@ -79,7 +79,7 @@ class SparkJavaBasedTest extends AgentTestRunner {
     context.serviceName == "unnamed-java-app"
     context.operationName == "jetty.request"
     context.resourceName == "GET /param/:param"
-    context.spanType == DDSpanTypes.WEB_SERVLET
+    context.spanType == STSSpanTypes.WEB_SERVLET
     !context.getErrorFlag()
     context.parentId == 0
     def tags = context.tags

@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.hystrix;
+package stackstate.trace.instrumentation.hystrix;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
@@ -8,7 +8,7 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.not;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
+import stackstate.trace.agent.tooling.Instrumenter;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;

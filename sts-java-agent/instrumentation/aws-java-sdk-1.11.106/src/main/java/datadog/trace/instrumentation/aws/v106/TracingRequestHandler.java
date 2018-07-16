@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package datadog.trace.instrumentation.aws.v106;
+package stackstate.trace.instrumentation.aws.v106;
 
 import com.amazonaws.AmazonWebServiceRequest;
 import com.amazonaws.Request;

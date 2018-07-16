@@ -1,7 +1,7 @@
-package datadog.trace.agent.tooling.muzzle;
+package stackstate.trace.agent.tooling.muzzle;
 
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.agent.tooling.Utils;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.agent.tooling.Utils;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -133,7 +133,7 @@ public class MuzzleVisitor implements AsmVisitorWrapper {
             visitMethod(
                 Opcodes.ACC_PROTECTED + Opcodes.ACC_SYNCHRONIZED,
                 "getInstrumentationMuzzle",
-                "()Ldatadog/trace/agent/tooling/muzzle/ReferenceMatcher;",
+                "()Lstackstate/trace/agent/tooling/muzzle/ReferenceMatcher;",
                 null,
                 null);
 
@@ -149,12 +149,12 @@ public class MuzzleVisitor implements AsmVisitorWrapper {
             Opcodes.GETFIELD,
             instrumentationClassName,
             "instrumentationMuzzle",
-            "Ldatadog/trace/agent/tooling/muzzle/ReferenceMatcher;");
+            "Lstackstate/trace/agent/tooling/muzzle/ReferenceMatcher;");
         mv.visitJumpInsn(Opcodes.IF_ACMPNE, ret);
 
         mv.visitVarInsn(Opcodes.ALOAD, 0);
 
-        mv.visitTypeInsn(Opcodes.NEW, "datadog/trace/agent/tooling/muzzle/ReferenceMatcher");
+        mv.visitTypeInsn(Opcodes.NEW, "stackstate/trace/agent/tooling/muzzle/ReferenceMatcher");
         mv.visitInsn(Opcodes.DUP);
 
         mv.visitVarInsn(Opcodes.ALOAD, 0);
@@ -167,17 +167,17 @@ public class MuzzleVisitor implements AsmVisitorWrapper {
 
         final Reference[] references = generateReferences();
         mv.visitLdcInsn(references.length);
-        mv.visitTypeInsn(Opcodes.ANEWARRAY, "datadog/trace/agent/tooling/muzzle/Reference");
+        mv.visitTypeInsn(Opcodes.ANEWARRAY, "stackstate/trace/agent/tooling/muzzle/Reference");
 
         for (int i = 0; i < references.length; ++i) {
           mv.visitInsn(Opcodes.DUP);
           mv.visitLdcInsn(i);
-          mv.visitTypeInsn(Opcodes.NEW, "datadog/trace/agent/tooling/muzzle/Reference$Builder");
+          mv.visitTypeInsn(Opcodes.NEW, "stackstate/trace/agent/tooling/muzzle/Reference$Builder");
           mv.visitInsn(Opcodes.DUP);
           mv.visitLdcInsn(references[i].getClassName());
           mv.visitMethodInsn(
               Opcodes.INVOKESPECIAL,
-              "datadog/trace/agent/tooling/muzzle/Reference$Builder",
+              "stackstate/trace/agent/tooling/muzzle/Reference$Builder",
               "<init>",
               "(Ljava/lang/String;)V",
               false);
@@ -186,47 +186,47 @@ public class MuzzleVisitor implements AsmVisitorWrapper {
             mv.visitLdcInsn(source.getLine());
             mv.visitMethodInsn(
                 Opcodes.INVOKEVIRTUAL,
-                "datadog/trace/agent/tooling/muzzle/Reference$Builder",
+                "stackstate/trace/agent/tooling/muzzle/Reference$Builder",
                 "withSource",
-                "(Ljava/lang/String;I)Ldatadog/trace/agent/tooling/muzzle/Reference$Builder;",
+                "(Ljava/lang/String;I)Lstackstate/trace/agent/tooling/muzzle/Reference$Builder;",
                 false);
           }
           for (Reference.Flag flag : references[i].getFlags()) {
             mv.visitFieldInsn(
                 Opcodes.GETSTATIC,
-                "datadog/trace/agent/tooling/muzzle/Reference$Flag",
+                "stackstate/trace/agent/tooling/muzzle/Reference$Flag",
                 flag.name(),
-                "Ldatadog/trace/agent/tooling/muzzle/Reference$Flag;");
+                "Lstackstate/trace/agent/tooling/muzzle/Reference$Flag;");
             mv.visitMethodInsn(
                 Opcodes.INVOKEVIRTUAL,
-                "datadog/trace/agent/tooling/muzzle/Reference$Builder",
+                "stackstate/trace/agent/tooling/muzzle/Reference$Builder",
                 "withFlag",
-                "(Ldatadog/trace/agent/tooling/muzzle/Reference$Flag;)Ldatadog/trace/agent/tooling/muzzle/Reference$Builder;",
+                "(Lstackstate/trace/agent/tooling/muzzle/Reference$Flag;)Lstackstate/trace/agent/tooling/muzzle/Reference$Builder;",
                 false);
           }
           if (null != references[i].getSuperName()) {
             mv.visitLdcInsn(references[i].getSuperName());
             mv.visitMethodInsn(
                 Opcodes.INVOKEVIRTUAL,
-                "datadog/trace/agent/tooling/muzzle/Reference$Builder",
+                "stackstate/trace/agent/tooling/muzzle/Reference$Builder",
                 "withSuperName",
-                "(Ljava/lang/String;)Ldatadog/trace/agent/tooling/muzzle/Reference$Builder;",
+                "(Ljava/lang/String;)Lstackstate/trace/agent/tooling/muzzle/Reference$Builder;",
                 false);
           }
           for (String interfaceName : references[i].getInterfaces()) {
             mv.visitLdcInsn(interfaceName);
             mv.visitMethodInsn(
                 Opcodes.INVOKEVIRTUAL,
-                "datadog/trace/agent/tooling/muzzle/Reference$Builder",
+                "stackstate/trace/agent/tooling/muzzle/Reference$Builder",
                 "withInterface",
-                "(Ljava/lang/String;)Ldatadog/trace/agent/tooling/muzzle/Reference$Builder;",
+                "(Ljava/lang/String;)Lstackstate/trace/agent/tooling/muzzle/Reference$Builder;",
                 false);
           }
           for (Reference.Field field : references[i].getFields()) {
             mv.visitLdcInsn(field.getName());
             mv.visitLdcInsn(field.getFlags().size());
             mv.visitTypeInsn(
-                Opcodes.ANEWARRAY, "datadog/trace/agent/tooling/muzzle/Reference$Flag");
+                Opcodes.ANEWARRAY, "stackstate/trace/agent/tooling/muzzle/Reference$Flag");
 
             int j = 0;
             for (Reference.Flag flag : field.getFlags()) {
@@ -234,18 +234,18 @@ public class MuzzleVisitor implements AsmVisitorWrapper {
               mv.visitLdcInsn(j);
               mv.visitFieldInsn(
                   Opcodes.GETSTATIC,
-                  "datadog/trace/agent/tooling/muzzle/Reference$Flag",
+                  "stackstate/trace/agent/tooling/muzzle/Reference$Flag",
                   flag.name(),
-                  "Ldatadog/trace/agent/tooling/muzzle/Reference$Flag;");
+                  "Lstackstate/trace/agent/tooling/muzzle/Reference$Flag;");
               mv.visitInsn(Opcodes.AASTORE);
               ++j;
             }
 
             mv.visitMethodInsn(
                 Opcodes.INVOKEVIRTUAL,
-                "datadog/trace/agent/tooling/muzzle/Reference$Builder",
+                "stackstate/trace/agent/tooling/muzzle/Reference$Builder",
                 "withField",
-                "(Ljava/lang/String;[Ldatadog/trace/agent/tooling/muzzle/Reference$Flag;)Ldatadog/trace/agent/tooling/muzzle/Reference$Builder;",
+                "(Ljava/lang/String;[Lstackstate/trace/agent/tooling/muzzle/Reference$Flag;)Lstackstate/trace/agent/tooling/muzzle/Reference$Builder;",
                 false);
           }
           for (Reference.Method method : references[i].getMethods()) {
@@ -253,16 +253,16 @@ public class MuzzleVisitor implements AsmVisitorWrapper {
 
             mv.visitLdcInsn(method.getFlags().size());
             mv.visitTypeInsn(
-                Opcodes.ANEWARRAY, "datadog/trace/agent/tooling/muzzle/Reference$Flag");
+                Opcodes.ANEWARRAY, "stackstate/trace/agent/tooling/muzzle/Reference$Flag");
             int j = 0;
             for (Reference.Flag flag : method.getFlags()) {
               mv.visitInsn(Opcodes.DUP);
               mv.visitLdcInsn(j);
               mv.visitFieldInsn(
                   Opcodes.GETSTATIC,
-                  "datadog/trace/agent/tooling/muzzle/Reference$Flag",
+                  "stackstate/trace/agent/tooling/muzzle/Reference$Flag",
                   flag.name(),
-                  "Ldatadog/trace/agent/tooling/muzzle/Reference$Flag;");
+                  "Lstackstate/trace/agent/tooling/muzzle/Reference$Flag;");
               mv.visitInsn(Opcodes.AASTORE);
               ++j;
             }
@@ -282,31 +282,31 @@ public class MuzzleVisitor implements AsmVisitorWrapper {
 
             mv.visitMethodInsn(
                 Opcodes.INVOKEVIRTUAL,
-                "datadog/trace/agent/tooling/muzzle/Reference$Builder",
+                "stackstate/trace/agent/tooling/muzzle/Reference$Builder",
                 "withMethod",
-                "(Ljava/lang/String;[Ldatadog/trace/agent/tooling/muzzle/Reference$Flag;Ljava/lang/String;[Ljava/lang/String;)Ldatadog/trace/agent/tooling/muzzle/Reference$Builder;",
+                "(Ljava/lang/String;[Lstackstate/trace/agent/tooling/muzzle/Reference$Flag;Ljava/lang/String;[Ljava/lang/String;)Lstackstate/trace/agent/tooling/muzzle/Reference$Builder;",
                 false);
           }
           mv.visitMethodInsn(
               Opcodes.INVOKEVIRTUAL,
-              "datadog/trace/agent/tooling/muzzle/Reference$Builder",
+              "stackstate/trace/agent/tooling/muzzle/Reference$Builder",
               "build",
-              "()Ldatadog/trace/agent/tooling/muzzle/Reference;",
+              "()Lstackstate/trace/agent/tooling/muzzle/Reference;",
               false);
           mv.visitInsn(Opcodes.AASTORE);
         }
 
         mv.visitMethodInsn(
             Opcodes.INVOKESPECIAL,
-            "datadog/trace/agent/tooling/muzzle/ReferenceMatcher",
+            "stackstate/trace/agent/tooling/muzzle/ReferenceMatcher",
             "<init>",
-            "([Ljava/lang/String;[Ldatadog/trace/agent/tooling/muzzle/Reference;)V",
+            "([Ljava/lang/String;[Lstackstate/trace/agent/tooling/muzzle/Reference;)V",
             false);
         mv.visitFieldInsn(
             Opcodes.PUTFIELD,
             instrumentationClassName,
             "instrumentationMuzzle",
-            "Ldatadog/trace/agent/tooling/muzzle/ReferenceMatcher;");
+            "Lstackstate/trace/agent/tooling/muzzle/ReferenceMatcher;");
 
         mv.visitLabel(ret);
         mv.visitFrame(Opcodes.F_SAME, 1, null, 0, null);
@@ -315,7 +315,7 @@ public class MuzzleVisitor implements AsmVisitorWrapper {
             Opcodes.GETFIELD,
             instrumentationClassName,
             "instrumentationMuzzle",
-            "Ldatadog/trace/agent/tooling/muzzle/ReferenceMatcher;");
+            "Lstackstate/trace/agent/tooling/muzzle/ReferenceMatcher;");
         mv.visitInsn(Opcodes.ARETURN);
         mv.visitLabel(finish);
 

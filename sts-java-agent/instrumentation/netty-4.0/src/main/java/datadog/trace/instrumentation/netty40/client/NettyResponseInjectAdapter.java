@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.netty40.client;
+package stackstate.trace.instrumentation.netty40.client;
 
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;

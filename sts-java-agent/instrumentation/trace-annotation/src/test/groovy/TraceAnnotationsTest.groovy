@@ -1,16 +1,16 @@
-import datadog.opentracing.decorators.ErrorFlag
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.api.Trace
-import dd.test.trace.annotation.SayTracedHello
+import stackstate.opentracing.decorators.ErrorFlag
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.api.Trace
+import sts.test.trace.annotation.SayTracedHello
 
 import java.util.concurrent.Callable
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class TraceAnnotationsTest extends AgentTestRunner {
 
   static {
-    System.clearProperty("dd.trace.annotations")
+    System.clearProperty("sts.trace.annotations")
   }
 
   def "test simple case annotations"() {

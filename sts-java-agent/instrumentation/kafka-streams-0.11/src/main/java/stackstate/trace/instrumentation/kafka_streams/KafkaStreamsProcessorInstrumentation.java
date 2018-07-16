@@ -1,6 +1,6 @@
 package stackstate.trace.instrumentation.kafka_streams;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
 import static net.bytebuddy.matcher.ElementMatchers.isPackagePrivate;
@@ -31,7 +31,7 @@ public class KafkaStreamsProcessorInstrumentation {
   // The combination of these are needed because there's not a good instrumentation point.
 
   public static final String[] HELPER_CLASS_NAMES =
-      new String[] {"datadog.trace.instrumentation.kafka_streams.TextMapExtractAdapter"};
+      new String[] {"stackstate.trace.instrumentation.kafka_streams.TextMapExtractAdapter"};
 
   @AutoService(Instrumenter.class)
   public static class StartInstrumentation extends Instrumenter.Default {

@@ -1,7 +1,7 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TestUtils
-import datadog.trace.api.DDSpanTypes
-import datadog.trace.api.DDTags
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
+import stackstate.trace.api.STSSpanTypes
+import stackstate.trace.api.STSTags
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
@@ -27,11 +27,11 @@ import io.opentracing.tag.Tags
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class Netty40ServerTest extends AgentTestRunner {
   static {
-    System.setProperty("dd.integration.netty.enabled", "true")
+    System.setProperty("sts.integration.netty.enabled", "true")
   }
 
   OkHttpClient client = new OkHttpClient.Builder()
@@ -61,7 +61,7 @@ class Netty40ServerTest extends AgentTestRunner {
           serviceName "unnamed-java-app"
           operationName "netty.request"
           resourceName "GET /"
-          spanType DDSpanTypes.WEB_SERVLET
+          spanType STSSpanTypes.WEB_SERVLET
           errored false
           tags {
             "$Tags.COMPONENT.key" "netty"
@@ -71,7 +71,7 @@ class Netty40ServerTest extends AgentTestRunner {
             "$Tags.PEER_HOSTNAME.key" "localhost"
             "$Tags.PEER_PORT.key" Integer
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_SERVER
-            "$DDTags.SPAN_TYPE" DDSpanTypes.WEB_SERVLET
+            "$STSTags.SPAN_TYPE" STSSpanTypes.WEB_SERVLET
             defaultTags()
           }
         }
@@ -107,7 +107,7 @@ class Netty40ServerTest extends AgentTestRunner {
           serviceName "unnamed-java-app"
           operationName "netty.request"
           resourceName name
-          spanType DDSpanTypes.WEB_SERVLET
+          spanType STSSpanTypes.WEB_SERVLET
           errored error
           tags {
             "$Tags.COMPONENT.key" "netty"
@@ -117,7 +117,7 @@ class Netty40ServerTest extends AgentTestRunner {
             "$Tags.PEER_HOSTNAME.key" "localhost"
             "$Tags.PEER_PORT.key" Integer
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_SERVER
-            "$DDTags.SPAN_TYPE" DDSpanTypes.WEB_SERVLET
+            "$STSTags.SPAN_TYPE" STSSpanTypes.WEB_SERVLET
             if (error) {
               tag("error", true)
             }

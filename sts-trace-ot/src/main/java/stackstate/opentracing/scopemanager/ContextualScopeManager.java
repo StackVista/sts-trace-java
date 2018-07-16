@@ -1,6 +1,6 @@
 package stackstate.opentracing.scopemanager;
 
-import datadog.opentracing.DDSpan;
+import stackstate.opentracing.STSSpan;
 import io.opentracing.Scope;
 import io.opentracing.ScopeManager;
 import io.opentracing.Span;
@@ -18,8 +18,8 @@ public class ContextualScopeManager implements ScopeManager {
         return context.activate(span, finishOnClose);
       }
     }
-    if (span instanceof DDSpan) {
-      return new ContinuableScope(this, (DDSpan) span, finishOnClose);
+    if (span instanceof STSSpan) {
+      return new ContinuableScope(this, (STSSpan) span, finishOnClose);
     } else {
       return new SimpleScope(this, span, finishOnClose);
     }

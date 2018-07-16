@@ -1,7 +1,7 @@
 package stackstate.trace.instrumentation.jms1;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
-import static datadog.trace.instrumentation.jms.util.JmsUtil.toResourceName;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
+import static stackstate.trace.instrumentation.jms.util.JmsUtil.toResourceName;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.isInterface;
@@ -35,8 +35,8 @@ import net.bytebuddy.matcher.ElementMatcher;
 public final class JMS1MessageConsumerInstrumentation extends Instrumenter.Default {
   public static final String[] JMS1_HELPER_CLASS_NAMES =
       new String[] {
-        "datadog.trace.instrumentation.jms.util.JmsUtil",
-        "datadog.trace.instrumentation.jms.util.MessagePropertyTextMap"
+        "stackstate.trace.instrumentation.jms.util.JmsUtil",
+        "stackstate.trace.instrumentation.jms.util.MessagePropertyTextMap"
       };
 
   public JMS1MessageConsumerInstrumentation() {

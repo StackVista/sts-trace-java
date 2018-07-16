@@ -1,12 +1,12 @@
-package datadog.trace.instrumentation.jsp;
+package stackstate.trace.instrumentation.jsp;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.api.DDSpanTypes;
-import datadog.trace.api.DDTags;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -57,7 +57,7 @@ public final class JSPInstrumentation extends Instrumenter.Default {
           GlobalTracer.get()
               .buildSpan("jsp.render")
               .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
-              .withTag(DDTags.SPAN_TYPE, DDSpanTypes.WEB_SERVLET)
+              .withTag(STSTags.SPAN_TYPE, STSSpanTypes.WEB_SERVLET)
               .withTag("servlet.context", req.getContextPath())
               .startActive(true);
 
@@ -68,7 +68,7 @@ public final class JSPInstrumentation extends Instrumenter.Default {
       if (includeServletPath != null && includeServletPath instanceof String) {
         resourceName = includeServletPath.toString();
       }
-      span.setTag(DDTags.RESOURCE_NAME, resourceName);
+      span.setTag(STSTags.RESOURCE_NAME, resourceName);
 
       Object forwardOrigin = req.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH);
       if (forwardOrigin != null && forwardOrigin instanceof String) {

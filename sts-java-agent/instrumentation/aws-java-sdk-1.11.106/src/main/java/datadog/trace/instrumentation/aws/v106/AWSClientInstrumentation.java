@@ -1,6 +1,6 @@
-package datadog.trace.instrumentation.aws.v106;
+package stackstate.trace.instrumentation.aws.v106;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static net.bytebuddy.matcher.ElementMatchers.declaresField;
 import static net.bytebuddy.matcher.ElementMatchers.isAbstract;
 import static net.bytebuddy.matcher.ElementMatchers.isConstructor;
@@ -8,7 +8,7 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 
 import com.amazonaws.handlers.RequestHandler2;
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
+import stackstate.trace.agent.tooling.Instrumenter;
 import io.opentracing.util.GlobalTracer;
 import java.util.HashMap;
 import java.util.List;
@@ -44,8 +44,8 @@ public final class AWSClientInstrumentation extends Instrumenter.Default {
   @Override
   public String[] helperClassNames() {
     return new String[] {
-      "datadog.trace.instrumentation.aws.v106.TracingRequestHandler",
-      "datadog.trace.instrumentation.aws.v106.SpanDecorator"
+      "stackstate.trace.instrumentation.aws.v106.TracingRequestHandler",
+      "stackstate.trace.instrumentation.aws.v106.SpanDecorator"
     };
   }
 

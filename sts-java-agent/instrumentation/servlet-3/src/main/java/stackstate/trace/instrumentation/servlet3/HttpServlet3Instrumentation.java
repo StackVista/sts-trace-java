@@ -50,8 +50,8 @@ public final class HttpServlet3Instrumentation extends Instrumenter.Default {
   @Override
   public String[] helperClassNames() {
     return new String[] {
-      "datadog.trace.instrumentation.servlet3.HttpServletRequestExtractAdapter",
-      "datadog.trace.instrumentation.servlet3.HttpServletRequestExtractAdapter$MultivaluedMapFlatIterator",
+      "stackstate.trace.instrumentation.servlet3.HttpServletRequestExtractAdapter",
+      "stackstate.trace.instrumentation.servlet3.HttpServletRequestExtractAdapter$MultivaluedMapFlatIterator",
       HttpServlet3Advice.class.getName() + "$TagSettingAsyncListener"
     };
   }

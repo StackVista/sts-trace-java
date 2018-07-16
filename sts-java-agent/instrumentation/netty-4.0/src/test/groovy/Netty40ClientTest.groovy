@@ -1,7 +1,7 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TestUtils
-import datadog.trace.api.DDSpanTypes
-import datadog.trace.api.DDTags
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
+import stackstate.trace.api.STSSpanTypes
+import stackstate.trace.api.STSTags
 import io.opentracing.tag.Tags
 import org.asynchttpclient.AsyncHttpClient
 import org.eclipse.jetty.server.Handler
@@ -14,12 +14,12 @@ import spock.lang.Shared
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 import static org.asynchttpclient.Dsl.asyncHttpClient
 
 class Netty40ClientTest extends AgentTestRunner {
   static {
-    System.setProperty("dd.integration.netty.enabled", "true")
+    System.setProperty("sts.integration.netty.enabled", "true")
   }
 
   static final PORT = TestUtils.randomOpenPort()
@@ -73,7 +73,7 @@ class Netty40ClientTest extends AgentTestRunner {
           serviceName "unnamed-java-app"
           operationName "netty.client.request"
           resourceName "GET /"
-          spanType DDSpanTypes.HTTP_CLIENT
+          spanType STSSpanTypes.HTTP_CLIENT
           errored false
           tags {
             "$Tags.COMPONENT.key" "netty-client"
@@ -83,7 +83,7 @@ class Netty40ClientTest extends AgentTestRunner {
             "$Tags.PEER_HOSTNAME.key" "localhost"
             "$Tags.PEER_PORT.key" Integer
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             defaultTags()
           }
         }
@@ -91,7 +91,7 @@ class Netty40ClientTest extends AgentTestRunner {
     }
 
     and:
-    headers["x-datadog-trace-id"] == "${TEST_WRITER.get(0).get(0).traceId}"
-    headers["x-datadog-parent-id"] == "${TEST_WRITER.get(0).get(0).spanId}"
+    headers["x-stackstate-trace-id"] == "${TEST_WRITER.get(0).get(0).traceId}"
+    headers["x-stackstate-parent-id"] == "${TEST_WRITER.get(0).get(0).spanId}"
   }
 }

@@ -11,12 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package datadog.trace.instrumentation.aws.v106;
+package stackstate.trace.instrumentation.aws.v106;
 
 import com.amazonaws.AmazonWebServiceResponse;
 import com.amazonaws.Request;
 import com.amazonaws.Response;
-import datadog.trace.api.DDTags;
+import stackstate.trace.api.STSTags;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
 import java.io.PrintWriter;
@@ -47,7 +47,7 @@ class SpanDecorator {
     span.setTag("aws.endpoint", request.getEndpoint().toString());
 
     span.setTag(
-        DDTags.RESOURCE_NAME,
+        STSTags.RESOURCE_NAME,
         remapServiceName(awsServiceName) + "." + remapOperationName(awsOperation));
 
     try {

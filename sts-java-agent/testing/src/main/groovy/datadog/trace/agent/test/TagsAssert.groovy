@@ -1,16 +1,16 @@
-package datadog.trace.agent.test
+package stackstate.trace.agent.test
 
-import datadog.opentracing.DDSpan
+import stackstate.opentracing.STSSpan
 
 class TagsAssert {
   private final Map<String, Object> tags
   private final Set<String> assertedTags = new TreeSet<>()
 
-  private TagsAssert(DDSpan span) {
+  private TagsAssert(STSSpan span) {
     this.tags = new TreeMap(span.tags)
   }
 
-  static void assertTags(DDSpan span,
+  static void assertTags(STSSpan span,
                          @DelegatesTo(value = TagsAssert, strategy = Closure.DELEGATE_FIRST) Closure spec) {
     def asserter = new TagsAssert(span)
     def clone = (Closure) spec.clone()

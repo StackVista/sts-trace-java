@@ -8,7 +8,7 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import com.google.auto.service.AutoService;
 import com.mongodb.MongoClientOptions;
-import datadog.trace.agent.tooling.Instrumenter;
+import stackstate.trace.agent.tooling.Instrumenter;
 import io.opentracing.util.GlobalTracer;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -21,7 +21,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 @AutoService(Instrumenter.class)
 public final class MongoClientInstrumentation extends Instrumenter.Default {
   public static final String[] HELPERS =
-      new String[] {"datadog.trace.instrumentation.mongo.DDTracingCommandListener"};
+      new String[] {"stackstate.trace.instrumentation.mongo.DDTracingCommandListener"};
 
   public MongoClientInstrumentation() {
     super("mongo");

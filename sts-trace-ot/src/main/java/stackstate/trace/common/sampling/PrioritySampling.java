@@ -1,6 +1,6 @@
 package stackstate.trace.common.sampling;
 
-/** @deprecated Replaced by {@link datadog.trace.api.sampling.PrioritySampling} . */
+/** @deprecated Replaced by {@link stackstate.trace.api.sampling.PrioritySampling} . */
 @Deprecated
 public class PrioritySampling {
   /**

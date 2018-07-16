@@ -5,7 +5,7 @@ plugins {
 
 apply from: "${rootDir}/gradle/java.gradle"
 
-excludedClassesConverage += [ 'datadog.trace.bootstrap.*'  ]
+excludedClassesConverage += [ 'stackstate.trace.bootstrap.*'  ]
 
 dependencies {
   compile project(':sts-trace-api')

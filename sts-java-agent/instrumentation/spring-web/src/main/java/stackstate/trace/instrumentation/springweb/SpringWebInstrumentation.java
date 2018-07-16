@@ -1,6 +1,6 @@
 package stackstate.trace.instrumentation.springweb;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithField;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithField;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.failSafe;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;

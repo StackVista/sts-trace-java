@@ -42,7 +42,7 @@ public class PendingTrace extends ConcurrentLinkedDeque<STSSpan> {
       Collections.newSetFromMap(new ConcurrentHashMap<WeakReference<?>, Boolean>());
 
   private final AtomicInteger pendingReferenceCount = new AtomicInteger(0);
-  private final AtomicReference<WeakReference<DDSpan>> rootSpan = new AtomicReference<>();
+  private final AtomicReference<WeakReference<STSSpan>> rootSpan = new AtomicReference<>();
 
   /** Ensure a trace is never written multiple times */
   private final AtomicBoolean isWritten = new AtomicBoolean(false);

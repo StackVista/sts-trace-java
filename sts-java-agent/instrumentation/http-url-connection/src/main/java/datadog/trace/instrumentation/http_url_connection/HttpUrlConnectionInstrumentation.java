@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.http_url_connection;
+package stackstate.trace.instrumentation.http_url_connection;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
@@ -8,10 +8,10 @@ import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.api.DDSpanTypes;
-import datadog.trace.api.DDTags;
-import datadog.trace.bootstrap.CallDepthThreadLocalMap;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
@@ -47,7 +47,7 @@ public class HttpUrlConnectionInstrumentation extends Instrumenter.Default {
   @Override
   public String[] helperClassNames() {
     return new String[] {
-      "datadog.trace.instrumentation.http_url_connection.MessageHeadersInjectAdapter"
+      "stackstate.trace.instrumentation.http_url_connection.MessageHeadersInjectAdapter"
     };
   }
 
@@ -75,8 +75,8 @@ public class HttpUrlConnectionInstrumentation extends Instrumenter.Default {
         @Advice.Origin("#m") final String methodName) {
 
       final boolean isTraceRequest =
-          Thread.currentThread().getName().equals("dd-agent-writer")
-              || connection.getRequestProperty("Datadog-Meta-Lang") != null;
+          Thread.currentThread().getName().equals("sts-agent-writer")
+              || connection.getRequestProperty("Stackstate-Meta-Lang") != null;
       if (isTraceRequest) {
         return null;
       }
@@ -104,7 +104,7 @@ public class HttpUrlConnectionInstrumentation extends Instrumenter.Default {
           tracer
               .buildSpan(protocol + command)
               .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
-              .withTag(DDTags.SPAN_TYPE, DDSpanTypes.HTTP_CLIENT)
+              .withTag(STSTags.SPAN_TYPE, STSSpanTypes.HTTP_CLIENT)
               .startActive(true);
 
       if (connection != null) {

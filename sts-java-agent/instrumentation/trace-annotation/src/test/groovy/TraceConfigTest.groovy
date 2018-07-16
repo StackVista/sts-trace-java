@@ -1,19 +1,19 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.instrumentation.trace_annotation.TraceConfigInstrumentation
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.instrumentation.trace_annotation.TraceConfigInstrumentation
 
 import java.util.concurrent.Callable
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
-import static datadog.trace.agent.test.TestUtils.withSystemProperty
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.TestUtils.withSystemProperty
 
 class TraceConfigTest extends AgentTestRunner {
 
   static {
-    System.setProperty("dd.trace.methods", "package.ClassName[method1,method2];${ConfigTracedCallable.name}[call]")
+    System.setProperty("sts.trace.methods", "package.ClassName[method1,method2];${ConfigTracedCallable.name}[call]")
   }
 
   def specCleanup() {
-    System.clearProperty("dd.trace.methods")
+    System.clearProperty("sts.trace.methods")
   }
 
   class ConfigTracedCallable implements Callable<String> {
@@ -44,7 +44,7 @@ class TraceConfigTest extends AgentTestRunner {
   def "test configuration #value"() {
     setup:
     def config = null
-    withSystemProperty("dd.trace.methods", value) {
+    withSystemProperty("sts.trace.methods", value) {
       def instrumentation = new TraceConfigInstrumentation()
       config = instrumentation.classMethodsToTrace
     }

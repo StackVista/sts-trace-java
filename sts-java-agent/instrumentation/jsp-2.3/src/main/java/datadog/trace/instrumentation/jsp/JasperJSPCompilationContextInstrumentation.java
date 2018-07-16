@@ -1,13 +1,13 @@
-package datadog.trace.instrumentation.jsp;
+package stackstate.trace.instrumentation.jsp;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.api.DDSpanTypes;
-import datadog.trace.api.DDTags;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -59,14 +59,14 @@ public final class JasperJSPCompilationContextInstrumentation extends Instrument
           GlobalTracer.get()
               .buildSpan("jsp.compile")
               .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
-              .withTag(DDTags.SPAN_TYPE, DDSpanTypes.WEB_SERVLET)
+              .withTag(STSTags.SPAN_TYPE, STSSpanTypes.WEB_SERVLET)
               .startActive(true);
 
       final Span span = scope.span();
       if (jspCompilationContext.getServletContext() != null) {
         span.setTag("servlet.context", jspCompilationContext.getServletContext().getContextPath());
       }
-      span.setTag(DDTags.RESOURCE_NAME, jspCompilationContext.getJspFile());
+      span.setTag(STSTags.RESOURCE_NAME, jspCompilationContext.getJspFile());
       Tags.COMPONENT.set(span, "jsp-http-servlet");
       return scope;
     }

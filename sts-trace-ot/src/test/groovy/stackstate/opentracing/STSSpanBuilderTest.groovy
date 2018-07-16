@@ -242,7 +242,7 @@ class STSSpanBuilderTest extends Specification {
 
   def "ExtractedContext should populate new span details"() {
     setup:
-    final DDSpan span = tracer.buildSpan("op name")
+    final STSSpan span = tracer.buildSpan("op name")
       .asChildOf(extractedContext).start()
 
     expect:

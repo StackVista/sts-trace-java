@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.http_url_connection;
+package stackstate.trace.instrumentation.http_url_connection;
 
 import io.opentracing.propagation.TextMap;
 import java.net.HttpURLConnection;

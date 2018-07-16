@@ -1,16 +1,16 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TestUtils
-import datadog.trace.api.DDSpanTypes
-import datadog.trace.api.DDTags
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
+import stackstate.trace.api.STSSpanTypes
+import stackstate.trace.api.STSTags
 import io.opentracing.tag.Tags
 import io.opentracing.util.GlobalTracer
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
-import static datadog.trace.agent.test.TestUtils.runUnderTrace
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.TestUtils.runUnderTrace
 
 class UrlConnectionTest extends AgentTestRunner {
   static {
-    System.setProperty("dd.integration.httpurlconnection.enabled", "true")
+    System.setProperty("sts.integration.httpurlconnection.enabled", "true")
   }
 
   private static final int INVALID_PORT = TestUtils.randomOpenPort()
@@ -47,7 +47,7 @@ class UrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" component
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$url"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.PEER_HOSTNAME.key" "localhost"

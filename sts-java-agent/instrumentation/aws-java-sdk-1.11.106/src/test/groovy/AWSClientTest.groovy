@@ -11,8 +11,8 @@ import com.amazonaws.services.rds.AmazonRDSClientBuilder
 import com.amazonaws.services.rds.model.DeleteOptionGroupRequest
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.api.DDTags
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.api.STSTags
 import io.opentracing.tag.Tags
 import ratpack.http.Headers
 import spock.lang.Shared
@@ -142,8 +142,8 @@ class AWSClientTest extends AgentTestRunner {
     tags2[Tags.HTTP_URL.key] == "http://localhost:$server.address.port/$url"
     tags2[Tags.PEER_HOSTNAME.key] == "localhost"
     tags2[Tags.PEER_PORT.key] == server.address.port
-    tags2[DDTags.THREAD_NAME] != null
-    tags2[DDTags.THREAD_ID] != null
+    tags2[STSTags.THREAD_NAME] != null
+    tags2[STSTags.THREAD_ID] != null
     tags2.size() == 9
 
     and:
@@ -177,8 +177,8 @@ class AWSClientTest extends AgentTestRunner {
     tags["thread.id"] != null
     tags.size() == 13
 
-    receivedHeaders.get().get("x-datadog-trace-id") == "$span.traceId"
-    receivedHeaders.get().get("x-datadog-parent-id") == "$span.spanId"
+    receivedHeaders.get().get("x-stackstate-trace-id") == "$span.traceId"
+    receivedHeaders.get().get("x-stackstate-parent-id") == "$span.spanId"
 
     where:
     service | operation           | method | url                  | handlerCount | call                                                                   | body               | params                                              | client

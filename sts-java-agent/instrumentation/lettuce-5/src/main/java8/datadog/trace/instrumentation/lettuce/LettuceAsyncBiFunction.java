@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.lettuce;
+package stackstate.trace.instrumentation.lettuce;
 
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;

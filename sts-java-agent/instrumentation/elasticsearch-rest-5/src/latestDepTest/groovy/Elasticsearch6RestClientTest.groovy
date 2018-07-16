@@ -1,5 +1,5 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TestUtils
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
 import groovy.json.JsonSlurper
 import io.opentracing.tag.Tags
 import org.apache.http.HttpHost
@@ -15,11 +15,11 @@ import org.elasticsearch.node.Node
 import org.elasticsearch.transport.Netty4Plugin
 import spock.lang.Shared
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class Elasticsearch6RestClientTest extends AgentTestRunner {
   static {
-    System.setProperty("dd.integration.elasticsearch.enabled", "true")
+    System.setProperty("sts.integration.elasticsearch.enabled", "true")
   }
 
   static final int HTTP_PORT = TestUtils.randomOpenPort()

@@ -7,7 +7,7 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
+import stackstate.trace.agent.tooling.Instrumenter;
 import io.opentracing.util.GlobalTracer;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,18 +43,18 @@ public class OkHttp3Instrumentation extends Instrumenter.Default {
   @Override
   public String[] helperClassNames() {
     return new String[] {
-      "datadog.trace.instrumentation.okhttp3.OkHttpClientSpanDecorator",
-      "datadog.trace.instrumentation.okhttp3.OkHttpClientSpanDecorator$1",
-      "datadog.trace.instrumentation.okhttp3.RequestBuilderInjectAdapter",
-      "datadog.trace.instrumentation.okhttp3.TagWrapper",
-      "datadog.trace.instrumentation.okhttp3.TracedCallable",
-      "datadog.trace.instrumentation.okhttp3.TracedExecutor",
-      "datadog.trace.instrumentation.okhttp3.TracedExecutorService",
-      "datadog.trace.instrumentation.okhttp3.TracedRunnable",
-      "datadog.trace.instrumentation.okhttp3.TracingInterceptor",
-      "datadog.trace.instrumentation.okhttp3.TracingCallFactory",
-      "datadog.trace.instrumentation.okhttp3.TracingCallFactory$NetworkInterceptor",
-      "datadog.trace.instrumentation.okhttp3.TracingCallFactory$1"
+      "stackstate.trace.instrumentation.okhttp3.OkHttpClientSpanDecorator",
+      "stackstate.trace.instrumentation.okhttp3.OkHttpClientSpanDecorator$1",
+      "stackstate.trace.instrumentation.okhttp3.RequestBuilderInjectAdapter",
+      "stackstate.trace.instrumentation.okhttp3.TagWrapper",
+      "stackstate.trace.instrumentation.okhttp3.TracedCallable",
+      "stackstate.trace.instrumentation.okhttp3.TracedExecutor",
+      "stackstate.trace.instrumentation.okhttp3.TracedExecutorService",
+      "stackstate.trace.instrumentation.okhttp3.TracedRunnable",
+      "stackstate.trace.instrumentation.okhttp3.TracingInterceptor",
+      "stackstate.trace.instrumentation.okhttp3.TracingCallFactory",
+      "stackstate.trace.instrumentation.okhttp3.TracingCallFactory$NetworkInterceptor",
+      "stackstate.trace.instrumentation.okhttp3.TracingCallFactory$1"
     };
   }
 

@@ -1,12 +1,12 @@
-package datadog.trace.agent.test
+package stackstate.trace.agent.test
 
-import datadog.trace.common.writer.ListWriter
+import stackstate.trace.common.writer.ListWriter
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import org.spockframework.runtime.Condition
 import org.spockframework.runtime.ConditionNotSatisfiedError
 import org.spockframework.runtime.model.TextPosition
 
-import static datadog.trace.agent.test.TraceAssert.assertTrace
+import static stackstate.trace.agent.test.TraceAssert.assertTrace
 
 class ListWriterAssert {
   private final ListWriter writer
@@ -34,7 +34,7 @@ class ListWriterAssert {
       for (int i = 0; i < e.stackTrace.length; i++) {
         def className = e.stackTrace[i].className
         def skip = className.startsWith("org.codehaus.groovy.") ||
-          className.startsWith("datadog.trace.agent.test.") ||
+          className.startsWith("stackstate.trace.agent.test.") ||
           className.startsWith("sun.reflect.") ||
           className.startsWith("groovy.lang.") ||
           className.startsWith("java.lang.")

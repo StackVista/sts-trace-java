@@ -1,9 +1,9 @@
 import com.google.common.io.Files
-import datadog.opentracing.DDTracer
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TestUtils
-import datadog.trace.api.DDSpanTypes
-import datadog.trace.common.writer.ListWriter
+import stackstate.opentracing.STSTracer
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
+import stackstate.trace.api.STSSpanTypes
+import stackstate.trace.common.writer.ListWriter
 import io.opentracing.util.GlobalTracer
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -14,7 +14,7 @@ import org.apache.tomcat.JarScanType
 
 import java.lang.reflect.Field
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class TomcatServlet3Test extends AgentTestRunner {
 
@@ -30,7 +30,7 @@ class TomcatServlet3Test extends AgentTestRunner {
   Context appContext
 
   ListWriter writer = new ListWriter()
-  DDTracer tracer = new DDTracer(writer)
+  STSTracer tracer = new STSTracer(writer)
 
   def setup() {
     tomcatServer = new Tomcat()
@@ -98,7 +98,7 @@ class TomcatServlet3Test extends AgentTestRunner {
           serviceName "my-context"
           operationName "servlet.request"
           resourceName "GET /my-context/$path"
-          spanType DDSpanTypes.WEB_SERVLET
+          spanType STSSpanTypes.WEB_SERVLET
           errored false
           parent()
           tags {
@@ -106,7 +106,7 @@ class TomcatServlet3Test extends AgentTestRunner {
             "http.method" "GET"
             "span.kind" "server"
             "component" "java-web-servlet"
-            "span.type" DDSpanTypes.WEB_SERVLET
+            "span.type" STSSpanTypes.WEB_SERVLET
             "servlet.context" "/my-context"
             "http.status_code" 200
             defaultTags()
@@ -138,7 +138,7 @@ class TomcatServlet3Test extends AgentTestRunner {
           serviceName "my-context"
           operationName "servlet.request"
           resourceName "GET /my-context/$path"
-          spanType DDSpanTypes.WEB_SERVLET
+          spanType STSSpanTypes.WEB_SERVLET
           errored true
           parent()
           tags {
@@ -146,7 +146,7 @@ class TomcatServlet3Test extends AgentTestRunner {
             "http.method" "GET"
             "span.kind" "server"
             "component" "java-web-servlet"
-            "span.type" DDSpanTypes.WEB_SERVLET
+            "span.type" STSSpanTypes.WEB_SERVLET
             "servlet.context" "/my-context"
             "http.status_code" 500
             errorTags(RuntimeException, "some $path error")
@@ -179,7 +179,7 @@ class TomcatServlet3Test extends AgentTestRunner {
           serviceName "my-context"
           operationName "servlet.request"
           resourceName "GET /my-context/$path"
-          spanType DDSpanTypes.WEB_SERVLET
+          spanType STSSpanTypes.WEB_SERVLET
           errored true
           parent()
           tags {
@@ -187,7 +187,7 @@ class TomcatServlet3Test extends AgentTestRunner {
             "http.method" "GET"
             "span.kind" "server"
             "component" "java-web-servlet"
-            "span.type" DDSpanTypes.WEB_SERVLET
+            "span.type" STSSpanTypes.WEB_SERVLET
             "servlet.context" "/my-context"
             "http.status_code" 500
             "error" true

@@ -1,4 +1,4 @@
-package datadog.opentracing.scopemanager;
+package stackstate.opentracing.scopemanager;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;

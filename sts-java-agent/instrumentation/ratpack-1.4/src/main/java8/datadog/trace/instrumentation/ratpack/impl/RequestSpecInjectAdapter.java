@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.ratpack.impl;
+package stackstate.trace.instrumentation.ratpack.impl;
 
 import io.opentracing.propagation.TextMap;
 import java.util.Iterator;
@@ -8,7 +8,7 @@ import ratpack.http.client.RequestSpec;
 /**
  * SimpleTextMap to add headers to an outgoing Ratpack HttpClient request
  *
- * @see datadog.trace.instrumentation.apachehttpclient.DDTracingClientExec.HttpHeadersInjectAdapter
+ * @see stackstate.trace.instrumentation.apachehttpclient.DDTracingClientExec.HttpHeadersInjectAdapter
  */
 public class RequestSpecInjectAdapter implements TextMap {
   private final RequestSpec requestSpec;

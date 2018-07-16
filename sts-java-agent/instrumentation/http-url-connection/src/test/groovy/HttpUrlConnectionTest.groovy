@@ -1,6 +1,6 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.api.DDSpanTypes
-import datadog.trace.api.DDTags
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.api.STSSpanTypes
+import stackstate.trace.api.STSTags
 import io.opentracing.Scope
 import io.opentracing.SpanContext
 import io.opentracing.propagation.Format
@@ -10,15 +10,15 @@ import io.opentracing.util.GlobalTracer
 import ratpack.handling.Context
 import spock.lang.Shared
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
-import static datadog.trace.agent.test.TestUtils.runUnderTrace
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.TestUtils.runUnderTrace
 import static ratpack.groovy.test.embed.GroovyEmbeddedApp.ratpack
 import static ratpack.http.HttpMethod.HEAD
 import static ratpack.http.HttpMethod.POST
 
 class HttpUrlConnectionTest extends AgentTestRunner {
   static {
-    System.setProperty("dd.integration.httpurlconnection.enabled", "true")
+    System.setProperty("sts.integration.httpurlconnection.enabled", "true")
   }
 
   static final RESPONSE = "<html><body><h1>Hello test.</h1>"
@@ -116,7 +116,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "HttpURLConnection"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$server.address"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.HTTP_STATUS.key" STATUS
@@ -132,7 +132,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "HttpURLConnection"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$server.address"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.HTTP_STATUS.key" STATUS
@@ -148,7 +148,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "HttpURLConnection"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$server.address"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.HTTP_STATUS.key" STATUS
@@ -164,7 +164,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "HttpURLConnection"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$server.address"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.HTTP_STATUS.key" STATUS
@@ -218,7 +218,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "HttpURLConnection"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$server.address"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.HTTP_STATUS.key" STATUS
@@ -234,7 +234,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "HttpURLConnection"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$server.address"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.HTTP_STATUS.key" STATUS
@@ -250,7 +250,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "HttpURLConnection"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$server.address"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.HTTP_STATUS.key" STATUS
@@ -266,7 +266,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "HttpURLConnection"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$server.address"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.HTTP_STATUS.key" STATUS
@@ -307,7 +307,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "HttpURLConnection"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$server.address"
             "$Tags.HTTP_METHOD.key" "HEAD"
             "$Tags.HTTP_STATUS.key" STATUS
@@ -371,7 +371,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "HttpURLConnection"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$server.address"
             "$Tags.HTTP_METHOD.key" "POST"
             "$Tags.HTTP_STATUS.key" STATUS
@@ -387,7 +387,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "HttpURLConnection"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$server.address"
             "$Tags.HTTP_METHOD.key" "POST"
             "$Tags.HTTP_STATUS.key" STATUS
@@ -403,7 +403,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
           tags {
             "$Tags.COMPONENT.key" "HttpURLConnection"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
-            "$DDTags.SPAN_TYPE" DDSpanTypes.HTTP_CLIENT
+            "$STSTags.SPAN_TYPE" STSSpanTypes.HTTP_CLIENT
             "$Tags.HTTP_URL.key" "$server.address"
             "$Tags.HTTP_METHOD.key" "POST"
             "$Tags.PEER_HOSTNAME.key" "localhost"
@@ -419,7 +419,7 @@ class HttpUrlConnectionTest extends AgentTestRunner {
     setup:
     runUnderTrace("someTrace") {
       HttpURLConnection connection = server.address.toURL().openConnection()
-      connection.addRequestProperty("Datadog-Meta-Lang", "false")
+      connection.addRequestProperty("Stackstate-Meta-Lang", "false")
       connection.addRequestProperty("is-dd-server", "false")
       def stream = connection.inputStream
       def lines = stream.readLines()

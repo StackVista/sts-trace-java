@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.jetty8;
+package stackstate.trace.instrumentation.jetty8;
 
 import io.opentracing.propagation.TextMap;
 import java.util.AbstractMap;

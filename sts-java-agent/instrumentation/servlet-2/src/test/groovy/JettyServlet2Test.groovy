@@ -1,9 +1,9 @@
-import datadog.opentracing.DDSpan
-import datadog.opentracing.DDTracer
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TestUtils
-import datadog.trace.api.DDSpanTypes
-import datadog.trace.common.writer.ListWriter
+import stackstate.opentracing.STSSpan
+import stackstate.opentracing.STSTracer
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
+import stackstate.trace.api.STSSpanTypes
+import stackstate.trace.common.writer.ListWriter
 import io.opentracing.util.GlobalTracer
 import okhttp3.Credentials
 import okhttp3.Interceptor
@@ -24,7 +24,7 @@ import java.lang.reflect.Field
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class JettyServlet2Test extends AgentTestRunner {
 
@@ -52,12 +52,12 @@ class JettyServlet2Test extends AgentTestRunner {
 
   ListWriter writer = new ListWriter() {
     @Override
-    void write(final List<DDSpan> trace) {
+    void write(final List<STSSpan> trace) {
       add(trace)
       JettyServlet2Test.this.latch.countDown()
     }
   }
-  DDTracer tracer = new DDTracer(writer)
+  STSTracer tracer = new STSTracer(writer)
 
   def setup() {
     jettyServer = new Server(PORT)
@@ -111,7 +111,7 @@ class JettyServlet2Test extends AgentTestRunner {
           serviceName "unnamed-java-app"
           operationName "servlet.request"
           resourceName "GET /$path"
-          spanType DDSpanTypes.WEB_SERVLET
+          spanType STSSpanTypes.WEB_SERVLET
           errored false
           parent()
           tags {
@@ -119,7 +119,7 @@ class JettyServlet2Test extends AgentTestRunner {
             "http.method" "GET"
             "span.kind" "server"
             "component" "java-web-servlet"
-            "span.type" DDSpanTypes.WEB_SERVLET
+            "span.type" STSSpanTypes.WEB_SERVLET
             "servlet.context" ""
             if (auth) {
               "user.principal" "user"
@@ -153,7 +153,7 @@ class JettyServlet2Test extends AgentTestRunner {
           serviceName "unnamed-java-app"
           operationName "servlet.request"
           resourceName "GET /$path"
-          spanType DDSpanTypes.WEB_SERVLET
+          spanType STSSpanTypes.WEB_SERVLET
           errored true
           parent()
           tags {
@@ -161,7 +161,7 @@ class JettyServlet2Test extends AgentTestRunner {
             "http.method" "GET"
             "span.kind" "server"
             "component" "java-web-servlet"
-            "span.type" DDSpanTypes.WEB_SERVLET
+            "span.type" STSSpanTypes.WEB_SERVLET
             "servlet.context" ""
             errorTags(RuntimeException, "some $path error")
             defaultTags()
@@ -193,7 +193,7 @@ class JettyServlet2Test extends AgentTestRunner {
           serviceName "unnamed-java-app"
           operationName "servlet.request"
           resourceName "GET /$path"
-          spanType DDSpanTypes.WEB_SERVLET
+          spanType STSSpanTypes.WEB_SERVLET
           errored false
           parent()
           tags {
@@ -201,7 +201,7 @@ class JettyServlet2Test extends AgentTestRunner {
             "http.method" "GET"
             "span.kind" "server"
             "component" "java-web-servlet"
-            "span.type" DDSpanTypes.WEB_SERVLET
+            "span.type" STSSpanTypes.WEB_SERVLET
             "servlet.context" ""
             defaultTags()
           }

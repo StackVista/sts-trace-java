@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.servlet2;
+package stackstate.trace.instrumentation.servlet2;
 
 import io.opentracing.propagation.TextMap;
 import java.util.AbstractMap;

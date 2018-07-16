@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.sparkjava;
+package stackstate.trace.instrumentation.sparkjava;
 
 import static net.bytebuddy.matcher.ElementMatchers.isPublic;
 import static net.bytebuddy.matcher.ElementMatchers.named;
@@ -6,8 +6,8 @@ import static net.bytebuddy.matcher.ElementMatchers.returns;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.api.DDTags;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.util.GlobalTracer;
 import java.util.HashMap;
@@ -55,7 +55,7 @@ public class RoutesInstrumentation extends Instrumenter.Default {
       final Scope scope = GlobalTracer.get().scopeManager().active();
       if (scope != null && routeMatch != null) {
         final String resourceName = method.name().toUpperCase() + " " + routeMatch.getMatchUri();
-        scope.span().setTag(DDTags.RESOURCE_NAME, resourceName);
+        scope.span().setTag(STSTags.RESOURCE_NAME, resourceName);
       }
     }
   }

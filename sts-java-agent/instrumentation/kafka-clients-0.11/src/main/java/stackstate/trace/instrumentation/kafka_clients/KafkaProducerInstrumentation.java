@@ -1,6 +1,6 @@
 package stackstate.trace.instrumentation.kafka_clients;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
 import static net.bytebuddy.matcher.ElementMatchers.isPublic;
@@ -29,7 +29,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 public final class KafkaProducerInstrumentation extends Instrumenter.Default {
   private static final String[] HELPER_CLASS_NAMES =
       new String[] {
-        "datadog.trace.instrumentation.kafka_clients.TextMapInjectAdapter",
+        "stackstate.trace.instrumentation.kafka_clients.TextMapInjectAdapter",
         KafkaProducerInstrumentation.class.getName() + "$ProducerCallback"
       };
 

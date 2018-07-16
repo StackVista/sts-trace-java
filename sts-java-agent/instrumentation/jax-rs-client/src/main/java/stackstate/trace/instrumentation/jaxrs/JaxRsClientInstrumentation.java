@@ -28,9 +28,9 @@ public final class JaxRsClientInstrumentation extends Instrumenter.Default {
   @Override
   public String[] helperClassNames() {
     return new String[] {
-      "datadog.trace.instrumentation.jaxrs.ClientTracingFeature",
-      "datadog.trace.instrumentation.jaxrs.ClientTracingFilter",
-      "datadog.trace.instrumentation.jaxrs.InjectAdapter"
+      "stackstate.trace.instrumentation.jaxrs.ClientTracingFeature",
+      "stackstate.trace.instrumentation.jaxrs.ClientTracingFilter",
+      "stackstate.trace.instrumentation.jaxrs.InjectAdapter"
     };
   }
 

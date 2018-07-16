@@ -1,8 +1,8 @@
-package datadog.trace.agent.tooling.muzzle;
+package stackstate.trace.agent.tooling.muzzle;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.BOOTSTRAP_CLASSLOADER;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.BOOTSTRAP_CLASSLOADER;
 
-import datadog.trace.agent.tooling.Utils;
+import stackstate.trace.agent.tooling.Utils;
 import java.util.*;
 
 /** An immutable reference to a jvm class. */
@@ -121,7 +121,7 @@ public class Reference {
     final String resourceName = Utils.getResourceName(className);
     return loader.getResource(resourceName) != null
         // helper classes are not on the resource path because they are loaded with reflection (See HelperInjector)
-        || (className.startsWith("datadog.trace.")
+        || (className.startsWith("stackstate.trace.")
             && Utils.findLoadedClass(className, loader) != null)
         // bootstrap class
         || Utils.getBootstrapProxy().getResource(resourceName) != null;

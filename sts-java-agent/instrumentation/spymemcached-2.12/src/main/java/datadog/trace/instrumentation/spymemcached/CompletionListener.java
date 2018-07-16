@@ -1,8 +1,8 @@
-package datadog.trace.instrumentation.spymemcached;
+package stackstate.trace.instrumentation.spymemcached;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 
-import datadog.trace.api.DDTags;
+import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
@@ -44,9 +44,9 @@ public abstract class CompletionListener<T> {
     final Tracer.SpanBuilder spanBuilder =
         tracer
             .buildSpan(OPERATION_NAME)
-            .withTag(DDTags.SERVICE_NAME, SERVICE_NAME)
-            .withTag(DDTags.RESOURCE_NAME, operation)
-            .withTag(DDTags.SPAN_TYPE, SPAN_TYPE)
+            .withTag(STSTags.SERVICE_NAME, SERVICE_NAME)
+            .withTag(STSTags.RESOURCE_NAME, operation)
+            .withTag(STSTags.SPAN_TYPE, SPAN_TYPE)
             .withTag(Tags.COMPONENT.getKey(), COMPONENT_NAME)
             .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
             .withTag(Tags.DB_TYPE.getKey(), DB_TYPE);

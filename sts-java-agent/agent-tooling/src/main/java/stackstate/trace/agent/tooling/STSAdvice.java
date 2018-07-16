@@ -4,7 +4,7 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.LocationStrategy;
 import net.bytebuddy.dynamic.ClassFileLocator;
 
-/** A bytebuddy advice builder with default DataDog settings. */
+/** A bytebuddy advice builder with default Stackstate settings. */
 public class STSAdvice extends AgentBuilder.Transformer.ForAdvice {
   private static final ClassFileLocator AGENT_CLASS_LOCATOR =
       ClassFileLocator.ForClassLoader.of(Utils.getAgentClassLoader());
@@ -13,7 +13,7 @@ public class STSAdvice extends AgentBuilder.Transformer.ForAdvice {
       new AgentBuilder.LocationStrategy.Simple(AGENT_CLASS_LOCATOR);
 
   /**
-   * Create bytebuddy advice with default datadog settings.
+   * Create bytebuddy advice with default stackstate settings.
    *
    * @return the bytebuddy advice
    */

@@ -1,12 +1,12 @@
-package datadog.trace.instrumentation.spymemcached;
+package stackstate.trace.instrumentation.spymemcached;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithMethod;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithMethod;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.HelperInjector;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.bootstrap.CallDepthThreadLocalMap;
+import stackstate.trace.agent.tooling.HelperInjector;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
 import io.opentracing.util.GlobalTracer;
 import java.lang.reflect.Method;
 import java.util.HashMap;

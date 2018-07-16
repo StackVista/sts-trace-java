@@ -1,16 +1,16 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.api.DDSpanTypes
-import datadog.trace.api.DDTags
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.api.STSSpanTypes
+import stackstate.trace.api.STSTags
 import io.opentracing.tag.Tags
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import spock.lang.Shared
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class AkkaHttpServerInstrumentationTest extends AgentTestRunner {
   static {
-    System.setProperty("dd.integration.akka-http-server.enabled", "true")
+    System.setProperty("sts.integration.akka-http-server.enabled", "true")
   }
 
   @Shared
@@ -35,8 +35,8 @@ class AkkaHttpServerInstrumentationTest extends AgentTestRunner {
     OkHttpClient client = new OkHttpClient.Builder().build()
     def request = new Request.Builder()
       .url("http://localhost:$port/test")
-      .header("x-datadog-trace-id", "123")
-      .header("x-datadog-parent-id", "456")
+      .header("x-stackstate-trace-id", "123")
+      .header("x-stackstate-parent-id", "456")
       .get()
       .build()
     def response = client.newCall(request).execute()
@@ -59,7 +59,7 @@ class AkkaHttpServerInstrumentationTest extends AgentTestRunner {
             "$Tags.HTTP_URL.key" "http://localhost:$port/test"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_SERVER
-            "$DDTags.SPAN_TYPE" DDSpanTypes.WEB_SERVLET
+            "$STSTags.SPAN_TYPE" STSSpanTypes.WEB_SERVLET
             "$Tags.COMPONENT.key" "akka-http-server"
           }
         }
@@ -101,7 +101,7 @@ class AkkaHttpServerInstrumentationTest extends AgentTestRunner {
             "$Tags.HTTP_URL.key" "http://localhost:$port/$endpoint"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_SERVER
-            "$DDTags.SPAN_TYPE" DDSpanTypes.WEB_SERVLET
+            "$STSTags.SPAN_TYPE" STSSpanTypes.WEB_SERVLET
             "$Tags.COMPONENT.key" "akka-http-server"
             errorTags RuntimeException, errorMessage
           }
@@ -141,7 +141,7 @@ class AkkaHttpServerInstrumentationTest extends AgentTestRunner {
             "$Tags.HTTP_URL.key" "http://localhost:$port/server-error"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_SERVER
-            "$DDTags.SPAN_TYPE" DDSpanTypes.WEB_SERVLET
+            "$STSTags.SPAN_TYPE" STSSpanTypes.WEB_SERVLET
             "$Tags.COMPONENT.key" "akka-http-server"
             "$Tags.ERROR.key" true
           }
@@ -180,7 +180,7 @@ class AkkaHttpServerInstrumentationTest extends AgentTestRunner {
             "$Tags.HTTP_URL.key" "http://localhost:$port/not-found"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_SERVER
-            "$DDTags.SPAN_TYPE" DDSpanTypes.WEB_SERVLET
+            "$STSTags.SPAN_TYPE" STSSpanTypes.WEB_SERVLET
             "$Tags.COMPONENT.key" "akka-http-server"
           }
         }

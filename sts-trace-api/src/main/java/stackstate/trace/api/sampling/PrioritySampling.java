@@ -1,4 +1,4 @@
-package datadog.trace.api.sampling;
+package stackstate.trace.api.sampling;
 
 public class PrioritySampling {
   /**

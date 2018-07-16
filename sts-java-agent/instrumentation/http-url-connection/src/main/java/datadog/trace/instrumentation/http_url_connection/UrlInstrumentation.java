@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.http_url_connection;
+package stackstate.trace.instrumentation.http_url_connection;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.is;
@@ -7,9 +7,9 @@ import static net.bytebuddy.matcher.ElementMatchers.isPublic;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.api.DDSpanTypes;
-import datadog.trace.api.DDTags;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -53,7 +53,7 @@ public class UrlInstrumentation extends Instrumenter.Default {
     public static void errorSpan(
         @Advice.This final URL url, @Advice.Thrown final Throwable throwable) {
       if (throwable != null) {
-        final boolean isTraceRequest = Thread.currentThread().getName().equals("dd-agent-writer");
+        final boolean isTraceRequest = Thread.currentThread().getName().equals("sts-agent-writer");
         if (isTraceRequest) {
           return;
         }
@@ -65,7 +65,7 @@ public class UrlInstrumentation extends Instrumenter.Default {
             GlobalTracer.get()
                 .buildSpan(protocol + ".request")
                 .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
-                .withTag(DDTags.SPAN_TYPE, DDSpanTypes.HTTP_CLIENT)
+                .withTag(STSTags.SPAN_TYPE, STSSpanTypes.HTTP_CLIENT)
                 .startActive(true);
 
         final Span span = scope.span();

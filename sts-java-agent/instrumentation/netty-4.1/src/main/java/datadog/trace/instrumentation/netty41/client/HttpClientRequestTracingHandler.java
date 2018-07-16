@@ -1,10 +1,10 @@
-package datadog.trace.instrumentation.netty41.client;
+package stackstate.trace.instrumentation.netty41.client;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 
-import datadog.trace.api.DDSpanTypes;
-import datadog.trace.api.DDTags;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -40,7 +40,7 @@ public class HttpClientRequestTracingHandler extends ChannelOutboundHandlerAdapt
             .withTag(Tags.HTTP_METHOD.getKey(), request.method().name())
             .withTag(Tags.HTTP_URL.getKey(), url)
             .withTag(Tags.COMPONENT.getKey(), "netty-client")
-            .withTag(DDTags.SPAN_TYPE, DDSpanTypes.HTTP_CLIENT)
+            .withTag(STSTags.SPAN_TYPE, STSSpanTypes.HTTP_CLIENT)
             .start();
 
     GlobalTracer.get()

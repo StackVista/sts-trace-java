@@ -1,6 +1,6 @@
-package datadog.trace.instrumentation.jetty8;
+package stackstate.trace.instrumentation.jetty8;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.isInterface;
@@ -10,10 +10,10 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.api.DDSpanTypes;
-import datadog.trace.api.DDTags;
-import datadog.trace.context.TraceScope;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.context.TraceScope;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
@@ -60,8 +60,8 @@ public final class HandlerInstrumentation extends Instrumenter.Default {
   @Override
   public String[] helperClassNames() {
     return new String[] {
-      "datadog.trace.instrumentation.jetty8.HttpServletRequestExtractAdapter",
-      "datadog.trace.instrumentation.jetty8.HttpServletRequestExtractAdapter$MultivaluedMapFlatIterator",
+      "stackstate.trace.instrumentation.jetty8.HttpServletRequestExtractAdapter",
+      "stackstate.trace.instrumentation.jetty8.HttpServletRequestExtractAdapter$MultivaluedMapFlatIterator",
       HandlerInstrumentationAdvice.class.getName() + "$TagSettingAsyncListener"
     };
   }
@@ -100,7 +100,7 @@ public final class HandlerInstrumentation extends Instrumenter.Default {
               .buildSpan(SERVLET_OPERATION_NAME)
               .asChildOf(extractedContext)
               .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
-              .withTag(DDTags.SPAN_TYPE, DDSpanTypes.WEB_SERVLET)
+              .withTag(STSTags.SPAN_TYPE, STSSpanTypes.WEB_SERVLET)
               .withTag("span.origin.type", source.getClass().getName())
               .startActive(false);
 
@@ -112,7 +112,7 @@ public final class HandlerInstrumentation extends Instrumenter.Default {
       Tags.HTTP_METHOD.set(span, req.getMethod());
       Tags.HTTP_URL.set(span, req.getRequestURL().toString());
       Tags.COMPONENT.set(span, "jetty-handler");
-      span.setTag(DDTags.RESOURCE_NAME, resourceName);
+      span.setTag(STSTags.RESOURCE_NAME, resourceName);
       return scope;
     }
 

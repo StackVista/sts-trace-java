@@ -1,17 +1,17 @@
-package datadog.trace.agent.test
+package stackstate.trace.agent.test
 
-import datadog.opentracing.DDSpan
+import stackstate.opentracing.STSSpan
 
-import static datadog.trace.agent.test.TagsAssert.assertTags
+import static stackstate.trace.agent.test.TagsAssert.assertTags
 
 class SpanAssert {
-  private final DDSpan span
+  private final STSSpan span
 
   private SpanAssert(span) {
     this.span = span
   }
 
-  static void assertSpan(DDSpan span,
+  static void assertSpan(STSSpan span,
                          @DelegatesTo(value = SpanAssert, strategy = Closure.DELEGATE_FIRST) Closure spec) {
     def asserter = new SpanAssert(span)
     def clone = (Closure) spec.clone()
@@ -50,7 +50,7 @@ class SpanAssert {
     assert span.traceId == traceId
   }
 
-  def childOf(DDSpan parent) {
+  def childOf(STSSpan parent) {
     assert span.parentId == parent.spanId
     assert span.traceId == parent.traceId
   }

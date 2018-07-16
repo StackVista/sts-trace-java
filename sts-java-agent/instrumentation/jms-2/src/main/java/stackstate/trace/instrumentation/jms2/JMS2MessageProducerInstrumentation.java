@@ -1,7 +1,7 @@
 package stackstate.trace.instrumentation.jms2;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
-import static datadog.trace.instrumentation.jms.util.JmsUtil.toResourceName;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
+import static stackstate.trace.instrumentation.jms.util.JmsUtil.toResourceName;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.failSafe;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;

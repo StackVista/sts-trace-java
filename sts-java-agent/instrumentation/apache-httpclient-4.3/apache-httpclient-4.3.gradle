@@ -45,7 +45,7 @@ dependencies {
   annotationProcessor deps.autoservice
   implementation deps.autoservice
 
-  testCompile project(':dd-java-agent:testing')
+  testCompile project(':sts-java-agent:testing')
   testCompile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3'
 
 

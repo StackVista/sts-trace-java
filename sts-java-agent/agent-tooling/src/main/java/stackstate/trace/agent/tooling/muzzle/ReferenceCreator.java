@@ -1,6 +1,6 @@
-package datadog.trace.agent.tooling.muzzle;
+package stackstate.trace.agent.tooling.muzzle;
 
-import datadog.trace.agent.tooling.Utils;
+import stackstate.trace.agent.tooling.Utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -35,9 +35,9 @@ public class ReferenceCreator extends ClassVisitor {
 
           Map<String, Reference> instrumentationReferences = cv.getReferences();
           for (Map.Entry<String, Reference> entry : instrumentationReferences.entrySet()) {
-            // Don't generate references created outside of the datadog instrumentation package.
+            // Don't generate references created outside of the stackstate instrumentation package.
             if (!visitedSources.contains(entry.getKey())
-                && entry.getKey().startsWith("datadog.trace.instrumentation.")) {
+                && entry.getKey().startsWith("stackstate.trace.instrumentation.")) {
               instrumentationQueue.add(entry.getKey());
             }
             if (references.containsKey(entry.getKey())) {

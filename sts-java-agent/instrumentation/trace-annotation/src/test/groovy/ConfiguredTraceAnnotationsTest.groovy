@@ -1,22 +1,22 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.instrumentation.trace_annotation.TraceAnnotationsInstrumentation
-import dd.test.trace.annotation.SayTracedHello
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.instrumentation.trace_annotation.TraceAnnotationsInstrumentation
+import sts.test.trace.annotation.SayTracedHello
 
 import java.util.concurrent.Callable
 
 import static TraceAnnotationsInstrumentation.DEFAULT_ANNOTATIONS
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
-import static datadog.trace.agent.test.TestUtils.withSystemProperty
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.TestUtils.withSystemProperty
 
 class ConfiguredTraceAnnotationsTest extends AgentTestRunner {
 
   static {
     // nr annotation not included here, so should be disabled.
-    System.setProperty("dd.trace.annotations", "package.Class\$Name;${OuterClass.InterestingMethod.name}")
+    System.setProperty("sts.trace.annotations", "package.Class\$Name;${OuterClass.InterestingMethod.name}")
   }
 
   def specCleanup() {
-    System.clearProperty("dd.trace.annotations")
+    System.clearProperty("sts.trace.annotations")
   }
 
   def "test disabled nr annotation"() {
@@ -48,7 +48,7 @@ class ConfiguredTraceAnnotationsTest extends AgentTestRunner {
   def "test configuration #value"() {
     setup:
     def config = null
-    withSystemProperty("dd.trace.annotations", value) {
+    withSystemProperty("sts.trace.annotations", value) {
       def instrumentation = new TraceAnnotationsInstrumentation()
       config = instrumentation.additionalTraceAnnotations
     }

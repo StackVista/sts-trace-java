@@ -1,13 +1,13 @@
 import com.netflix.hystrix.HystrixCommand
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.api.Trace
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.api.Trace
 
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
 import static com.netflix.hystrix.HystrixCommandGroupKey.Factory.asKey
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
-import static datadog.trace.agent.test.TestUtils.runUnderTrace
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.TestUtils.runUnderTrace
 
 class HystrixTest extends AgentTestRunner {
   // Uncomment for debugging:

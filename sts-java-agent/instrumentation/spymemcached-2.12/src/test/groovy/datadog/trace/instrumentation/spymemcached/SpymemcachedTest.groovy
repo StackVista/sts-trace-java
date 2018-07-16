@@ -1,9 +1,9 @@
-package datadog.trace.instrumentation.spymemcached
+package stackstate.trace.instrumentation.spymemcached
 
 import com.google.common.util.concurrent.MoreExecutors
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TraceAssert
-import datadog.trace.api.DDTags
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TraceAssert
+import stackstate.trace.api.STSTags
 import io.opentracing.tag.Tags
 import net.spy.memcached.CASResponse
 import net.spy.memcached.ConnectionFactory
@@ -22,18 +22,18 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.locks.ReentrantLock
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 import static CompletionListener.COMPONENT_NAME
 import static CompletionListener.OPERATION_NAME
 import static CompletionListener.SERVICE_NAME
 import static CompletionListener.SPAN_TYPE
-import static datadog.trace.agent.test.TestUtils.runUnderTrace
+import static stackstate.trace.agent.test.TestUtils.runUnderTrace
 import static net.spy.memcached.ConnectionFactoryBuilder.Protocol.BINARY
 
 class SpymemcachedTest extends AgentTestRunner {
 
   static {
-    System.setProperty("dd.integration.spymemcached.enabled", "true")
+    System.setProperty("sts.integration.spymemcached.enabled", "true")
   }
 
   @Shared
@@ -633,7 +633,7 @@ class SpymemcachedTest extends AgentTestRunner {
 
       tags {
         defaultTags()
-        "${DDTags.SPAN_TYPE}" SPAN_TYPE
+        "${STSTags.SPAN_TYPE}" SPAN_TYPE
         "${Tags.COMPONENT.key}" COMPONENT_NAME
         "${Tags.SPAN_KIND.key}" Tags.SPAN_KIND_CLIENT
         "${Tags.DB_TYPE.key}" CompletionListener.DB_TYPE

@@ -1,6 +1,6 @@
-package datadog.trace.instrumentation.ratpack;
+package stackstate.trace.instrumentation.ratpack;
 
-import static datadog.trace.instrumentation.ratpack.RatpackInstrumentation.CLASSLOADER_CONTAINS_RATPACK_1_4_OR_ABOVE;
+import static stackstate.trace.instrumentation.ratpack.RatpackInstrumentation.CLASSLOADER_CONTAINS_RATPACK_1_4_OR_ABOVE;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.isInterface;
 import static net.bytebuddy.matcher.ElementMatchers.named;
@@ -8,8 +8,8 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,17 +46,17 @@ public final class RatpackHttpClientInstrumentation extends Instrumenter.Default
   public String[] helperClassNames() {
     return new String[] {
       // http helpers
-      "datadog.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice$RatpackHttpClientRequestAdvice",
-      "datadog.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice$RatpackHttpClientRequestStreamAdvice",
-      "datadog.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice$RatpackHttpGetAdvice",
-      "datadog.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice$RequestAction",
-      "datadog.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice$ResponseAction",
-      "datadog.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice$StreamedResponseAction",
-      "datadog.trace.instrumentation.ratpack.impl.RequestSpecInjectAdapter",
-      "datadog.trace.instrumentation.ratpack.impl.WrappedRequestSpec",
+      "stackstate.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice$RatpackHttpClientRequestAdvice",
+      "stackstate.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice$RatpackHttpClientRequestStreamAdvice",
+      "stackstate.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice$RatpackHttpGetAdvice",
+      "stackstate.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice$RequestAction",
+      "stackstate.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice$ResponseAction",
+      "stackstate.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice$StreamedResponseAction",
+      "stackstate.trace.instrumentation.ratpack.impl.RequestSpecInjectAdapter",
+      "stackstate.trace.instrumentation.ratpack.impl.WrappedRequestSpec",
       // core helpers
-      "datadog.opentracing.scopemanager.ContextualScopeManager",
-      "datadog.opentracing.scopemanager.ScopeContext"
+      "stackstate.opentracing.scopemanager.ContextualScopeManager",
+      "stackstate.opentracing.scopemanager.ScopeContext"
     };
   }
 

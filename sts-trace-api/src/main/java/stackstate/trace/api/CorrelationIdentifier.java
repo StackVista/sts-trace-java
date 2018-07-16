@@ -1,4 +1,4 @@
-package datadog.trace.api;
+package stackstate.trace.api;
 
 import java.util.concurrent.atomic.AtomicReference;
 

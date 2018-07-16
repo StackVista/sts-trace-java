@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.lettuce;
+package stackstate.trace.instrumentation.lettuce;
 
 import io.lettuce.core.protocol.RedisCommand;
 import java.util.*;

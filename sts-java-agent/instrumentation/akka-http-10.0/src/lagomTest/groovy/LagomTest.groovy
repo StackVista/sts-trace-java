@@ -1,12 +1,12 @@
 import akka.NotUsed
 import akka.stream.javadsl.Source
 import akka.stream.testkit.javadsl.TestSink
-import datadog.trace.api.DDSpanTypes
-import datadog.trace.api.DDTags
+import stackstate.trace.api.STSSpanTypes
+import stackstate.trace.api.STSTags
 import io.opentracing.tag.Tags
 import net.bytebuddy.utility.JavaModule
 
-import datadog.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.AgentTestRunner
 import play.inject.guice.GuiceApplicationBuilder
 import spock.lang.Shared
 
@@ -15,11 +15,11 @@ import akka.stream.testkit.TestSubscriber.Probe
 import java.util.function.Function
 
 import static com.lightbend.lagom.javadsl.testkit.ServiceTest.*
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
 
 class LagomTest extends AgentTestRunner {
   static {
-    System.setProperty("dd.integration.akka-http-server.enabled", "true")
+    System.setProperty("sts.integration.akka-http-server.enabled", "true")
   }
 
   @Shared
@@ -88,7 +88,7 @@ class LagomTest extends AgentTestRunner {
             "$Tags.HTTP_URL.key" "ws://localhost:${server.port()}/echo"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_SERVER
-            "$DDTags.SPAN_TYPE" DDSpanTypes.WEB_SERVLET
+            "$STSTags.SPAN_TYPE" STSSpanTypes.WEB_SERVLET
             "$Tags.COMPONENT.key" "akka-http-server"
           }
         }
@@ -126,7 +126,7 @@ class LagomTest extends AgentTestRunner {
             "$Tags.HTTP_URL.key" "ws://localhost:${server.port()}/error"
             "$Tags.HTTP_METHOD.key" "GET"
             "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_SERVER
-            "$DDTags.SPAN_TYPE" DDSpanTypes.WEB_SERVLET
+            "$STSTags.SPAN_TYPE" STSSpanTypes.WEB_SERVLET
             "$Tags.COMPONENT.key" "akka-http-server"
             "$Tags.ERROR.key" true
           }

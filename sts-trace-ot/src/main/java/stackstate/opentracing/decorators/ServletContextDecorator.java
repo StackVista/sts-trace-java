@@ -1,7 +1,7 @@
-package datadog.opentracing.decorators;
+package stackstate.opentracing.decorators;
 
-import datadog.opentracing.DDSpanContext;
-import datadog.opentracing.DDTracer;
+import stackstate.opentracing.STSSpanContext;
+import stackstate.opentracing.STSTracer;
 
 public class ServletContextDecorator extends AbstractDecorator {
 
@@ -11,7 +11,7 @@ public class ServletContextDecorator extends AbstractDecorator {
   }
 
   @Override
-  public boolean shouldSetTag(final DDSpanContext context, final String tag, final Object value) {
+  public boolean shouldSetTag(final STSSpanContext context, final String tag, final Object value) {
     String contextName = String.valueOf(value).trim();
     if (contextName.equals("/")
         || (!context.getServiceName().equals(DDTracer.UNASSIGNED_DEFAULT_SERVICE_NAME)

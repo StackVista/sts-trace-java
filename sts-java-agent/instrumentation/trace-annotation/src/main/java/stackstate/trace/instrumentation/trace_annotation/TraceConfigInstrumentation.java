@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.trace_annotation;
+package stackstate.trace.instrumentation.trace_annotation;
 
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.named;
@@ -6,7 +6,7 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 import com.google.auto.service.AutoService;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import datadog.trace.agent.tooling.Instrumenter;
+import stackstate.trace.agent.tooling.Instrumenter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +29,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 @Slf4j
 @AutoService(Instrumenter.class)
 public class TraceConfigInstrumentation implements Instrumenter {
-  private static final String CONFIG_NAME = "dd.trace.methods";
+  private static final String CONFIG_NAME = "sts.trace.methods";
 
   static final String PACKAGE_CLASS_NAME_REGEX = "[\\w.\\$]+";
   private static final String METHOD_LIST_REGEX = "\\s*(?:\\w+\\s*,)*\\s*(?:\\w+\\s*,?)\\s*";

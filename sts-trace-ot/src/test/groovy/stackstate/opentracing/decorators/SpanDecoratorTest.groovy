@@ -10,7 +10,7 @@ import io.opentracing.tag.StringTag
 import io.opentracing.tag.Tags
 import spock.lang.Specification
 
-import static datadog.opentracing.STSTracer.UNASSIGNED_DEFAULT_SERVICE_NAME
+import static stackstate.opentracing.STSTracer.UNASSIGNED_DEFAULT_SERVICE_NAME
 
 class SpanDecoratorTest extends Specification {
   def tracer = new STSTracer(new LoggingWriter())

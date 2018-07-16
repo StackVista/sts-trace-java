@@ -1,6 +1,6 @@
-package datadog.opentracing
+package stackstate.opentracing
 
-import datadog.trace.common.writer.ListWriter
+import stackstate.trace.common.writer.ListWriter
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -29,7 +29,7 @@ class OTTraceCorrelationTest extends Specification {
 
   def "get trace id with trace"() {
     expect:
-    ((DDSpan) scope.span()).traceId == traceCorrelation.getTraceId()
+    ((STSSpan) scope.span()).traceId == traceCorrelation.getTraceId()
   }
 
   def "get span id without span"() {
@@ -42,6 +42,6 @@ class OTTraceCorrelationTest extends Specification {
 
   def "get span id with trace"() {
     expect:
-    ((DDSpan) scope.span()).spanId == traceCorrelation.getSpanId()
+    ((STSSpan) scope.span()).spanId == traceCorrelation.getSpanId()
   }
 }

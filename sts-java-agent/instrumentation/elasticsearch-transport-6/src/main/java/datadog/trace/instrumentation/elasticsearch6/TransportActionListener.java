@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.elasticsearch6;
+package stackstate.trace.instrumentation.elasticsearch6;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 

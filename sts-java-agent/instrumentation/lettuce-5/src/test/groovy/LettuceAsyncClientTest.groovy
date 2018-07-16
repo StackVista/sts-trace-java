@@ -1,5 +1,5 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.agent.test.TestUtils
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
 import io.lettuce.core.ClientOptions
 import io.lettuce.core.ConnectionFuture
 import io.lettuce.core.RedisClient
@@ -23,13 +23,13 @@ import java.util.function.BiFunction
 import java.util.function.Consumer
 import java.util.function.Function
 
-import static datadog.trace.agent.test.ListWriterAssert.assertTraces
-import static datadog.trace.instrumentation.lettuce.LettuceInstrumentationUtil.AGENT_CRASHING_COMMAND_PREFIX
+import static stackstate.trace.agent.test.ListWriterAssert.assertTraces
+import static stackstate.trace.instrumentation.lettuce.LettuceInstrumentationUtil.AGENT_CRASHING_COMMAND_PREFIX
 
 class LettuceAsyncClientTest extends AgentTestRunner {
 
   static {
-    System.setProperty("dd.integration.lettuce.enabled", "true")
+    System.setProperty("sts.integration.lettuce.enabled", "true")
   }
 
   public static final String HOST = "127.0.0.1"

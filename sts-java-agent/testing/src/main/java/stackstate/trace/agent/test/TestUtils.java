@@ -2,7 +2,7 @@ package stackstate.trace.agent.test;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 
-import datadog.trace.agent.tooling.Utils;
+import stackstate.trace.agent.tooling.Utils;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;

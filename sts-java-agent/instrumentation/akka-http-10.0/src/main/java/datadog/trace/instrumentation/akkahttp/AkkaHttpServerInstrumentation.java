@@ -1,4 +1,4 @@
-package datadog.trace.instrumentation.akkahttp;
+package stackstate.trace.instrumentation.akkahttp;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -7,10 +7,10 @@ import akka.http.scaladsl.model.HttpRequest;
 import akka.http.scaladsl.model.HttpResponse;
 import akka.stream.*;
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.*;
-import datadog.trace.api.DDSpanTypes;
-import datadog.trace.api.DDTags;
-import datadog.trace.context.TraceScope;
+import stackstate.trace.agent.tooling.*;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.context.TraceScope;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
@@ -48,11 +48,11 @@ public final class AkkaHttpServerInstrumentation extends Instrumenter.Default {
   @Override
   public String[] helperClassNames() {
     return new String[] {
-      AkkaHttpServerInstrumentation.class.getName() + "$DatadogWrapperHelper",
-      AkkaHttpServerInstrumentation.class.getName() + "$DatadogSyncWrapper",
-      AkkaHttpServerInstrumentation.class.getName() + "$DatadogAsyncWrapper",
-      AkkaHttpServerInstrumentation.class.getName() + "$DatadogAsyncWrapper$1",
-      AkkaHttpServerInstrumentation.class.getName() + "$DatadogAsyncWrapper$2",
+      AkkaHttpServerInstrumentation.class.getName() + "$StackstateWrapperHelper",
+      AkkaHttpServerInstrumentation.class.getName() + "$StackstateSyncWrapper",
+      AkkaHttpServerInstrumentation.class.getName() + "$StackstateAsyncWrapper",
+      AkkaHttpServerInstrumentation.class.getName() + "$StackstateAsyncWrapper$1",
+      AkkaHttpServerInstrumentation.class.getName() + "$StackstateAsyncWrapper$2",
       AkkaHttpServerInstrumentation.class.getName() + "$AkkaHttpServerHeaders"
     };
   }
@@ -80,7 +80,7 @@ public final class AkkaHttpServerInstrumentation extends Instrumenter.Default {
     public static void wrapHandler(
         @Advice.Argument(value = 0, readOnly = false)
             Function1<HttpRequest, HttpResponse> handler) {
-      handler = new DatadogSyncWrapper(handler);
+      handler = new StackstateSyncWrapper(handler);
     }
   }
 
@@ -90,11 +90,11 @@ public final class AkkaHttpServerInstrumentation extends Instrumenter.Default {
         @Advice.Argument(value = 0, readOnly = false)
             Function1<HttpRequest, scala.concurrent.Future<HttpResponse>> handler,
         @Advice.Argument(value = 7) Materializer materializer) {
-      handler = new DatadogAsyncWrapper(handler, materializer.executionContext());
+      handler = new StackstateAsyncWrapper(handler, materializer.executionContext());
     }
   }
 
-  public static class DatadogWrapperHelper {
+  public static class StackstateWrapperHelper {
     public static Scope createSpan(HttpRequest request) {
       final SpanContext extractedContext =
           GlobalTracer.get()
@@ -105,7 +105,7 @@ public final class AkkaHttpServerInstrumentation extends Instrumenter.Default {
               .asChildOf(extractedContext)
               .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
               .withTag(Tags.HTTP_METHOD.getKey(), request.method().value())
-              .withTag(DDTags.SPAN_TYPE, DDSpanTypes.WEB_SERVLET)
+              .withTag(STSTags.SPAN_TYPE, STSSpanTypes.WEB_SERVLET)
               .withTag(Tags.COMPONENT.getKey(), "akka-http-server")
               .withTag(Tags.HTTP_URL.getKey(), request.getUri().toString())
               .startActive(false);
@@ -137,35 +137,35 @@ public final class AkkaHttpServerInstrumentation extends Instrumenter.Default {
     }
   }
 
-  public static class DatadogSyncWrapper extends AbstractFunction1<HttpRequest, HttpResponse> {
+  public static class StackstateSyncWrapper extends AbstractFunction1<HttpRequest, HttpResponse> {
     private final Function1<HttpRequest, HttpResponse> userHandler;
 
-    public DatadogSyncWrapper(Function1<HttpRequest, HttpResponse> userHandler) {
+    public StackstateSyncWrapper(Function1<HttpRequest, HttpResponse> userHandler) {
       this.userHandler = userHandler;
     }
 
     @Override
     public HttpResponse apply(HttpRequest request) {
-      final Scope scope = DatadogWrapperHelper.createSpan(request);
+      final Scope scope = StackstateWrapperHelper.createSpan(request);
       try {
         final HttpResponse response = userHandler.apply(request);
         scope.close();
-        DatadogWrapperHelper.finishSpan(scope.span(), response);
+        StackstateWrapperHelper.finishSpan(scope.span(), response);
         return response;
       } catch (Throwable t) {
         scope.close();
-        DatadogWrapperHelper.finishSpan(scope.span(), t);
+        StackstateWrapperHelper.finishSpan(scope.span(), t);
         throw t;
       }
     }
   }
 
-  public static class DatadogAsyncWrapper
+  public static class StackstateAsyncWrapper
       extends AbstractFunction1<HttpRequest, Future<HttpResponse>> {
     private final Function1<HttpRequest, Future<HttpResponse>> userHandler;
     private final ExecutionContext executionContext;
 
-    public DatadogAsyncWrapper(
+    public StackstateAsyncWrapper(
         Function1<HttpRequest, Future<HttpResponse>> userHandler,
         ExecutionContext executionContext) {
       this.userHandler = userHandler;
@@ -174,13 +174,13 @@ public final class AkkaHttpServerInstrumentation extends Instrumenter.Default {
 
     @Override
     public Future<HttpResponse> apply(HttpRequest request) {
-      final Scope scope = DatadogWrapperHelper.createSpan(request);
+      final Scope scope = StackstateWrapperHelper.createSpan(request);
       Future<HttpResponse> futureResponse = null;
       try {
         futureResponse = userHandler.apply(request);
       } catch (Throwable t) {
         scope.close();
-        DatadogWrapperHelper.finishSpan(scope.span(), t);
+        StackstateWrapperHelper.finishSpan(scope.span(), t);
         throw t;
       }
       final Future<HttpResponse> wrapped =
@@ -188,14 +188,14 @@ public final class AkkaHttpServerInstrumentation extends Instrumenter.Default {
               new AbstractFunction1<HttpResponse, HttpResponse>() {
                 @Override
                 public HttpResponse apply(HttpResponse response) {
-                  DatadogWrapperHelper.finishSpan(scope.span(), response);
+                  StackstateWrapperHelper.finishSpan(scope.span(), response);
                   return response;
                 }
               },
               new AbstractFunction1<Throwable, Throwable>() {
                 @Override
                 public Throwable apply(Throwable t) {
-                  DatadogWrapperHelper.finishSpan(scope.span(), t);
+                  StackstateWrapperHelper.finishSpan(scope.span(), t);
                   return t;
                 }
               },

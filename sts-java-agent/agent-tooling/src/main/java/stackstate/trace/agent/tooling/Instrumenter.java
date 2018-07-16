@@ -3,8 +3,8 @@ package stackstate.trace.agent.tooling;
 import static stackstate.trace.agent.tooling.Utils.getConfigEnabled;
 import static net.bytebuddy.matcher.ElementMatchers.any;
 
-import datadog.trace.agent.tooling.muzzle.Reference;
-import datadog.trace.agent.tooling.muzzle.ReferenceMatcher;
+import stackstate.trace.agent.tooling.muzzle.Reference;
+import stackstate.trace.agent.tooling.muzzle.ReferenceMatcher;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -18,7 +18,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
 
 /**
- * Built-in bytebuddy-based instrumentation for the datadog javaagent.
+ * Built-in bytebuddy-based instrumentation for the stackstate javaagent.
  *
  * <p>It is strongly recommended to extend {@link Default} rather than implement this interface
  * directly.
@@ -124,7 +124,7 @@ public interface Instrumenter {
     /**
      * This method is implemented dynamically by compile-time bytecode transformations.
      *
-     * <p>{@see datadog.trace.agent.tooling.muzzle.MuzzleGradlePlugin}
+     * <p>{@see stackstate.trace.agent.tooling.muzzle.MuzzleGradlePlugin}
      */
     protected ReferenceMatcher getInstrumentationMuzzle() {
       return null;

@@ -1,6 +1,6 @@
-package datadog.trace.instrumentation.netty40;
+package stackstate.trace.instrumentation.netty40;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.isInterface;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
@@ -10,14 +10,14 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.bootstrap.CallDepthThreadLocalMap;
-import datadog.trace.instrumentation.netty40.client.HttpClientRequestTracingHandler;
-import datadog.trace.instrumentation.netty40.client.HttpClientResponseTracingHandler;
-import datadog.trace.instrumentation.netty40.client.HttpClientTracingHandler;
-import datadog.trace.instrumentation.netty40.server.HttpServerRequestTracingHandler;
-import datadog.trace.instrumentation.netty40.server.HttpServerResponseTracingHandler;
-import datadog.trace.instrumentation.netty40.server.HttpServerTracingHandler;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
+import stackstate.trace.instrumentation.netty40.client.HttpClientRequestTracingHandler;
+import stackstate.trace.instrumentation.netty40.client.HttpClientResponseTracingHandler;
+import stackstate.trace.instrumentation.netty40.client.HttpClientTracingHandler;
+import stackstate.trace.instrumentation.netty40.server.HttpServerRequestTracingHandler;
+import stackstate.trace.instrumentation.netty40.server.HttpServerResponseTracingHandler;
+import stackstate.trace.instrumentation.netty40.server.HttpServerTracingHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpClientCodec;

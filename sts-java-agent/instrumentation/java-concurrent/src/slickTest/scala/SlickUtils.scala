@@ -1,5 +1,5 @@
-import datadog.trace.api.Trace
-import datadog.trace.context.TraceScope
+import stackstate.trace.api.Trace
+import stackstate.trace.context.TraceScope
 import io.opentracing.util.GlobalTracer
 import slick.jdbc.H2Profile.api._
 

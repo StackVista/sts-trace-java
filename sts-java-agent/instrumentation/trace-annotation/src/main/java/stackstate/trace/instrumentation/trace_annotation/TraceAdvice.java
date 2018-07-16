@@ -1,8 +1,8 @@
-package datadog.trace.instrumentation.trace_annotation;
+package stackstate.trace.instrumentation.trace_annotation;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 
-import datadog.trace.api.Trace;
+import stackstate.trace.api.Trace;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
