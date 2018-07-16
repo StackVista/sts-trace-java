@@ -6,6 +6,7 @@ import com.mongodb.event.CommandFailedEvent;
 import com.mongodb.event.CommandListener;
 import com.mongodb.event.CommandStartedEvent;
 import com.mongodb.event.CommandSucceededEvent;
+import stackstate.trace.api.STSTags;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.tag.Tags;
@@ -21,7 +22,6 @@ import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.bson.BsonValue;
-import stackstate.trace.api.STSTags;
 
 @Slf4j
 public class STSTracingCommandListener implements CommandListener {

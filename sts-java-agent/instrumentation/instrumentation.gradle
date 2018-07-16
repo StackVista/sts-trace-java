@@ -30,6 +30,7 @@ subprojects { subProj ->
           tasks = ['compileJava']
           plugin = 'stackstate.trace.agent.tooling.muzzle.MuzzleGradlePlugin'
           classPath = project(':sts-java-agent:agent-tooling').configurations.instrumentationMuzzle + subProj.configurations.compile + subProj.sourceSets.main.output
+          classPath = project(':sts-java-agent:agent-tooling').configurations.instrumentationMuzzle + subProj.configurations.compile + subProj.sourceSets.main.output
         }
       }
     }
