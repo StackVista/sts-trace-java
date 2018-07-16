@@ -2,8 +2,6 @@ package stackstate.trace.common.writer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import stackstate.opentracing.STSSpan;
-import stackstate.opentracing.STSTraceOTInfo;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
+import stackstate.opentracing.STSSpan;
+import stackstate.opentracing.STSTraceOTInfo;
 
 /** The API pointing to a STS agent */
 @Slf4j

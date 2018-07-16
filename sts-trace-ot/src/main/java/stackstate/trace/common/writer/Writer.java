@@ -1,10 +1,10 @@
 package stackstate.trace.common.writer;
 
-import stackstate.opentracing.STSSpan;
-import stackstate.trace.common.STSTraceConfig;
 import java.util.List;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.opentracing.STSSpan;
+import stackstate.trace.common.STSTraceConfig;
 
 /** A writer is responsible to send collected spans to some place */
 public interface Writer {

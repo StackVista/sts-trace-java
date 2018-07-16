@@ -9,10 +9,6 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.api.STSTags;
-import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
-import stackstate.trace.bootstrap.JDBCMaps;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.noop.NoopScopeManager.NoopScope;
@@ -26,6 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
+import stackstate.trace.bootstrap.JDBCMaps;
 
 @AutoService(Instrumenter.class)
 public final class PreparedStatementInstrumentation extends Instrumenter.Default {

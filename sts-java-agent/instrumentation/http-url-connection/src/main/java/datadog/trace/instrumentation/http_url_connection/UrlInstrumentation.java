@@ -7,9 +7,6 @@ import static net.bytebuddy.matcher.ElementMatchers.isPublic;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.api.STSSpanTypes;
-import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -20,6 +17,9 @@ import java.util.HashMap;
 import java.util.Map;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
 
 @AutoService(Instrumenter.class)
 public class UrlInstrumentation extends Instrumenter.Default {

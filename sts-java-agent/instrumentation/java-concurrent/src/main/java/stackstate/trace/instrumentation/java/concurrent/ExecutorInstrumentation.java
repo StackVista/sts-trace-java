@@ -8,9 +8,6 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.*;
-import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
-import stackstate.trace.context.TraceScope;
 import io.opentracing.Scope;
 import io.opentracing.util.GlobalTracer;
 import java.lang.reflect.Field;
@@ -24,6 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.*;
+import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
+import stackstate.trace.context.TraceScope;
 
 @Slf4j
 @AutoService(Instrumenter.class)

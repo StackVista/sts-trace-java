@@ -2,9 +2,9 @@ package stackstate.trace.agent.tooling.muzzle;
 
 import static net.bytebuddy.dynamic.loading.ClassLoadingStrategy.BOOTSTRAP_LOADER;
 
-import stackstate.trace.agent.tooling.Utils;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.trace.agent.tooling.Utils;
 
 /** Matches a set of references against a classloader. */
 @Slf4j

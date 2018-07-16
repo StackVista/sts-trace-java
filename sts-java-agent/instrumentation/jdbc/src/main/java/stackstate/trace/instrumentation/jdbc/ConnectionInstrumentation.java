@@ -9,14 +9,14 @@ import static net.bytebuddy.matcher.ElementMatchers.returns;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.bootstrap.JDBCMaps;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.Map;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.bootstrap.JDBCMaps;
 
 @AutoService(Instrumenter.class)
 public final class ConnectionInstrumentation extends Instrumenter.Default {

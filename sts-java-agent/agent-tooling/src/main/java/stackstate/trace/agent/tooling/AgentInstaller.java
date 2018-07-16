@@ -1,12 +1,12 @@
 package stackstate.trace.agent.tooling;
 
-import static stackstate.trace.agent.tooling.ClassLoaderMatcher.skipClassLoader;
 import static net.bytebuddy.matcher.ElementMatchers.any;
 import static net.bytebuddy.matcher.ElementMatchers.nameContains;
 import static net.bytebuddy.matcher.ElementMatchers.nameMatches;
 import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.not;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.skipClassLoader;
 
 import java.lang.instrument.Instrumentation;
 import java.util.ServiceLoader;

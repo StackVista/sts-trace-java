@@ -6,7 +6,6 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 import com.google.auto.service.AutoService;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import stackstate.trace.agent.tooling.Instrumenter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +15,7 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
 
 /**
  * TraceConfig Instrumentation does not extend Default.

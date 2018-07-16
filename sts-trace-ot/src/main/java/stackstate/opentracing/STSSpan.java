@@ -4,10 +4,6 @@ import static io.opentracing.log.Fields.ERROR_OBJECT;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import stackstate.trace.api.STSTags;
-import stackstate.trace.api.interceptor.MutableSpan;
-import stackstate.trace.api.sampling.PrioritySampling;
-import stackstate.trace.common.util.Clock;
 import io.opentracing.Span;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -17,6 +13,10 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.api.interceptor.MutableSpan;
+import stackstate.trace.api.sampling.PrioritySampling;
+import stackstate.trace.common.util.Clock;
 
 /**
  * Represents a period of time. Associated information is stored in the SpanContext.

@@ -1,13 +1,12 @@
 package stackstate.trace.instrumentation.okhttp3;
 
-import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
-import static stackstate.trace.instrumentation.okhttp3.OkHttpClientSpanDecorator.STANDARD_TAGS;
 import static net.bytebuddy.matcher.ElementMatchers.isConstructor;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
+import static stackstate.trace.instrumentation.okhttp3.OkHttpClientSpanDecorator.STANDARD_TAGS;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
 import io.opentracing.util.GlobalTracer;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,6 +15,7 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import stackstate.trace.agent.tooling.Instrumenter;
 
 @AutoService(Instrumenter.class)
 public class OkHttp3Instrumentation extends Instrumenter.Default {

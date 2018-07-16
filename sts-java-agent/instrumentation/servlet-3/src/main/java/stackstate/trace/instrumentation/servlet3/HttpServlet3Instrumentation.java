@@ -10,10 +10,6 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.api.STSSpanTypes;
-import stackstate.trace.api.STSTags;
-import stackstate.trace.context.TraceScope;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
@@ -31,6 +27,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.context.TraceScope;
 
 @AutoService(Instrumenter.class)
 public final class HttpServlet3Instrumentation extends Instrumenter.Default {

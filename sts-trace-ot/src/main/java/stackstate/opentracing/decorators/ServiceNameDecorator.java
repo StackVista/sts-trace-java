@@ -1,8 +1,8 @@
 package stackstate.opentracing.decorators;
 
+import java.util.Map;
 import stackstate.opentracing.STSSpanContext;
 import stackstate.trace.api.STSTags;
-import java.util.Map;
 
 public class ServiceNameDecorator extends AbstractDecorator {
 

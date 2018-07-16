@@ -1,20 +1,20 @@
 package stackstate.trace.instrumentation.aws.v106;
 
-import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static net.bytebuddy.matcher.ElementMatchers.declaresField;
 import static net.bytebuddy.matcher.ElementMatchers.isAbstract;
 import static net.bytebuddy.matcher.ElementMatchers.isConstructor;
 import static net.bytebuddy.matcher.ElementMatchers.named;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 
 import com.amazonaws.handlers.RequestHandler2;
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
 import io.opentracing.util.GlobalTracer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
 
 /**
  * The interface for com.amazonaws.Request changed in 106. The method addHandlerContext which is

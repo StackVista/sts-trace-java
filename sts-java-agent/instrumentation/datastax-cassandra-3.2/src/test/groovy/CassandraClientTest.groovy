@@ -1,6 +1,7 @@
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.Session
 import stackstate.opentracing.STSSpan
+import stackstate.trace.agent.test.AgentTestRunner
 import stackstate.trace.api.STSTags
 import io.opentracing.tag.Tags
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper

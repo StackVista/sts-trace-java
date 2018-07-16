@@ -1,6 +1,5 @@
 package stackstate.trace.instrumentation.springweb;
 
-import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithField;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.failSafe;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
@@ -12,11 +11,9 @@ import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.not;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithField;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.api.STSSpanTypes;
-import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -28,6 +25,9 @@ import javax.servlet.http.HttpServletRequest;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.web.servlet.HandlerMapping;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
 
 @AutoService(Instrumenter.class)
 public final class SpringWebInstrumentation extends Instrumenter.Default {

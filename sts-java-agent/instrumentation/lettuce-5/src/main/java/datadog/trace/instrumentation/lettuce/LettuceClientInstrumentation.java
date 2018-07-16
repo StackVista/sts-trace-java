@@ -1,13 +1,13 @@
 package stackstate.trace.instrumentation.lettuce;
 
-import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static net.bytebuddy.matcher.ElementMatchers.*;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
 import java.util.HashMap;
 import java.util.Map;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
 
 @AutoService(Instrumenter.class)
 public final class LettuceClientInstrumentation extends Instrumenter.Default {

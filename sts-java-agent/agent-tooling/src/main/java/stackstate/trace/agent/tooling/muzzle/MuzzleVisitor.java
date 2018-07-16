@@ -1,7 +1,5 @@
 package stackstate.trace.agent.tooling.muzzle;
 
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.agent.tooling.Utils;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,6 +12,8 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.jar.asm.*;
 import net.bytebuddy.pool.TypePool;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.agent.tooling.Utils;
 
 /** Visit a class and add: a private instrumenationMuzzle field and getter */
 public class MuzzleVisitor implements AsmVisitorWrapper {

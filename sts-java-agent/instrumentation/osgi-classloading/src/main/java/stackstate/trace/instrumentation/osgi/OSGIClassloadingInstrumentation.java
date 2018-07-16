@@ -1,13 +1,13 @@
 package stackstate.trace.instrumentation.osgi;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.agent.tooling.Utils;
 import java.util.Collections;
 import java.util.Map;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.NameMatcher;
 import net.bytebuddy.matcher.StringMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.agent.tooling.Utils;
 
 @AutoService(Instrumenter.class)
 public final class OSGIClassloadingInstrumentation extends Instrumenter.Default {
@@ -37,10 +37,10 @@ public final class OSGIClassloadingInstrumentation extends Instrumenter.Default 
               }
               final String existing = System.getProperty("org.osgi.framework.bootdelegation");
               if (null == existing) {
-                System.setProperty("org.osgi.framework.bootdelegation", ddPrefixes.toString());
+                System.setProperty("org.osgi.framework.bootdelegation", stsPrefixes.toString());
               } else if (!existing.contains(stsPrefixes)) {
                 System.setProperty(
-                    "org.osgi.framework.bootdelegation", existing + "," + ddPrefixes.toString());
+                    "org.osgi.framework.bootdelegation", existing + "," + stsPrefixes.toString());
               }
             }
             return false;

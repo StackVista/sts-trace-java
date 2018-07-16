@@ -1,16 +1,14 @@
 package stackstate.trace.instrumentation.trace_annotation;
 
-import static stackstate.trace.instrumentation.trace_annotation.TraceConfigInstrumentation.PACKAGE_CLASS_NAME_REGEX;
 import static net.bytebuddy.matcher.ElementMatchers.declaresMethod;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.is;
 import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
+import static stackstate.trace.instrumentation.trace_annotation.TraceConfigInstrumentation.PACKAGE_CLASS_NAME_REGEX;
 
 import com.google.auto.service.AutoService;
 import com.google.common.collect.Sets;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.api.Trace;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.Trace;
 
 @Slf4j
 @AutoService(Instrumenter.class)

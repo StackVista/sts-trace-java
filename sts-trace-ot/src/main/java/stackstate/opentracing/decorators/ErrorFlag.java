@@ -1,7 +1,7 @@
 package stackstate.opentracing.decorators;
 
-import stackstate.opentracing.STSSpanContext;
 import io.opentracing.tag.Tags;
+import stackstate.opentracing.STSSpanContext;
 
 public class ErrorFlag extends AbstractDecorator {
   public ErrorFlag() {

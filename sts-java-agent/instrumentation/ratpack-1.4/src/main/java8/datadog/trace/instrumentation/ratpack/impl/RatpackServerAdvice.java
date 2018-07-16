@@ -1,6 +1,5 @@
 package stackstate.trace.instrumentation.ratpack.impl;
 
-import stackstate.opentracing.scopemanager.ContextualScopeManager;
 import io.opentracing.Scope;
 import io.opentracing.ScopeManager;
 import io.opentracing.util.GlobalTracer;
@@ -11,6 +10,7 @@ import ratpack.func.Action;
 import ratpack.handling.HandlerDecorator;
 import ratpack.registry.Registry;
 import ratpack.registry.RegistrySpec;
+import stackstate.opentracing.scopemanager.ContextualScopeManager;
 
 @Slf4j
 public class RatpackServerAdvice {

@@ -1,23 +1,5 @@
 package stackstate.opentracing;
 
-import stackstate.opentracing.decorators.AbstractDecorator;
-import stackstate.opentracing.decorators.STSDecoratorsFactory;
-import stackstate.opentracing.propagation.Codec;
-import stackstate.opentracing.propagation.ExtractedContext;
-import stackstate.opentracing.propagation.HTTPCodec;
-import stackstate.opentracing.scopemanager.ContextualScopeManager;
-import stackstate.opentracing.scopemanager.ScopeContext;
-import stackstate.trace.api.CorrelationIdentifier;
-import stackstate.trace.api.interceptor.MutableSpan;
-import stackstate.trace.api.interceptor.TraceInterceptor;
-import stackstate.trace.api.sampling.PrioritySampling;
-import stackstate.trace.common.STSTraceConfig;
-import stackstate.trace.common.sampling.AllSampler;
-import stackstate.trace.common.sampling.RateByServiceSampler;
-import stackstate.trace.common.sampling.Sampler;
-import stackstate.trace.common.writer.STSAgentWriter;
-import stackstate.trace.common.writer.STSApi;
-import stackstate.trace.common.writer.Writer;
 import io.opentracing.Scope;
 import io.opentracing.ScopeManager;
 import io.opentracing.Span;
@@ -39,6 +21,24 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.opentracing.decorators.AbstractDecorator;
+import stackstate.opentracing.decorators.STSDecoratorsFactory;
+import stackstate.opentracing.propagation.Codec;
+import stackstate.opentracing.propagation.ExtractedContext;
+import stackstate.opentracing.propagation.HTTPCodec;
+import stackstate.opentracing.scopemanager.ContextualScopeManager;
+import stackstate.opentracing.scopemanager.ScopeContext;
+import stackstate.trace.api.CorrelationIdentifier;
+import stackstate.trace.api.interceptor.MutableSpan;
+import stackstate.trace.api.interceptor.TraceInterceptor;
+import stackstate.trace.api.sampling.PrioritySampling;
+import stackstate.trace.common.STSTraceConfig;
+import stackstate.trace.common.sampling.AllSampler;
+import stackstate.trace.common.sampling.RateByServiceSampler;
+import stackstate.trace.common.sampling.Sampler;
+import stackstate.trace.common.writer.STSAgentWriter;
+import stackstate.trace.common.writer.STSApi;
+import stackstate.trace.common.writer.Writer;
 
 /** STSTracer makes it easy to send traces and span to STS using the OpenTracing API. */
 @Slf4j
@@ -123,7 +123,7 @@ public class STSTracer implements io.opentracing.Tracer {
               new Thread() {
                 @Override
                 public void run() {
-                  DDTracer.this.close();
+                  STSTracer.this.close();
                 }
               });
     } catch (final IllegalStateException ex) {
@@ -504,7 +504,7 @@ public class STSTracer implements io.opentracing.Tracer {
           this.tags = new HashMap<>();
         }
         if (!stssc.getTags().isEmpty()) {
-          tags.putAll(ddsc.getTags());
+          tags.putAll(stssc.getTags());
         }
         parentTrace = new PendingTrace(STSTracer.this, traceId);
         samplingPriority = stssc.getSamplingPriority();

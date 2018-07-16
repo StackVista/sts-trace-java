@@ -1,20 +1,20 @@
 package stackstate.trace.instrumentation.kafka_streams;
 
-import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
 import static net.bytebuddy.matcher.ElementMatchers.isPublic;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.returns;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
 import java.util.HashMap;
 import java.util.Map;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.record.TimestampType;
+import stackstate.trace.agent.tooling.Instrumenter;
 
 // This is necessary because SourceNodeRecordDeserializer drops the headers.  :-(
 @AutoService(Instrumenter.class)

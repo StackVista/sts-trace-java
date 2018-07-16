@@ -1,20 +1,20 @@
 package stackstate.trace.instrumentation.ratpack;
 
-import static stackstate.trace.instrumentation.ratpack.RatpackInstrumentation.CLASSLOADER_CONTAINS_RATPACK_1_4_OR_ABOVE;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.isInterface;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.not;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
+import static stackstate.trace.instrumentation.ratpack.RatpackInstrumentation.CLASSLOADER_CONTAINS_RATPACK_1_4_OR_ABOVE;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.instrumentation.ratpack.impl.RatpackHttpClientAdvice;
 
 @AutoService(Instrumenter.class)
 public final class RatpackHttpClientInstrumentation extends Instrumenter.Default {

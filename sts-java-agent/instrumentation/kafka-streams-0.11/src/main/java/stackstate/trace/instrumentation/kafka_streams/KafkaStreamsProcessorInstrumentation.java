@@ -1,6 +1,5 @@
 package stackstate.trace.instrumentation.kafka_streams;
 
-import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
 import static net.bytebuddy.matcher.ElementMatchers.isPackagePrivate;
@@ -8,11 +7,9 @@ import static net.bytebuddy.matcher.ElementMatchers.isPublic;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.returns;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.api.STSSpanTypes;
-import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
@@ -25,6 +22,9 @@ import java.util.Map;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.apache.kafka.streams.processor.internals.StampedRecord;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
 
 public class KafkaStreamsProcessorInstrumentation {
   // These two instrumentations work together to apply StreamTask.process.

@@ -1,6 +1,5 @@
 package stackstate.trace.agent.tooling;
 
-import stackstate.trace.bootstrap.ExceptionLogger;
 import net.bytebuddy.asm.Advice.ExceptionHandler;
 import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
@@ -10,6 +9,7 @@ import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.jar.asm.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import stackstate.trace.bootstrap.ExceptionLogger;
 
 public class ExceptionHandlers {
   private static final String LOG_FACTORY_NAME = LoggerFactory.class.getName().replace('.', '/');

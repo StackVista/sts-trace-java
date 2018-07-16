@@ -1,6 +1,5 @@
 package stackstate.trace.instrumentation.lettuce;
 
-import stackstate.trace.api.STSTags;
 import io.lettuce.core.protocol.AsyncCommand;
 import io.lettuce.core.protocol.RedisCommand;
 import io.opentracing.Scope;
@@ -9,6 +8,7 @@ import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
 import java.util.Collections;
 import net.bytebuddy.asm.Advice;
+import stackstate.trace.api.STSTags;
 
 public class LettuceAsyncCommandsAdvice {
 

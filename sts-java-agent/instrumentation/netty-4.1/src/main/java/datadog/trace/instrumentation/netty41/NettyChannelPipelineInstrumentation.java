@@ -1,6 +1,5 @@
 package stackstate.trace.instrumentation.netty41;
 
-import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.isInterface;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
@@ -8,16 +7,9 @@ import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.not;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
-import stackstate.trace.instrumentation.netty41.client.HttpClientRequestTracingHandler;
-import stackstate.trace.instrumentation.netty41.client.HttpClientResponseTracingHandler;
-import stackstate.trace.instrumentation.netty41.client.HttpClientTracingHandler;
-import stackstate.trace.instrumentation.netty41.server.HttpServerRequestTracingHandler;
-import stackstate.trace.instrumentation.netty41.server.HttpServerResponseTracingHandler;
-import stackstate.trace.instrumentation.netty41.server.HttpServerTracingHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpClientCodec;
@@ -30,6 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
+import stackstate.trace.instrumentation.netty41.client.HttpClientRequestTracingHandler;
+import stackstate.trace.instrumentation.netty41.client.HttpClientResponseTracingHandler;
+import stackstate.trace.instrumentation.netty41.client.HttpClientTracingHandler;
+import stackstate.trace.instrumentation.netty41.server.HttpServerRequestTracingHandler;
+import stackstate.trace.instrumentation.netty41.server.HttpServerResponseTracingHandler;
+import stackstate.trace.instrumentation.netty41.server.HttpServerTracingHandler;
 
 @AutoService(Instrumenter.class)
 public class NettyChannelPipelineInstrumentation extends Instrumenter.Default {

@@ -1,10 +1,10 @@
 package stackstate.trace.agent.tooling.muzzle;
 
-import stackstate.trace.agent.tooling.Utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import net.bytebuddy.jar.asm.*;
+import stackstate.trace.agent.tooling.Utils;
 
 /** Visit a class and collect all references made by the visited class. */
 public class ReferenceCreator extends ClassVisitor {

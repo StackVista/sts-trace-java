@@ -14,7 +14,7 @@ public class ServletContextDecorator extends AbstractDecorator {
   public boolean shouldSetTag(final STSSpanContext context, final String tag, final Object value) {
     String contextName = String.valueOf(value).trim();
     if (contextName.equals("/")
-        || (!context.getServiceName().equals(DDTracer.UNASSIGNED_DEFAULT_SERVICE_NAME)
+        || (!context.getServiceName().equals(STSTracer.UNASSIGNED_DEFAULT_SERVICE_NAME)
             && !context.getServiceName().isEmpty())) {
       return true;
     }

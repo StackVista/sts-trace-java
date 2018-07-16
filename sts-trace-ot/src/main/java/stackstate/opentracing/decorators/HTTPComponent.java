@@ -1,8 +1,8 @@
 package stackstate.opentracing.decorators;
 
+import io.opentracing.tag.Tags;
 import stackstate.opentracing.STSSpanContext;
 import stackstate.trace.api.STSTags;
-import io.opentracing.tag.Tags;
 
 /**
  * This span decorator leverages HTTP tags. It allows the dev to define a custom service name and

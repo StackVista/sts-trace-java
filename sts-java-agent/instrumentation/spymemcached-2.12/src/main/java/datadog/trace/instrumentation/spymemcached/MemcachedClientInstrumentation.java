@@ -1,12 +1,9 @@
 package stackstate.trace.instrumentation.spymemcached;
 
-import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithMethod;
 import static net.bytebuddy.matcher.ElementMatchers.*;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithMethod;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.HelperInjector;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
 import io.opentracing.util.GlobalTracer;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -17,6 +14,9 @@ import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.internal.BulkFuture;
 import net.spy.memcached.internal.GetFuture;
 import net.spy.memcached.internal.OperationFuture;
+import stackstate.trace.agent.tooling.HelperInjector;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
 
 @AutoService(Instrumenter.class)
 public final class MemcachedClientInstrumentation extends Instrumenter.Default {

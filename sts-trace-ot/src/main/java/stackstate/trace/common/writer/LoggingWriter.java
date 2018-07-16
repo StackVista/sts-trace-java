@@ -1,9 +1,9 @@
 package stackstate.trace.common.writer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import stackstate.opentracing.STSSpan;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.opentracing.STSSpan;
 
 @Slf4j
 public class LoggingWriter implements Writer {

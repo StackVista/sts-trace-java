@@ -1,5 +1,7 @@
 import stackstate.opentracing.STSSpan
+import stackstate.trace.agent.test.AgentTestRunner
 import stackstate.trace.api.STSTags
+import stackstate.trace.instrumentation.jedis.JedisInstrumentation
 import io.opentracing.tag.Tags
 import redis.clients.jedis.Jedis
 import redis.embedded.RedisServer

@@ -1,10 +1,10 @@
 package stackstate.trace.agent.tooling;
 
-import stackstate.trace.bootstrap.StackstateClassLoader;
-import stackstate.trace.bootstrap.StackstateClassLoader.BootstrapClassLoaderProxy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import stackstate.trace.bootstrap.StackStateClassLoader;
+import stackstate.trace.bootstrap.StackStateClassLoader.BootstrapClassLoaderProxy;
 
 public class Utils {
   /* packages which will be loaded on the bootstrap classloader*/
@@ -53,8 +53,8 @@ public class Utils {
 
   /** Return a classloader which can be used to look up bootstrap resources. */
   public static BootstrapClassLoaderProxy getBootstrapProxy() {
-    if (getAgentClassLoader() instanceof StackstateClassLoader) {
-      return ((StackstateClassLoader) getAgentClassLoader()).getBootstrapProxy();
+    if (getAgentClassLoader() instanceof StackStateClassLoader) {
+      return ((StackStateClassLoader) getAgentClassLoader()).getBootstrapProxy();
     } else {
       // in a unit test
       return unitTestBootstrapProxy;

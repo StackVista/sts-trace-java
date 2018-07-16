@@ -1,10 +1,10 @@
 package stackstate.trace.instrumentation.ratpack.impl;
 
-import stackstate.opentracing.scopemanager.ScopeContext;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import ratpack.exec.Execution;
 import ratpack.exec.UnmanagedThreadException;
+import stackstate.opentracing.scopemanager.ScopeContext;
 
 /**
  * This scope manager uses the Ratpack Execution to store the current Scope. This is a ratpack

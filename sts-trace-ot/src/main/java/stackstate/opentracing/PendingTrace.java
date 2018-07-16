@@ -1,7 +1,5 @@
 package stackstate.opentracing;
 
-import stackstate.opentracing.scopemanager.ContinuableScope;
-import stackstate.trace.common.util.Clock;
 import java.io.Closeable;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -18,6 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.opentracing.scopemanager.ContinuableScope;
+import stackstate.trace.common.util.Clock;
 
 @Slf4j
 public class PendingTrace extends ConcurrentLinkedDeque<STSSpan> {

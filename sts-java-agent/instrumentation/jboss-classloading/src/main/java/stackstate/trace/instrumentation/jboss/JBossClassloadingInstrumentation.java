@@ -1,13 +1,13 @@
 package stackstate.trace.instrumentation.jboss;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.agent.tooling.Utils;
 import java.util.Collections;
 import java.util.Map;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.NameMatcher;
 import net.bytebuddy.matcher.StringMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.agent.tooling.Utils;
 
 @AutoService(Instrumenter.class)
 public final class JBossClassloadingInstrumentation extends Instrumenter.Default {

@@ -10,8 +10,6 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -22,6 +20,8 @@ import java.util.Map;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.elasticsearch.client.ResponseListener;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSTags;
 
 @AutoService(Instrumenter.class)
 public class Elasticsearch5RestClientInstrumentation extends Instrumenter.Default {

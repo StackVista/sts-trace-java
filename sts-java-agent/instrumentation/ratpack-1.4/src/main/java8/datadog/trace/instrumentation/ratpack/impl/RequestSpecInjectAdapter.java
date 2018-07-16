@@ -8,7 +8,8 @@ import ratpack.http.client.RequestSpec;
 /**
  * SimpleTextMap to add headers to an outgoing Ratpack HttpClient request
  *
- * @see stackstate.trace.instrumentation.apachehttpclient.DDTracingClientExec.HttpHeadersInjectAdapter
+ * @see
+ *     stackstate.trace.instrumentation.apachehttpclient.DDTracingClientExec.HttpHeadersInjectAdapter
  */
 public class RequestSpecInjectAdapter implements TextMap {
   private final RequestSpec requestSpec;

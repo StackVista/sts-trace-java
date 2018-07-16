@@ -1,13 +1,15 @@
 package stackstate.opentracing;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import stackstate.opentracing.decorators.AbstractDecorator;
-import stackstate.trace.api.STSTags;
-import stackstate.trace.api.sampling.PrioritySampling;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.opentracing.decorators.AbstractDecorator;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.api.sampling.PrioritySampling;
 
 class STSSpanContextPidProvider implements ISTSSpanContextPidProvider {
 

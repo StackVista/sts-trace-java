@@ -6,8 +6,6 @@ import static net.bytebuddy.matcher.ElementMatchers.returns;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.util.GlobalTracer;
 import java.util.HashMap;
@@ -16,6 +14,8 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
 import spark.route.HttpMethod;
 import spark.routematch.RouteMatch;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSTags;
 
 @AutoService(Instrumenter.class)
 public class RoutesInstrumentation extends Instrumenter.Default {

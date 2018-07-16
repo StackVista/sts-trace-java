@@ -1,7 +1,5 @@
 package stackstate.trace.instrumentation.lettuce.rx;
 
-import stackstate.trace.api.STSTags;
-import stackstate.trace.instrumentation.lettuce.LettuceInstrumentationUtil;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -13,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Signal;
 import reactor.core.publisher.SignalType;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.instrumentation.lettuce.LettuceInstrumentationUtil;
 
 public class LettuceFluxTerminationRunnable implements Consumer<Signal>, Runnable {
 

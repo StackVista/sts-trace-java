@@ -1,10 +1,10 @@
 package stackstate.trace.agent.tooling.muzzle;
 
-import stackstate.trace.agent.tooling.HelperInjector;
-import stackstate.trace.agent.tooling.Instrumenter;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.ServiceLoader;
+import stackstate.trace.agent.tooling.HelperInjector;
+import stackstate.trace.agent.tooling.Instrumenter;
 
 /**
  * Entry point for muzzle version scan gradle plugin.

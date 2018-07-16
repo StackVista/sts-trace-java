@@ -1,7 +1,5 @@
 package stackstate.trace.instrumentation.ratpack.impl;
 
-import stackstate.trace.api.STSSpanTypes;
-import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
@@ -12,6 +10,8 @@ import ratpack.handling.Context;
 import ratpack.handling.Handler;
 import ratpack.http.Request;
 import ratpack.http.Status;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
 
 /**
  * This Ratpack handler reads tracing headers from the incoming request, starts a scope and ensures

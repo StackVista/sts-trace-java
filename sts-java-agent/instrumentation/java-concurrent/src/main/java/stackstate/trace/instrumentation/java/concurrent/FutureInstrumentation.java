@@ -7,15 +7,15 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
 import static net.bytebuddy.matcher.ElementMatchers.returns;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.instrumentation.java.concurrent.ExecutorInstrumentation.ConcurrentUtils;
-import stackstate.trace.instrumentation.java.concurrent.ExecutorInstrumentation.StackstateWrapper;
 import java.util.*;
 import java.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.instrumentation.java.concurrent.ExecutorInstrumentation.ConcurrentUtils;
+import stackstate.trace.instrumentation.java.concurrent.ExecutorInstrumentation.StackStateWrapper;
 
 @Slf4j
 @AutoService(Instrumenter.class)
@@ -83,7 +83,7 @@ public final class FutureInstrumentation extends Instrumenter.Default {
   public String[] helperClassNames() {
     return new String[] {
       ExecutorInstrumentation.class.getName() + "$ConcurrentUtils",
-      ExecutorInstrumentation.class.getName() + "$StackstateWrapper",
+      ExecutorInstrumentation.class.getName() + "$StackStateWrapper",
       ExecutorInstrumentation.class.getName() + "$CallableWrapper",
       ExecutorInstrumentation.class.getName() + "$RunnableWrapper"
     };
@@ -99,13 +99,13 @@ public final class FutureInstrumentation extends Instrumenter.Default {
 
   public static class CanceledFutureAdvice {
     @Advice.OnMethodEnter(suppress = Throwable.class)
-    public static StackstateWrapper findWrapper(@Advice.This final Future<?> future) {
-      return ConcurrentUtils.getStackstateWrapper(future);
+    public static StackStateWrapper findWrapper(@Advice.This final Future<?> future) {
+      return ConcurrentUtils.getStackStateWrapper(future);
     }
 
     @Advice.OnMethodExit(suppress = Throwable.class)
     public static void abortTracing(
-        @Advice.Enter final StackstateWrapper wrapper, @Advice.Return final boolean canceled) {
+        @Advice.Enter final StackStateWrapper wrapper, @Advice.Return final boolean canceled) {
       if (canceled && null != wrapper) {
         wrapper.cancel();
       }

@@ -1,10 +1,10 @@
 package stackstate.opentracing;
 
 import com.google.common.annotations.VisibleForTesting;
-import stackstate.trace.api.CorrelationIdentifier;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.util.GlobalTracer;
+import stackstate.trace.api.CorrelationIdentifier;
 
 public class OTTraceCorrelation implements CorrelationIdentifier.Provider {
   public static final OTTraceCorrelation INSTANCE = new OTTraceCorrelation();

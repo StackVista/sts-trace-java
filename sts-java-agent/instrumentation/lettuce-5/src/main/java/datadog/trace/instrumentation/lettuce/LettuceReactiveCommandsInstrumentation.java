@@ -1,15 +1,15 @@
 package stackstate.trace.instrumentation.lettuce;
 
-import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static net.bytebuddy.matcher.ElementMatchers.*;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.instrumentation.lettuce.rx.LettuceFluxCreationAdvice;
-import stackstate.trace.instrumentation.lettuce.rx.LettuceMonoCreationAdvice;
 import java.util.HashMap;
 import java.util.Map;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.instrumentation.lettuce.rx.LettuceFluxCreationAdvice;
+import stackstate.trace.instrumentation.lettuce.rx.LettuceMonoCreationAdvice;
 
 @AutoService(Instrumenter.class)
 public class LettuceReactiveCommandsInstrumentation extends Instrumenter.Default {

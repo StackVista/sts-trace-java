@@ -2,7 +2,6 @@ package stackstate.trace.instrumentation.trace_annotation;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 
-import stackstate.trace.api.Trace;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -10,6 +9,7 @@ import io.opentracing.util.GlobalTracer;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import net.bytebuddy.asm.Advice;
+import stackstate.trace.api.Trace;
 
 public class TraceAdvice {
 

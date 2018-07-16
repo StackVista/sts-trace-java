@@ -1,10 +1,10 @@
 package stackstate.trace.instrumentation.lettuce.rx;
 
-import stackstate.trace.instrumentation.lettuce.LettuceInstrumentationUtil;
 import io.lettuce.core.protocol.RedisCommand;
 import java.util.function.Supplier;
 import net.bytebuddy.asm.Advice;
 import reactor.core.publisher.Flux;
+import stackstate.trace.instrumentation.lettuce.LettuceInstrumentationUtil;
 
 public class LettuceFluxCreationAdvice {
 

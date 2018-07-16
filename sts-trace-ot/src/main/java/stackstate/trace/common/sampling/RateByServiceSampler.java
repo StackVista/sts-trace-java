@@ -2,14 +2,14 @@
 package stackstate.trace.common.sampling;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import stackstate.opentracing.STSSpan;
-import stackstate.opentracing.STSSpanContext;
-import stackstate.trace.api.sampling.PrioritySampling;
-import stackstate.trace.common.writer.STSApi.ResponseListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.opentracing.STSSpan;
+import stackstate.opentracing.STSSpanContext;
+import stackstate.trace.api.sampling.PrioritySampling;
+import stackstate.trace.common.writer.STSApi.ResponseListener;
 
 /**
  * A rate sampler which maintains different sample rates per service+env name.

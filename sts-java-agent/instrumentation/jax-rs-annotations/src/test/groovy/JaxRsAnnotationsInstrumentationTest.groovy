@@ -1,4 +1,5 @@
 import stackstate.opentracing.STSSpanContext
+import stackstate.trace.agent.test.AgentTestRunner
 import io.opentracing.util.GlobalTracer
 
 import javax.ws.rs.DELETE

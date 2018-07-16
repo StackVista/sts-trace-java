@@ -1,13 +1,13 @@
 package stackstate.trace.common;
 
-import stackstate.opentracing.STSTracer;
-import stackstate.trace.common.writer.STSAgentWriter;
-import stackstate.trace.common.writer.Writer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.opentracing.STSTracer;
+import stackstate.trace.common.writer.STSAgentWriter;
+import stackstate.trace.common.writer.Writer;
 
 /**
  * Config gives priority to system properties and falls back to environment variables. It also

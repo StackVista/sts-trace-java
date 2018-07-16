@@ -1,4 +1,6 @@
 import stackstate.opentracing.STSSpan
+import stackstate.trace.agent.test.AgentTestRunner
+import stackstate.trace.agent.test.TestUtils
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import play.api.test.TestServer
@@ -25,8 +27,8 @@ class Play24Test extends AgentTestRunner {
     OkHttpClient client = new OkHttpClient.Builder().build()
     def request = new Request.Builder()
       .url("http://localhost:$port/helloplay/spock")
-      .header("x-stackstate-trace-id", "123")
-      .header("x-stackstate-parent-id", "456")
+      .header("x-datadog-trace-id", "123")
+      .header("x-datadog-parent-id", "456")
       .get()
       .build()
     def response = client.newCall(request).execute()

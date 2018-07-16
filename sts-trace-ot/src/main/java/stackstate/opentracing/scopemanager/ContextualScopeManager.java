@@ -1,11 +1,11 @@
 package stackstate.opentracing.scopemanager;
 
-import stackstate.opentracing.STSSpan;
 import io.opentracing.Scope;
 import io.opentracing.ScopeManager;
 import io.opentracing.Span;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import stackstate.opentracing.STSSpan;
 
 public class ContextualScopeManager implements ScopeManager {
   static final ThreadLocal<Scope> tlsScope = new ThreadLocal<>();

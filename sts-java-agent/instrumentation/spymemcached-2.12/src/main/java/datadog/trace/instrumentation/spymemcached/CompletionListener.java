@@ -2,7 +2,6 @@ package stackstate.trace.instrumentation.spymemcached;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 
-import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
@@ -11,6 +10,7 @@ import java.util.Collections;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.trace.api.STSTags;
 
 @Slf4j
 public abstract class CompletionListener<T> {

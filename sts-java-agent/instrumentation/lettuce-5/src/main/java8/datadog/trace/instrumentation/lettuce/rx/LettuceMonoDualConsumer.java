@@ -1,7 +1,5 @@
 package stackstate.trace.instrumentation.lettuce.rx;
 
-import stackstate.trace.api.STSTags;
-import stackstate.trace.instrumentation.lettuce.LettuceInstrumentationUtil;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -11,6 +9,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.instrumentation.lettuce.LettuceInstrumentationUtil;
 
 public class LettuceMonoDualConsumer<R, T, U extends Throwable>
     implements Consumer<R>, BiConsumer<T, Throwable> {

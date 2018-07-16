@@ -1,15 +1,15 @@
 package stackstate.opentracing.scopemanager;
 
-import stackstate.opentracing.STSSpan;
-import stackstate.opentracing.STSSpanContext;
-import stackstate.opentracing.PendingTrace;
-import stackstate.trace.context.TraceScope;
 import io.opentracing.Scope;
 import java.io.Closeable;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.opentracing.PendingTrace;
+import stackstate.opentracing.STSSpan;
+import stackstate.opentracing.STSSpanContext;
+import stackstate.trace.context.TraceScope;
 
 @Slf4j
 public class ContinuableScope implements Scope, TraceScope {

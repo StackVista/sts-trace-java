@@ -1,10 +1,10 @@
 package stackstate.opentracing.decorators;
 
-import stackstate.opentracing.STSSpanContext;
 import io.opentracing.tag.Tags;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import stackstate.opentracing.STSSpanContext;
 
 /**
  * This span decorator is a simple mapping to override the operation DB tags. The operation name of

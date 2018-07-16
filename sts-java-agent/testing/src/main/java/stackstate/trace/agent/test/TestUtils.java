@@ -2,7 +2,6 @@ package stackstate.trace.agent.test;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 
-import stackstate.trace.agent.tooling.Utils;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
@@ -22,6 +21,7 @@ import java.util.concurrent.Callable;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
+import stackstate.trace.agent.tooling.Utils;
 
 public class TestUtils {
 

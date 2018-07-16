@@ -1,11 +1,10 @@
 package stackstate.trace.instrumentation.apachehttpclient;
 
-import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
 import static net.bytebuddy.matcher.ElementMatchers.named;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
 import io.opentracing.util.GlobalTracer;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +13,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.execchain.ClientExecChain;
+import stackstate.trace.agent.tooling.Instrumenter;
 
 @AutoService(Instrumenter.class)
 public class ApacheHttpClientInstrumentation extends Instrumenter.Default {

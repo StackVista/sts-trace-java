@@ -1,17 +1,17 @@
 package stackstate.trace.instrumentation.ratpack;
 
-import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithMethod;
 import static net.bytebuddy.matcher.ElementMatchers.*;
+import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithMethod;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.instrumentation.ratpack.impl.RatpackServerAdvice;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.instrumentation.ratpack.impl.RatpackServerAdvice;
 
 @AutoService(Instrumenter.class)
 @Slf4j

@@ -1,10 +1,10 @@
 package stackstate.trace.agent.tooling.muzzle;
 
-import stackstate.trace.agent.tooling.Instrumenter;
 import net.bytebuddy.build.Plugin;
 import net.bytebuddy.description.type.TypeDefinition;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType.Builder;
+import stackstate.trace.agent.tooling.Instrumenter;
 
 /** Bytebuddy gradle plugin which creates muzzle-references at compile time. */
 public class MuzzleGradlePlugin implements Plugin {

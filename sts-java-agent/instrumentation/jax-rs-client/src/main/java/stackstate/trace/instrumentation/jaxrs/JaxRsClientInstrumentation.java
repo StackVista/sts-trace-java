@@ -6,12 +6,12 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.returns;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.*;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.client.ClientBuilder;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.*;
 
 @AutoService(Instrumenter.class)
 public final class JaxRsClientInstrumentation extends Instrumenter.Default {

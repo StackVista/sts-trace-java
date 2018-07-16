@@ -8,10 +8,6 @@ import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.api.STSSpanTypes;
-import stackstate.trace.api.STSTags;
-import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
@@ -26,6 +22,10 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
 
 @AutoService(Instrumenter.class)
 public class HttpUrlConnectionInstrumentation extends Instrumenter.Default {

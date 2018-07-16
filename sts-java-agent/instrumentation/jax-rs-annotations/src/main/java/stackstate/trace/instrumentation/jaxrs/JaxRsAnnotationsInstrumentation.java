@@ -7,8 +7,6 @@ import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.api.STSTags;
 import io.opentracing.Scope;
 import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
@@ -19,6 +17,8 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.api.STSTags;
 
 @AutoService(Instrumenter.class)
 public final class JaxRsAnnotationsInstrumentation extends Instrumenter.Default {

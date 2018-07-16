@@ -3,7 +3,6 @@ package stackstate.trace.agent.test;
 import static stackstate.trace.agent.tooling.Utils.BOOTSTRAP_PACKAGE_PREFIXES;
 
 import com.google.common.reflect.ClassPath;
-import stackstate.trace.agent.tooling.Utils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -18,6 +17,7 @@ import net.bytebuddy.dynamic.ClassFileLocator;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.model.InitializationError;
 import org.spockframework.runtime.Sputnik;
+import stackstate.trace.agent.tooling.Utils;
 
 /**
  * Runs a spock test in an agent-friendly way.

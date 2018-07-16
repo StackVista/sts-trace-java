@@ -3,8 +3,6 @@ package stackstate.trace.instrumentation.netty41.client;
 import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 import static io.opentracing.log.Fields.ERROR_OBJECT;
 
-import stackstate.trace.api.STSSpanTypes;
-import stackstate.trace.api.STSTags;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -15,6 +13,8 @@ import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
 import java.net.InetSocketAddress;
 import java.util.Collections;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
 
 public class HttpClientRequestTracingHandler extends ChannelOutboundHandlerAdapter {
 

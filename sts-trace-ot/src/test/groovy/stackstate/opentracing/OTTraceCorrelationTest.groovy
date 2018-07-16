@@ -9,7 +9,7 @@ class OTTraceCorrelationTest extends Specification {
   static final WRITER = new ListWriter()
 
   @Shared
-  DDTracer tracer = new DDTracer(WRITER)
+  STSTracer tracer = new STSTracer(WRITER)
   @Shared
   OTTraceCorrelation traceCorrelation = new OTTraceCorrelation(tracer)
 

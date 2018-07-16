@@ -7,10 +7,6 @@ import akka.http.scaladsl.model.HttpRequest;
 import akka.http.scaladsl.model.HttpResponse;
 import akka.stream.*;
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.*;
-import stackstate.trace.api.STSSpanTypes;
-import stackstate.trace.api.STSTags;
-import stackstate.trace.context.TraceScope;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
@@ -27,6 +23,10 @@ import scala.Function1;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 import scala.runtime.AbstractFunction1;
+import stackstate.trace.agent.tooling.*;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.context.TraceScope;
 
 @Slf4j
 @AutoService(Instrumenter.class)
@@ -48,7 +48,7 @@ public final class AkkaHttpServerInstrumentation extends Instrumenter.Default {
   @Override
   public String[] helperClassNames() {
     return new String[] {
-      AkkaHttpServerInstrumentation.class.getName() + "$StackstateWrapperHelper",
+      AkkaHttpServerInstrumentation.class.getName() + "$StackStateWrapperHelper",
       AkkaHttpServerInstrumentation.class.getName() + "$StackstateSyncWrapper",
       AkkaHttpServerInstrumentation.class.getName() + "$StackstateAsyncWrapper",
       AkkaHttpServerInstrumentation.class.getName() + "$StackstateAsyncWrapper$1",
@@ -94,7 +94,7 @@ public final class AkkaHttpServerInstrumentation extends Instrumenter.Default {
     }
   }
 
-  public static class StackstateWrapperHelper {
+  public static class StackStateWrapperHelper {
     public static Scope createSpan(HttpRequest request) {
       final SpanContext extractedContext =
           GlobalTracer.get()
@@ -146,15 +146,15 @@ public final class AkkaHttpServerInstrumentation extends Instrumenter.Default {
 
     @Override
     public HttpResponse apply(HttpRequest request) {
-      final Scope scope = StackstateWrapperHelper.createSpan(request);
+      final Scope scope = StackStateWrapperHelper.createSpan(request);
       try {
         final HttpResponse response = userHandler.apply(request);
         scope.close();
-        StackstateWrapperHelper.finishSpan(scope.span(), response);
+        StackStateWrapperHelper.finishSpan(scope.span(), response);
         return response;
       } catch (Throwable t) {
         scope.close();
-        StackstateWrapperHelper.finishSpan(scope.span(), t);
+        StackStateWrapperHelper.finishSpan(scope.span(), t);
         throw t;
       }
     }
@@ -174,13 +174,13 @@ public final class AkkaHttpServerInstrumentation extends Instrumenter.Default {
 
     @Override
     public Future<HttpResponse> apply(HttpRequest request) {
-      final Scope scope = StackstateWrapperHelper.createSpan(request);
+      final Scope scope = StackStateWrapperHelper.createSpan(request);
       Future<HttpResponse> futureResponse = null;
       try {
         futureResponse = userHandler.apply(request);
       } catch (Throwable t) {
         scope.close();
-        StackstateWrapperHelper.finishSpan(scope.span(), t);
+        StackStateWrapperHelper.finishSpan(scope.span(), t);
         throw t;
       }
       final Future<HttpResponse> wrapped =
@@ -188,14 +188,14 @@ public final class AkkaHttpServerInstrumentation extends Instrumenter.Default {
               new AbstractFunction1<HttpResponse, HttpResponse>() {
                 @Override
                 public HttpResponse apply(HttpResponse response) {
-                  StackstateWrapperHelper.finishSpan(scope.span(), response);
+                  StackStateWrapperHelper.finishSpan(scope.span(), response);
                   return response;
                 }
               },
               new AbstractFunction1<Throwable, Throwable>() {
                 @Override
                 public Throwable apply(Throwable t) {
-                  StackstateWrapperHelper.finishSpan(scope.span(), t);
+                  StackStateWrapperHelper.finishSpan(scope.span(), t);
                   return t;
                 }
               },

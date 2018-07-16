@@ -2,8 +2,8 @@ package stackstate.trace.agent.tooling.muzzle;
 
 import static stackstate.trace.agent.tooling.ClassLoaderMatcher.BOOTSTRAP_CLASSLOADER;
 
-import stackstate.trace.agent.tooling.Utils;
 import java.util.*;
+import stackstate.trace.agent.tooling.Utils;
 
 /** An immutable reference to a jvm class. */
 public class Reference {

@@ -1,10 +1,10 @@
 package stackstate.opentracing.decorators;
 
-import stackstate.opentracing.STSSpanContext;
-import stackstate.trace.api.STSTags;
 import io.opentracing.tag.Tags;
 import java.net.MalformedURLException;
 import java.util.regex.Pattern;
+import stackstate.opentracing.STSSpanContext;
+import stackstate.trace.api.STSTags;
 
 /** Decorator for servlet contrib */
 public class URLAsResourceName extends AbstractDecorator {

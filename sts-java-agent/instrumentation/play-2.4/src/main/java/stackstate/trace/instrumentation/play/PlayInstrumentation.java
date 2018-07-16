@@ -1,15 +1,11 @@
 package stackstate.trace.instrumentation.play;
 
+import static net.bytebuddy.matcher.ElementMatchers.*;
 import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClassWithMethod;
 import static stackstate.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
-import static net.bytebuddy.matcher.ElementMatchers.*;
 
 import akka.japi.JavaPartialFunction;
 import com.google.auto.service.AutoService;
-import stackstate.trace.agent.tooling.*;
-import stackstate.trace.api.STSSpanTypes;
-import stackstate.trace.api.STSTags;
-import stackstate.trace.context.TraceScope;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
@@ -28,6 +24,10 @@ import play.api.mvc.Result;
 import scala.Option;
 import scala.Tuple2;
 import scala.concurrent.Future;
+import stackstate.trace.agent.tooling.*;
+import stackstate.trace.api.STSSpanTypes;
+import stackstate.trace.api.STSTags;
+import stackstate.trace.context.TraceScope;
 
 @Slf4j
 @AutoService(Instrumenter.class)

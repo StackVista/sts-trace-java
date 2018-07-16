@@ -4,15 +4,15 @@ import static net.bytebuddy.matcher.ElementMatchers.isConstructor;
 import static net.bytebuddy.matcher.ElementMatchers.isSubTypeOf;
 
 import com.google.auto.service.AutoService;
-import stackstate.opentracing.STSTracer;
-import stackstate.trace.agent.tooling.Instrumenter;
-import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
 import io.opentracing.util.GlobalTracer;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatcher;
+import stackstate.opentracing.STSTracer;
+import stackstate.trace.agent.tooling.Instrumenter;
+import stackstate.trace.bootstrap.CallDepthThreadLocalMap;
 
 @AutoService(Instrumenter.class)
 public final class ClassLoaderInstrumentation extends Instrumenter.Default {
@@ -59,7 +59,7 @@ public final class ClassLoaderInstrumentation extends Instrumenter.Default {
           field.setAccessible(true);
 
           final Object o = field.get(null);
-          // FIXME: This instrumentation will never work. Referencing class DDTracer will throw an exception.
+          // FIXME: This instrumentation will never work. Referencing class STSTracer will throw an exception.
           if (o instanceof STSTracer) {
             final STSTracer tracer = (STSTracer) o;
             tracer.registerClassLoader(cl);

@@ -1,7 +1,5 @@
 package stackstate.opentracing.propagation;
 
-import stackstate.opentracing.STSSpanContext;
-import stackstate.trace.api.sampling.PrioritySampling;
 import io.opentracing.propagation.TextMap;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -10,6 +8,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.opentracing.STSSpanContext;
+import stackstate.trace.api.sampling.PrioritySampling;
 
 /** A codec designed for HTTP transport via headers */
 @Slf4j

@@ -16,7 +16,6 @@ package stackstate.trace.instrumentation.aws.v106;
 import com.amazonaws.AmazonWebServiceResponse;
 import com.amazonaws.Request;
 import com.amazonaws.Response;
-import stackstate.trace.api.STSTags;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
 import java.io.PrintWriter;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import stackstate.trace.api.STSTags;
 
 class SpanDecorator {
   static final String COMPONENT_NAME = "java-aws-sdk";

@@ -1,10 +1,8 @@
 package stackstate.trace.agent.tooling;
 
-import static stackstate.trace.agent.tooling.Utils.getConfigEnabled;
 import static net.bytebuddy.matcher.ElementMatchers.any;
+import static stackstate.trace.agent.tooling.Utils.getConfigEnabled;
 
-import stackstate.trace.agent.tooling.muzzle.Reference;
-import stackstate.trace.agent.tooling.muzzle.ReferenceMatcher;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -16,6 +14,8 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
+import stackstate.trace.agent.tooling.muzzle.Reference;
+import stackstate.trace.agent.tooling.muzzle.ReferenceMatcher;
 
 /**
  * Built-in bytebuddy-based instrumentation for the stackstate javaagent.
@@ -110,13 +110,13 @@ public interface Instrumenter {
                       return true;
                     }
                   })
-              .transform(DDTransformers.defaultTransformers());
+              .transform(STSTransformers.defaultTransformers());
       final String[] helperClassNames = helperClassNames();
       if (helperClassNames.length > 0) {
         advice = advice.transform(new HelperInjector(helperClassNames));
       }
       for (Map.Entry<ElementMatcher, String> entry : transformers().entrySet()) {
-        advice = advice.transform(DDAdvice.create().advice(entry.getKey(), entry.getValue()));
+        advice = advice.transform(STSAdvice.create().advice(entry.getKey(), entry.getValue()));
       }
       return advice.asDecorator();
     }

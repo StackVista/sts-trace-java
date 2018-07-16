@@ -1,8 +1,8 @@
 package stackstate.opentracing.decorators;
 
+import io.opentracing.tag.Tags;
 import stackstate.opentracing.STSSpanContext;
 import stackstate.trace.api.STSTags;
-import io.opentracing.tag.Tags;
 
 /** This span decorator protect against spam on the resource name */
 public class Status404Decorator extends AbstractDecorator {

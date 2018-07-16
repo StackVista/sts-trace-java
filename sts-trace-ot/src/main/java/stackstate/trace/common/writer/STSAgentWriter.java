@@ -1,6 +1,5 @@
 package stackstate.trace.common.writer;
 
-import stackstate.opentracing.STSSpan;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -11,6 +10,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
+import stackstate.opentracing.STSSpan;
 
 /**
  * This writer write provided traces to the a STS agent which is most of time located on the same

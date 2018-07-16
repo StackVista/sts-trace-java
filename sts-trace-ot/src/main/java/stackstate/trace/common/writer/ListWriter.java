@@ -1,12 +1,12 @@
 package stackstate.trace.common.writer;
 
-import stackstate.opentracing.STSSpan;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import stackstate.opentracing.STSSpan;
 
 /** List writer used by tests mostly */
 public class ListWriter extends CopyOnWriteArrayList<List<STSSpan>> implements Writer {

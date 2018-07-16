@@ -1,7 +1,7 @@
 package stackstate.opentracing.decorators;
 
-import stackstate.opentracing.STSSpanContext;
 import io.opentracing.tag.Tags;
+import stackstate.opentracing.STSSpanContext;
 
 /** Mark all 5xx status codes as an error */
 public class Status5XXDecorator extends AbstractDecorator {
