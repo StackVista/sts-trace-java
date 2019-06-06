@@ -1,63 +1,48 @@
-/*
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 apply plugin: 'checkstyle'
 
 dependencies {
-  checkstyle 'com.puppycrawl.tools:checkstyle:8.0'
+  checkstyle 'com.puppycrawl.tools:checkstyle:8.20'
 }
 
-def checkstyleConfigDir = new File(buildscript.sourceFile.parentFile, 'enforcement')
+def checkstyleConfigDir = file("${buildscript.sourceFile.parentFile}/enforcement/checkstyle")
 
 checkstyle {
-  configFile = new File(checkstyleConfigDir, "checkstyle.xml")
+  configDir = checkstyleConfigDir
   configProperties.checkstyleConfigDir = checkstyleConfigDir
   maxWarnings = 500
 }
 
 plugins.withType(GroovyBasePlugin) {
   sourceSets.all { sourceSet ->
-    task "${sourceSet.getTaskName('checkstyle', 'groovy')}"(type: Checkstyle) {
+    tasks.register("${sourceSet.getTaskName('checkstyle', 'groovy')}", Checkstyle) {
       configFile = new File(checkstyleConfigDir, "checkstyle-groovy.xml")
-      source sourceSet.allGroovy
+      source(allGroovy)
       classpath = sourceSet.compileClasspath
-      reports.xml.destination new File(checkstyle.reportsDir, "${sourceSet.name}-groovy.xml")
+      reports.xml.destination = new File(reportsDir, "${sourceSet.name}-groovy.xml")
     }
   }
 }
 
 def checkstyleTasks = tasks.withType(Checkstyle)
 
-task checkstyle(dependsOn: checkstyleTasks)
+tasks.register("checkstyle") {
+  dependsOn checkstyleTasks
+}
 
 check.dependsOn checkstyleTasks
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
   mustRunAfter checkstyleTasks
 }
 
-if (!JavaVersion.current().isJava9Compatible()) {
-  // Verification seems broken on Java 9.
-  apply plugin: 'com.github.sherter.google-java-format'
+// Verification seems broken on Java 9.
+apply plugin: 'com.github.sherter.google-java-format'
 
-  googleJavaFormat {
-    exclude 'gradle-home'
-  }
+googleJavaFormat {
+  source = sourceSets*.allJava
+  exclude '**/build/**/*.java'
+}
 
-  tasks.withType(Checkstyle) {
-    mustRunAfter verifyGoogleJavaFormat
-  }
+tasks.withType(Checkstyle).configureEach {
+  mustRunAfter verifyGoogleJavaFormat
 }

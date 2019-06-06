@@ -1,15 +1,21 @@
 package datadog.opentracing
 
+import datadog.opentracing.propagation.ExtractedContext
+import datadog.opentracing.propagation.TagContext
+import datadog.trace.api.Config
 import datadog.trace.api.DDTags
+import datadog.trace.api.sampling.PrioritySampling
 import datadog.trace.common.writer.ListWriter
 import spock.lang.Specification
 
+import static datadog.opentracing.DDSpanContext.ORIGIN_KEY
 import static java.util.concurrent.TimeUnit.MILLISECONDS
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
 
 class DDSpanBuilderTest extends Specification {
   def writer = new ListWriter()
+  def config = Config.get()
   def tracer = new DDTracer(writer)
 
   def "build simple span"() {
@@ -49,8 +55,10 @@ class DDSpanBuilderTest extends Specification {
 
     then:
     span.getTags() == [
-      (DDTags.THREAD_NAME): Thread.currentThread().getName(),
-      (DDTags.THREAD_ID)  : Thread.currentThread().getId(),
+      (DDTags.THREAD_NAME)     : Thread.currentThread().getName(),
+      (DDTags.THREAD_ID)       : Thread.currentThread().getId(),
+      (Config.RUNTIME_ID_TAG)  : config.getRuntimeId(),
+      (Config.LANGUAGE_TAG_KEY): Config.LANGUAGE_TAG_VALUE,
     ]
 
     when:
@@ -79,6 +87,34 @@ class DDSpanBuilderTest extends Specification {
 
     context.tags[DDTags.THREAD_NAME] == Thread.currentThread().getName()
     context.tags[DDTags.THREAD_ID] == Thread.currentThread().getId()
+  }
+
+  def "setting #name should remove"() {
+    setup:
+    final DDSpan span = tracer.buildSpan("op name")
+      .withTag(name, "tag value")
+      .withTag(name, value)
+      .start()
+
+    expect:
+    span.tags[name] == null
+
+    when:
+    span.setTag(name, "a tag")
+
+    then:
+    span.tags[name] == "a tag"
+
+    when:
+    span.setTag(name, (String) value)
+
+    then:
+    span.tags[name] == null
+
+    where:
+    name        | value
+    "null.tag"  | null
+    "empty.tag" | ""
   }
 
   def "should build span timestamp in nano"() {
@@ -112,14 +148,14 @@ class DDSpanBuilderTest extends Specification {
 
   def "should link to parent span"() {
     setup:
-    final long spanId = 1L
+    final String spanId = "1"
     final long expectedParentId = spanId
 
     final DDSpanContext mockedContext = mock(DDSpanContext)
-
+    when(mockedContext.getTraceId()).thenReturn(spanId)
     when(mockedContext.getSpanId()).thenReturn(spanId)
     when(mockedContext.getServiceName()).thenReturn("foo")
-    when(mockedContext.getTrace()).thenReturn(new PendingTrace(tracer, 1L))
+    when(mockedContext.getTrace()).thenReturn(new PendingTrace(tracer, "1", [:]))
 
     final String expectedName = "fakeName"
 
@@ -134,6 +170,7 @@ class DDSpanBuilderTest extends Specification {
 
     expect:
     actualContext.getParentId() == expectedParentId
+    actualContext.getTraceId() == spanId
   }
 
   def "should inherit the DD parent attributes"() {
@@ -171,7 +208,7 @@ class DDSpanBuilderTest extends Specification {
     span.getBaggageItem(expectedBaggageItemKey) == expectedBaggageItemValue
     span.context().getServiceName() == expectedParentServiceName
     span.context().getResourceName() == expectedName
-    span.context().getSpanType() == expectedParentType
+    span.context().getSpanType() == null
 
     when:
     // ServiceName and SpanType are always overwritten by the child  if they are present
@@ -182,6 +219,130 @@ class DDSpanBuilderTest extends Specification {
         .withResourceName(expectedChildResourceName)
         .withSpanType(expectedChildType)
         .asChildOf(parent)
+        .start()
+
+    then:
+    span.getOperationName() == expectedName
+    span.getBaggageItem(expectedBaggageItemKey) == expectedBaggageItemValue
+    span.context().getServiceName() == expectedChildServiceName
+    span.context().getResourceName() == expectedChildResourceName
+    span.context().getSpanType() == expectedChildType
+  }
+
+
+  def "should inherit the DD parent attributes addReference CHILD_OF"() {
+    setup:
+    def expectedName = "fakeName"
+    def expectedParentServiceName = "fakeServiceName"
+    def expectedParentResourceName = "fakeResourceName"
+    def expectedParentType = "fakeType"
+    def expectedChildServiceName = "fakeServiceName-child"
+    def expectedChildResourceName = "fakeResourceName-child"
+    def expectedChildType = "fakeType-child"
+    def expectedBaggageItemKey = "fakeKey"
+    def expectedBaggageItemValue = "fakeValue"
+
+    final DDSpan parent =
+      tracer
+        .buildSpan(expectedName)
+        .withServiceName("foo")
+        .withResourceName(expectedParentResourceName)
+        .withSpanType(expectedParentType)
+        .start()
+
+    parent.setBaggageItem(expectedBaggageItemKey, expectedBaggageItemValue)
+
+    // ServiceName and SpanType are always set by the parent  if they are not present in the child
+    DDSpan span =
+      tracer
+        .buildSpan(expectedName)
+        .withServiceName(expectedParentServiceName)
+        .addReference("child_of", parent.context())
+        .start()
+
+    println span.getBaggageItem(expectedBaggageItemKey)
+    println expectedBaggageItemValue
+    println span.context().getSpanType()
+    println expectedParentType
+
+    expect:
+    span.getOperationName() == expectedName
+    span.getBaggageItem(expectedBaggageItemKey) == expectedBaggageItemValue
+    span.context().getServiceName() == expectedParentServiceName
+    span.context().getResourceName() == expectedName
+    span.context().getSpanType() == null
+
+    when:
+    // ServiceName and SpanType are always overwritten by the child  if they are present
+    span =
+      tracer
+        .buildSpan(expectedName)
+        .withServiceName(expectedChildServiceName)
+        .withResourceName(expectedChildResourceName)
+        .withSpanType(expectedChildType)
+        .addReference("child_of", parent.context())
+        .start()
+
+    then:
+    span.getOperationName() == expectedName
+    span.getBaggageItem(expectedBaggageItemKey) == expectedBaggageItemValue
+    span.context().getServiceName() == expectedChildServiceName
+    span.context().getResourceName() == expectedChildResourceName
+    span.context().getSpanType() == expectedChildType
+  }
+
+
+  def "should inherit the DD parent attributes add reference FOLLOWS_FROM"() {
+    setup:
+    def expectedName = "fakeName"
+    def expectedParentServiceName = "fakeServiceName"
+    def expectedParentResourceName = "fakeResourceName"
+    def expectedParentType = "fakeType"
+    def expectedChildServiceName = "fakeServiceName-child"
+    def expectedChildResourceName = "fakeResourceName-child"
+    def expectedChildType = "fakeType-child"
+    def expectedBaggageItemKey = "fakeKey"
+    def expectedBaggageItemValue = "fakeValue"
+
+    final DDSpan parent =
+      tracer
+        .buildSpan(expectedName)
+        .withServiceName("foo")
+        .withResourceName(expectedParentResourceName)
+        .withSpanType(expectedParentType)
+        .start()
+
+    parent.setBaggageItem(expectedBaggageItemKey, expectedBaggageItemValue)
+
+    // ServiceName and SpanType are always set by the parent  if they are not present in the child
+    DDSpan span =
+      tracer
+        .buildSpan(expectedName)
+        .withServiceName(expectedParentServiceName)
+        .addReference("follows_from", parent.context())
+        .start()
+
+    println span.getBaggageItem(expectedBaggageItemKey)
+    println expectedBaggageItemValue
+    println span.context().getSpanType()
+    println expectedParentType
+
+    expect:
+    span.getOperationName() == expectedName
+    span.getBaggageItem(expectedBaggageItemKey) == expectedBaggageItemValue
+    span.context().getServiceName() == expectedParentServiceName
+    span.context().getResourceName() == expectedName
+    span.context().getSpanType() == null
+
+    when:
+    // ServiceName and SpanType are always overwritten by the child  if they are present
+    span =
+      tracer
+        .buildSpan(expectedName)
+        .withServiceName(expectedChildServiceName)
+        .withResourceName(expectedChildResourceName)
+        .withSpanType(expectedChildType)
+        .addReference("follows_from", parent.context())
         .start()
 
     then:
@@ -222,18 +383,63 @@ class DDSpanBuilderTest extends Specification {
     spans[(int) (Math.random() * nbSamples)].context.trace.containsAll(spans)
   }
 
+  def "ExtractedContext should populate new span details"() {
+    setup:
+    def thread = Thread.currentThread()
+    final DDSpan span = tracer.buildSpan("op name")
+      .asChildOf(extractedContext).start()
+
+    expect:
+    span.traceId == extractedContext.traceId
+    span.parentId == extractedContext.spanId
+    span.samplingPriority == extractedContext.samplingPriority
+    span.context().origin == extractedContext.origin
+    span.context().baggageItems == extractedContext.baggage
+    span.context().@tags == extractedContext.tags + [(Config.RUNTIME_ID_TAG)  : config.getRuntimeId(),
+                                                     (Config.LANGUAGE_TAG_KEY): Config.LANGUAGE_TAG_VALUE,
+                                                     (DDTags.THREAD_NAME)     : thread.name, (DDTags.THREAD_ID): thread.id]
+
+    where:
+    extractedContext                                                                                                  | _
+    new ExtractedContext("1", "2", 0, null, [:], [:])                                                                 | _
+    new ExtractedContext("3", "4", 1, "some-origin", ["asdf": "qwer"], [(ORIGIN_KEY): "some-origin", "zxcv": "1234"]) | _
+  }
+
+  def "TagContext should populate default span details"() {
+    setup:
+    def thread = Thread.currentThread()
+    final DDSpan span = tracer.buildSpan("op name").asChildOf(tagContext).start()
+
+    expect:
+    span.traceId != "0"
+    span.parentId == "0"
+    span.samplingPriority == PrioritySampling.SAMPLER_KEEP // Since we're using the RateByServiceSampler
+    span.context().origin == tagContext.origin
+    span.context().baggageItems == [:]
+    span.context().@tags == tagContext.tags + [(Config.RUNTIME_ID_TAG)  : config.getRuntimeId(),
+                                               (Config.LANGUAGE_TAG_KEY): Config.LANGUAGE_TAG_VALUE,
+                                               (DDTags.THREAD_NAME)     : thread.name, (DDTags.THREAD_ID): thread.id]
+
+    where:
+    tagContext                                                                   | _
+    new TagContext(null, [:])                                                    | _
+    new TagContext("some-origin", [(ORIGIN_KEY): "some-origin", "asdf": "qwer"]) | _
+  }
+
   def "global span tags populated on each span"() {
     setup:
     System.setProperty("dd.trace.span.tags", tagString)
-    tracer = new DDTracer(writer)
+    def config = new Config()
+    tracer = new DDTracer(config, writer)
     def span = tracer.buildSpan("op name").withServiceName("foo").start()
-    tags.putAll([
-      (DDTags.THREAD_NAME): Thread.currentThread().getName(),
-      (DDTags.THREAD_ID)  : Thread.currentThread().getId(),
-    ])
 
     expect:
-    span.tags == tags
+    span.tags == tags + [
+      (DDTags.THREAD_NAME)     : Thread.currentThread().getName(),
+      (DDTags.THREAD_ID)       : Thread.currentThread().getId(),
+      (Config.RUNTIME_ID_TAG)  : config.getRuntimeId(),
+      (Config.LANGUAGE_TAG_KEY): Config.LANGUAGE_TAG_VALUE,
+    ]
 
     cleanup:
     System.clearProperty("dd.trace.span.tags")

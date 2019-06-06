@@ -1,46 +1,49 @@
 package datadog.trace.instrumentation.jaxrs;
 
-import static net.bytebuddy.matcher.ElementMatchers.failSafe;
-import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
+import static datadog.trace.agent.tooling.ByteBuddyElementMatchers.safeHasSuperType;
+import static java.util.Collections.singletonMap;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.returns;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.DDAdvice;
-import datadog.trace.agent.tooling.DDTransformers;
-import datadog.trace.agent.tooling.HelperInjector;
 import datadog.trace.agent.tooling.Instrumenter;
+import java.util.Map;
 import javax.ws.rs.client.ClientBuilder;
-import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.matcher.ElementMatcher;
 
 @AutoService(Instrumenter.class)
-public final class JaxRsClientInstrumentation extends Instrumenter.Configurable {
+public final class JaxRsClientInstrumentation extends Instrumenter.Default {
 
   public JaxRsClientInstrumentation() {
     super("jax-rs", "jaxrs", "jax-rs-client");
   }
 
   @Override
-  protected boolean defaultEnabled() {
-    return false;
+  public ElementMatcher<TypeDescription> typeMatcher() {
+    return safeHasSuperType(named("javax.ws.rs.client.ClientBuilder"));
   }
 
   @Override
-  protected AgentBuilder apply(final AgentBuilder agentBuilder) {
-    return agentBuilder
-        .type(failSafe(hasSuperType(named("javax.ws.rs.client.ClientBuilder"))))
-        .transform(
-            new HelperInjector(
-                "datadog.trace.instrumentation.jaxrs.ClientTracingFeature",
-                "datadog.trace.instrumentation.jaxrs.ClientTracingFilter"))
-        .transform(DDTransformers.defaultTransformers())
-        .transform(
-            DDAdvice.create()
-                .advice(
-                    named("build").and(returns(hasSuperType(named("javax.ws.rs.client.Client")))),
-                    ClientBuilderAdvice.class.getName()))
-        .asDecorator();
+  public String[] helperClassNames() {
+    return new String[] {
+      "datadog.trace.agent.decorator.BaseDecorator",
+      "datadog.trace.agent.decorator.ClientDecorator",
+      "datadog.trace.agent.decorator.HttpClientDecorator",
+      packageName + ".JaxRsClientDecorator",
+      packageName + ".ClientTracingFeature",
+      packageName + ".ClientTracingFilter",
+      packageName + ".InjectAdapter",
+    };
+  }
+
+  @Override
+  public Map<? extends ElementMatcher<? super MethodDescription>, String> transformers() {
+    return singletonMap(
+        named("build").and(returns(safeHasSuperType(named("javax.ws.rs.client.Client")))),
+        ClientBuilderAdvice.class.getName());
   }
 
   public static class ClientBuilderAdvice {

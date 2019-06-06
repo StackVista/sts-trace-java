@@ -4,16 +4,20 @@ import static io.opentracing.log.Fields.ERROR_OBJECT;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import datadog.trace.api.DDTags;
 import datadog.trace.api.interceptor.MutableSpan;
-import datadog.trace.common.sampling.PrioritySampling;
+import datadog.trace.api.sampling.PrioritySampling;
 import datadog.trace.common.util.Clock;
 import io.opentracing.Span;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -32,10 +36,17 @@ public class DDSpan implements Span, MutableSpan {
   /** The context attached to the span */
   private final DDSpanContext context;
 
-  /** Creation time of the span in microseconds. Must be greater than zero. */
+  /**
+   * Creation time of the span in microseconds provided by external clock. Must be greater than
+   * zero.
+   */
   private final long startTimeMicro;
 
-  /** Creation time of span in system relative nanotime (may be negative) */
+  /**
+   * Creation time of span in nanoseconds. We use combination of millisecond-precision clock and
+   * nanosecond-precision offset from start of the trace. See {@link PendingTrace} for details. Must
+   * be greater than zero.
+   */
   private final long startTimeNano;
 
   /**
@@ -54,19 +65,19 @@ public class DDSpan implements Span, MutableSpan {
    * @param context the context used for the span
    */
   DDSpan(final long timestampMicro, final DDSpanContext context) {
-
     this.context = context;
 
-    // record the start time in nano (current milli + nano delta)
     if (timestampMicro <= 0L) {
-      this.startTimeMicro = Clock.currentMicroTime();
-      this.startTimeNano = Clock.currentNanoTicks();
+      // record the start time
+      startTimeMicro = Clock.currentMicroTime();
+      startTimeNano = context.getTrace().getCurrentTimeNano();
     } else {
-      this.startTimeMicro = timestampMicro;
-      // timestamp might have come from an external clock, so don't bother with nanotime.
-      this.startTimeNano = 0;
+      startTimeMicro = timestampMicro;
+      // Timestamp have come from an external clock, so use startTimeNano as a flag
+      startTimeNano = 0;
     }
-    this.context.getTrace().registerSpan(this);
+
+    context.getTrace().registerSpan(this);
   }
 
   @JsonIgnore
@@ -74,16 +85,21 @@ public class DDSpan implements Span, MutableSpan {
     return durationNano.get() != 0;
   }
 
+  private void finishAndAddToTrace(final long durationNano) {
+    // ensure a min duration of 1
+    if (this.durationNano.compareAndSet(0, Math.max(1, durationNano))) {
+      log.debug("Finished: {}", this);
+      context.getTrace().addSpan(this);
+    } else {
+      log.debug("{} - already finished!", this);
+    }
+  }
+
   @Override
   public final void finish() {
-    if (startTimeNano != 0) {
-      // no external clock was used, so we can rely on nanotime, but still ensure a min duration of 1.
-      if (this.durationNano.compareAndSet(
-          0, Math.max(1, Clock.currentNanoTicks() - startTimeNano))) {
-        context.getTrace().addSpan(this);
-      } else {
-        log.debug("{} - already finished!", this);
-      }
+    if (startTimeNano > 0) {
+      // no external clock was used, so we can rely on nano time
+      finishAndAddToTrace(context.getTrace().getCurrentTimeNano() - startTimeNano);
     } else {
       finish(Clock.currentMicroTime());
     }
@@ -91,29 +107,38 @@ public class DDSpan implements Span, MutableSpan {
 
   @Override
   public final void finish(final long stoptimeMicros) {
-    // Ensure that duration is at least 1.  Less than 1 is possible due to our use of system clock instead of nano time.
-    if (this.durationNano.compareAndSet(
-        0, Math.max(1, TimeUnit.MICROSECONDS.toNanos(stoptimeMicros - this.startTimeMicro)))) {
-      context.getTrace().addSpan(this);
-    } else {
-      log.debug("{} - already finished!", this);
-    }
-  }
-
-  /**
-   * Check if the span is the root parent. It means that the traceId is the same as the spanId
-   *
-   * @return true if root, false otherwise
-   */
-  @JsonIgnore
-  public final boolean isRootSpan() {
-    return context.getParentId() == 0;
+    finishAndAddToTrace(TimeUnit.MICROSECONDS.toNanos(stoptimeMicros - startTimeMicro));
   }
 
   @Override
   public DDSpan setError(final boolean error) {
     context.setErrorFlag(true);
     return this;
+  }
+
+  /**
+   * Check if the span is the root parent. It means that the traceId is the same as the spanId. In
+   * the context of distributed tracing this will return true if an only if this is the application
+   * initializing the trace.
+   *
+   * @return true if root, false otherwise
+   */
+  @JsonIgnore
+  public final boolean isRootSpan() {
+    return "0".equals(context.getParentId());
+  }
+
+  @Override
+  @Deprecated
+  @JsonIgnore
+  public MutableSpan getRootSpan() {
+    return getLocalRootSpan();
+  }
+
+  @Override
+  @JsonIgnore
+  public MutableSpan getLocalRootSpan() {
+    return context().getTrace().getRootSpan();
   }
 
   public void setErrorMeta(final Throwable error) {
@@ -141,7 +166,7 @@ public class DDSpan implements Span, MutableSpan {
    */
   @Override
   public final DDSpan setTag(final String tag, final String value) {
-    this.context().setTag(tag, (Object) value);
+    context().setTag(tag, (Object) value);
     return this;
   }
 
@@ -150,7 +175,7 @@ public class DDSpan implements Span, MutableSpan {
    */
   @Override
   public final DDSpan setTag(final String tag, final boolean value) {
-    this.context().setTag(tag, (Object) value);
+    context().setTag(tag, (Object) value);
     return this;
   }
 
@@ -159,7 +184,7 @@ public class DDSpan implements Span, MutableSpan {
    */
   @Override
   public final DDSpan setTag(final String tag, final Number value) {
-    this.context().setTag(tag, (Object) value);
+    context().setTag(tag, (Object) value);
     return this;
   }
 
@@ -168,7 +193,7 @@ public class DDSpan implements Span, MutableSpan {
    */
   @Override
   public final DDSpanContext context() {
-    return this.context;
+    return context;
   }
 
   /* (non-Javadoc)
@@ -176,7 +201,7 @@ public class DDSpan implements Span, MutableSpan {
    */
   @Override
   public final String getBaggageItem(final String key) {
-    return this.context.getBaggageItem(key);
+    return context.getBaggageItem(key);
   }
 
   /* (non-Javadoc)
@@ -184,7 +209,7 @@ public class DDSpan implements Span, MutableSpan {
    */
   @Override
   public final DDSpan setBaggageItem(final String key, final String value) {
-    this.context.setBaggageItem(key, value);
+    context.setBaggageItem(key, value);
     return this;
   }
 
@@ -193,7 +218,7 @@ public class DDSpan implements Span, MutableSpan {
    */
   @Override
   public final DDSpan setOperationName(final String operationName) {
-    this.context().setOperationName(operationName);
+    context().setOperationName(operationName);
     return this;
   }
 
@@ -239,30 +264,30 @@ public class DDSpan implements Span, MutableSpan {
 
   @Override
   public final DDSpan setServiceName(final String serviceName) {
-    this.context().setServiceName(serviceName);
+    context().setServiceName(serviceName);
     return this;
   }
 
   @Override
   public final DDSpan setResourceName(final String resourceName) {
-    this.context().setResourceName(resourceName);
+    context().setResourceName(resourceName);
     return this;
   }
 
   /**
-   * Set the sampling priority of the span.
+   * Set the sampling priority of the root span of this span's trace
    *
    * <p>Has no effect if the span priority has been propagated (injected or extracted).
    */
   @Override
   public final DDSpan setSamplingPriority(final int newPriority) {
-    this.context().setSamplingPriority(newPriority);
+    context().setSamplingPriority(newPriority);
     return this;
   }
 
   @Override
   public final DDSpan setSpanType(final String type) {
-    this.context().setSpanType(type);
+    context().setSpanType(type);
     return this;
   }
 
@@ -285,10 +310,20 @@ public class DDSpan implements Span, MutableSpan {
     return meta;
   }
 
+  /**
+   * Span metrics.
+   *
+   * @return metrics for this span
+   */
+  @JsonGetter
+  public Map<String, Number> getMetrics() {
+    return context.getMetrics();
+  }
+
   @Override
   @JsonGetter("start")
   public long getStartTime() {
-    return startTimeMicro * 1000L;
+    return startTimeNano > 0 ? startTimeNano : TimeUnit.MICROSECONDS.toNanos(startTimeMicro);
   }
 
   @Override
@@ -304,17 +339,20 @@ public class DDSpan implements Span, MutableSpan {
   }
 
   @JsonGetter("trace_id")
-  public long getTraceId() {
+  @JsonSerialize(using = UInt64IDStringSerializer.class)
+  public String getTraceId() {
     return context.getTraceId();
   }
 
   @JsonGetter("span_id")
-  public long getSpanId() {
+  @JsonSerialize(using = UInt64IDStringSerializer.class)
+  public String getSpanId() {
     return context.getSpanId();
   }
 
   @JsonGetter("parent_id")
-  public long getParentId() {
+  @JsonSerialize(using = UInt64IDStringSerializer.class)
+  public String getParentId() {
     return context.getParentId();
   }
 
@@ -331,8 +369,7 @@ public class DDSpan implements Span, MutableSpan {
   }
 
   @Override
-  @JsonGetter("sampling_priority")
-  @JsonInclude(Include.NON_NULL)
+  @JsonIgnore
   public Integer getSamplingPriority() {
     final int samplingPriority = context.getSamplingPriority();
     if (samplingPriority == PrioritySampling.UNSET) {
@@ -351,7 +388,7 @@ public class DDSpan implements Span, MutableSpan {
   @Override
   @JsonIgnore
   public Map<String, Object> getTags() {
-    return this.context().getTags();
+    return context().getTags();
   }
 
   @JsonGetter
@@ -377,5 +414,23 @@ public class DDSpan implements Span, MutableSpan {
         .append(", duration_ns=")
         .append(durationNano)
         .toString();
+  }
+
+  protected static class UInt64IDStringSerializer extends StdSerializer<String> {
+
+    public UInt64IDStringSerializer() {
+      this(null);
+    }
+
+    public UInt64IDStringSerializer(final Class<String> stringClass) {
+      super(stringClass);
+    }
+
+    @Override
+    public void serialize(
+        final String value, final JsonGenerator gen, final SerializerProvider provider)
+        throws IOException {
+      gen.writeNumber(new BigInteger(value));
+    }
   }
 }

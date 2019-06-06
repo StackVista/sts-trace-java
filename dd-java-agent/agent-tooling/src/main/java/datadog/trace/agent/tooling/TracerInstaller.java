@@ -1,29 +1,36 @@
 package datadog.trace.agent.tooling;
 
 import datadog.opentracing.DDTracer;
-import io.opentracing.Tracer;
-import io.opentracing.util.GlobalTracer;
+import datadog.trace.api.Config;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TracerInstaller {
   /** Register a global tracer if no global tracer is already registered. */
   public static synchronized void installGlobalTracer() {
-    if (!GlobalTracer.isRegistered()) {
-      final Tracer resolved = new DDTracer();
-      try {
-        GlobalTracer.register(resolved);
-      } catch (final RuntimeException re) {
-        log.warn("Failed to register tracer '" + resolved + "'", re);
+    if (Config.get().isTraceEnabled()) {
+      if (!io.opentracing.util.GlobalTracer.isRegistered()) {
+        final DDTracer tracer = new DDTracer();
+        try {
+          io.opentracing.util.GlobalTracer.register(tracer);
+          datadog.trace.api.GlobalTracer.registerIfAbsent(tracer);
+        } catch (final RuntimeException re) {
+          log.warn("Failed to register tracer '" + tracer + "'", re);
+        }
+      } else {
+        log.debug("GlobalTracer already registered.");
       }
     } else {
-      log.debug("GlobalTracer already registered.");
+      log.debug("Tracing is disabled, not installing GlobalTracer.");
     }
   }
 
   public static void logVersionInfo() {
     VersionLogger.logAllVersions();
-    log.debug(GlobalTracer.class.getName() + " loaded on " + GlobalTracer.class.getClassLoader());
+    log.debug(
+        io.opentracing.util.GlobalTracer.class.getName()
+            + " loaded on "
+            + io.opentracing.util.GlobalTracer.class.getClassLoader());
     log.debug(
         AgentInstaller.class.getName() + " loaded on " + AgentInstaller.class.getClassLoader());
   }

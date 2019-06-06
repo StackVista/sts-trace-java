@@ -3,13 +3,29 @@ package datadog.trace.api.sampling
 import com.fasterxml.jackson.databind.ObjectMapper
 import datadog.opentracing.DDSpan
 import datadog.opentracing.SpanFactory
-import datadog.trace.common.sampling.PrioritySampling
 import datadog.trace.common.sampling.RateByServiceSampler
 import spock.lang.Specification
-import spock.lang.Timeout
 
-@Timeout(1)
 class RateByServiceSamplerTest extends Specification {
+
+  def "invalid rate -> 1"() {
+    setup:
+    RateByServiceSampler serviceSampler = new RateByServiceSampler()
+    ObjectMapper serializer = new ObjectMapper()
+    String response = '{"rate_by_service": {"service:,env:":' + rate + '}}'
+    serviceSampler.onResponse("traces", serializer.readTree(response))
+    expect:
+    serviceSampler.baseSampler.sampleRate == expectedRate
+
+    where:
+    rate | expectedRate
+    null | 1
+    1    | 1
+    0    | 1
+    -5   | 1
+    5    | 1
+    0.5  | 0.5
+  }
 
   def "rate by service name"() {
     setup:
@@ -49,5 +65,7 @@ class RateByServiceSamplerTest extends Specification {
     expect:
     // sets correctly on root span
     span.getSamplingPriority() == PrioritySampling.SAMPLER_KEEP
+    // RateByServiceSamler must not set the sample rate
+    span.getMetrics().get("_sample_rate") == null
   }
 }

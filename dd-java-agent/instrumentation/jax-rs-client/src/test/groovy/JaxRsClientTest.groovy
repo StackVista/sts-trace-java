@@ -1,96 +1,73 @@
-import datadog.trace.agent.test.AgentTestRunner
-import datadog.trace.api.DDSpanTypes
-import datadog.trace.api.DDTags
-import io.opentracing.tag.Tags
-import org.apache.cxf.jaxrs.client.spec.ClientBuilderImpl
-import org.glassfish.jersey.client.JerseyClientBuilder
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder
-import ratpack.http.Headers
-import spock.lang.Unroll
-
-import javax.ws.rs.client.AsyncInvoker
+import datadog.trace.agent.test.base.HttpClientTest
+import datadog.trace.instrumentation.jaxrs.JaxRsClientDecorator
 import javax.ws.rs.client.Client
+import javax.ws.rs.client.ClientBuilder
+import javax.ws.rs.client.Entity
 import javax.ws.rs.client.Invocation
 import javax.ws.rs.client.WebTarget
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
-import java.util.concurrent.atomic.AtomicReference
+import org.apache.cxf.jaxrs.client.spec.ClientBuilderImpl
+import org.glassfish.jersey.client.JerseyClientBuilder
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder
 
-import static ratpack.groovy.test.embed.GroovyEmbeddedApp.ratpack
+abstract class JaxRsClientTest extends HttpClientTest<JaxRsClientDecorator> {
 
-//@Timeout(10)
-class JaxRsClientTest extends AgentTestRunner {
-  static {
-    System.setProperty("dd.integration.jax-rs.enabled", "true")
+  @Override
+  int doRequest(String method, URI uri, Map<String, String> headers, Closure callback) {
+
+    Client client = builder().build()
+    WebTarget service = client.target(uri)
+    Invocation.Builder request = service.request(MediaType.TEXT_PLAIN)
+    headers.each { request.header(it.key, it.value) }
+    def body = BODY_METHODS.contains(method) ? Entity.text("") : null
+    Response response = request.method(method, (Entity) body)
+    callback?.call()
+
+    return response.status
   }
 
-  def receivedHeaders = new AtomicReference<Headers>()
-  def server = ratpack {
-    handlers {
-      all {
-        receivedHeaders.set(request.headers)
-        response.status(200).send("pong")
-      }
-    }
+  @Override
+  JaxRsClientDecorator decorator() {
+    return JaxRsClientDecorator.DECORATE
   }
 
-  @Unroll
-  def "#lib request creates spans and sends headers"() {
-    setup:
-    Client client = builder.build()
-    WebTarget service = client.target("http://localhost:$server.address.port/ping")
-    Response response
-    if (async) {
-      AsyncInvoker request = service.request(MediaType.TEXT_PLAIN).async()
-      response = request.get().get()
-    } else {
-      Invocation.Builder request = service.request(MediaType.TEXT_PLAIN)
-      response = request.get()
-    }
+  @Override
+  String expectedOperationName() {
+    return "jax-rs.client.call"
+  }
 
-    expect:
-    response.readEntity(String) == "pong"
+  boolean testRedirects() {
+    false
+  }
 
-    TEST_WRITER.size() == 1
+  abstract ClientBuilder builder()
+}
 
-    def trace = TEST_WRITER.firstTrace()
-    trace.size() == 1
+class JerseyClientTest extends JaxRsClientTest {
 
-    and:
-    def span = trace[0]
+  @Override
+  ClientBuilder builder() {
+    return new JerseyClientBuilder()
+  }
+}
 
-    span.context().operationName == "jax-rs.client.call"
-    span.serviceName == "unnamed-java-app"
-    span.resourceName == "GET jax-rs.client.call"
-    span.type == "http"
-    !span.context().getErrorFlag()
-    span.context().parentId == 0
+class ResteasyClientTest extends JaxRsClientTest {
 
+  @Override
+  ClientBuilder builder() {
+    return new ResteasyClientBuilder()
+  }
+}
 
-    def tags = span.context().tags
-    tags[Tags.COMPONENT.key] == "jax-rs.client"
-    tags[Tags.SPAN_KIND.key] == Tags.SPAN_KIND_CLIENT
-    tags[Tags.HTTP_METHOD.key] == "GET"
-    tags[Tags.HTTP_STATUS.key] == 200
-    tags[Tags.HTTP_URL.key] == "http://localhost:$server.address.port/ping"
-    tags[DDTags.SPAN_TYPE] == DDSpanTypes.HTTP_CLIENT
-    tags[DDTags.THREAD_NAME] != null
-    tags[DDTags.THREAD_ID] != null
-    tags.size() == 8
+class CxfClientTest extends JaxRsClientTest {
 
-    receivedHeaders.get().get("x-datadog-trace-id") == "$span.traceId"
-    receivedHeaders.get().get("x-datadog-parent-id") == "$span.spanId"
+  @Override
+  ClientBuilder builder() {
+    return new ClientBuilderImpl()
+  }
 
-    cleanup:
-    server.close()
-
-    where:
-    builder                     | async | lib
-    new JerseyClientBuilder()   | false | "jersey"
-    new ClientBuilderImpl()     | false | "cxf"
-    new ResteasyClientBuilder() | false | "resteasy"
-    new JerseyClientBuilder()   | true  | "jersey async"
-    new ClientBuilderImpl()     | true  | "cxf async"
-    new ResteasyClientBuilder() | true  | "resteasy async"
+  boolean testConnectionFailure() {
+    false
   }
 }

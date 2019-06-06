@@ -2,7 +2,17 @@
 
 apply plugin: 'scala'
 
+configurations {
+  all {
+    if (it.name != "zinc") {
+      resolutionStrategy {
+        force deps.scala
+      }
+    }
+  }
+}
+
 compileTestGroovy {
-    classpath = classpath.plus(files(compileTestScala.destinationDir))
-    dependsOn compileTestScala
+  classpath = classpath.plus(files(compileTestScala.destinationDir))
+  dependsOn compileTestScala
 }

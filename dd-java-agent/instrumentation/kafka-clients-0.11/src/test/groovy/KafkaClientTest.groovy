@@ -6,17 +6,14 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.listener.KafkaMessageListenerContainer
 import org.springframework.kafka.listener.MessageListener
-import org.springframework.kafka.listener.config.ContainerProperties
 import org.springframework.kafka.test.rule.KafkaEmbedded
 import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.kafka.test.utils.KafkaTestUtils
 import spock.lang.Shared
-import spock.lang.Timeout
 
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
-@Timeout(5)
 class KafkaClientTest extends AgentTestRunner {
   static final SHARED_TOPIC = "shared.topic"
 
@@ -37,7 +34,13 @@ class KafkaClientTest extends AgentTestRunner {
     def consumerFactory = new DefaultKafkaConsumerFactory<String, String>(consumerProperties)
 
     // set the topic that needs to be consumed
-    ContainerProperties containerProperties = new ContainerProperties(SHARED_TOPIC)
+    def containerProperties
+    try {
+      // Different class names for test and latestDepTest.
+      containerProperties = Class.forName("org.springframework.kafka.listener.config.ContainerProperties").newInstance(SHARED_TOPIC)
+    } catch (ClassNotFoundException | NoClassDefFoundError e) {
+      containerProperties = Class.forName("org.springframework.kafka.listener.ContainerProperties").newInstance(SHARED_TOPIC)
+    }
 
     // create a Kafka MessageListenerContainer
     def container = new KafkaMessageListenerContainer<>(consumerFactory, containerProperties)
@@ -46,11 +49,10 @@ class KafkaClientTest extends AgentTestRunner {
     def records = new LinkedBlockingQueue<ConsumerRecord<String, String>>()
 
     // setup a Kafka message listener
-    WRITER_PHASER.register()
     container.setupMessageListener(new MessageListener<String, String>() {
       @Override
       void onMessage(ConsumerRecord<String, String> record) {
-        WRITER_PHASER.arriveAndAwaitAdvance() // ensure consistent ordering of traces
+        TEST_WRITER.waitForTraces(1) // ensure consistent ordering of traces
         records.add(record)
       }
     })
@@ -72,61 +74,51 @@ class KafkaClientTest extends AgentTestRunner {
     received.value() == greeting
     received.key() == null
 
-    TEST_WRITER.waitForTraces(2)
-    TEST_WRITER.size() == 2
-
-    def t1 = TEST_WRITER.get(0)
-    t1.size() == 1
-    def t2 = TEST_WRITER.get(1)
-    t2.size() == 1
-
-    and: // PRODUCER span 0
-    def t1span1 = t1[0]
-
-    t1span1.context().operationName == "kafka.produce"
-    t1span1.serviceName == "kafka"
-    t1span1.resourceName == "Produce Topic $SHARED_TOPIC"
-    t1span1.type == "queue"
-    !t1span1.context().getErrorFlag()
-    t1span1.context().parentId == 0
-
-    def t1tags1 = t1span1.context().tags
-    t1tags1["component"] == "java-kafka"
-    t1tags1["span.kind"] == "producer"
-    t1tags1["span.type"] == "queue"
-    t1tags1["thread.name"] != null
-    t1tags1["thread.id"] != null
-    t1tags1.size() == 5
-
-    and: // CONSUMER span 0
-    def t2span1 = t2[0]
-
-    t2span1.context().operationName == "kafka.consume"
-    t2span1.serviceName == "kafka"
-    t2span1.resourceName == "Consume Topic $SHARED_TOPIC"
-    t2span1.type == "queue"
-    !t2span1.context().getErrorFlag()
-    t2span1.context().parentId == t1span1.context().spanId
-
-    def t2tags1 = t2span1.context().tags
-    t2tags1["component"] == "java-kafka"
-    t2tags1["span.kind"] == "consumer"
-    t1tags1["span.type"] == "queue"
-    t2tags1["partition"] >= 0
-    t2tags1["offset"] == 0
-    t2tags1["thread.name"] != null
-    t2tags1["thread.id"] != null
-    t2tags1.size() == 7
+    assertTraces(2) {
+      trace(0, 1) {
+        // PRODUCER span 0
+        span(0) {
+          serviceName "kafka"
+          operationName "kafka.produce"
+          resourceName "Produce Topic $SHARED_TOPIC"
+          spanType "queue"
+          errored false
+          parent()
+          tags {
+            "component" "java-kafka"
+            "span.kind" "producer"
+            defaultTags()
+          }
+        }
+      }
+      trace(1, 1) {
+        // CONSUMER span 0
+        span(0) {
+          serviceName "kafka"
+          operationName "kafka.consume"
+          resourceName "Consume Topic $SHARED_TOPIC"
+          spanType "queue"
+          errored false
+          childOf TEST_WRITER[0][0]
+          tags {
+            "component" "java-kafka"
+            "span.kind" "consumer"
+            "partition" { it >= 0 }
+            "offset" 0
+            defaultTags(true)
+          }
+        }
+      }
+    }
 
     def headers = received.headers()
     headers.iterator().hasNext()
-    new String(headers.headers("x-datadog-trace-id").iterator().next().value()) == "$t1span1.traceId"
-    new String(headers.headers("x-datadog-parent-id").iterator().next().value()) == "$t1span1.spanId"
-
+    new String(headers.headers("x-datadog-trace-id").iterator().next().value()) == "${TEST_WRITER[0][0].traceId}"
+    new String(headers.headers("x-datadog-parent-id").iterator().next().value()) == "${TEST_WRITER[0][0].spanId}"
 
     cleanup:
     producerFactory.stop()
-    container.stop()
+    container?.stop()
   }
 
 }

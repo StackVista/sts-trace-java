@@ -1,49 +1,49 @@
 package datadog.trace.agent.test
 
-import datadog.trace.bootstrap.ExceptionLogger
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.core.read.ListAppender
 import datadog.trace.agent.tooling.ExceptionHandlers
+import datadog.trace.bootstrap.ExceptionLogger
 import net.bytebuddy.agent.ByteBuddyAgent
+import net.bytebuddy.agent.builder.AgentBuilder
+import net.bytebuddy.agent.builder.ResettableClassFileTransformer
 import net.bytebuddy.dynamic.ClassFileLocator
+import org.slf4j.LoggerFactory
+import spock.lang.Shared
+import spock.lang.Specification
 
 import static net.bytebuddy.matcher.ElementMatchers.isMethod
 import static net.bytebuddy.matcher.ElementMatchers.named
 
-import net.bytebuddy.agent.builder.AgentBuilder
-import spock.lang.Specification
-import spock.lang.Shared
-
-import org.slf4j.LoggerFactory
-import ch.qos.logback.classic.Logger
-import ch.qos.logback.core.read.ListAppender
-import ch.qos.logback.classic.Level
-
 class ExceptionHandlerTest extends Specification {
   @Shared
   ListAppender testAppender = new ListAppender()
+  @Shared
+  ResettableClassFileTransformer transformer
 
   def setupSpec() {
     AgentBuilder builder = new AgentBuilder.Default()
       .disableClassFormatChanges()
       .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-      .type(named(getClass().getName()+'$SomeClass'))
+      .type(named(getClass().getName() + '$SomeClass'))
       .transform(
-      new AgentBuilder.Transformer.ForAdvice()
-        .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(BadAdvice.getClassLoader())))
-        .withExceptionHandler(ExceptionHandlers.defaultExceptionHandler())
-        .advice(
-        isMethod().and(named("isInstrumented")),
-        BadAdvice.getName()))
+        new AgentBuilder.Transformer.ForAdvice()
+          .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(BadAdvice.getClassLoader())))
+          .withExceptionHandler(ExceptionHandlers.defaultExceptionHandler())
+          .advice(
+            isMethod().and(named("isInstrumented")),
+            BadAdvice.getName()))
       .transform(
-      new AgentBuilder.Transformer.ForAdvice()
-        .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(BadAdvice.getClassLoader())))
-        .withExceptionHandler(ExceptionHandlers.defaultExceptionHandler())
-        .advice(
-        isMethod().and(named("smallStack").or(named("largeStack"))),
-        BadAdvice.NoOpAdvice.getName()))
-      .asDecorator()
+        new AgentBuilder.Transformer.ForAdvice()
+          .with(new AgentBuilder.LocationStrategy.Simple(ClassFileLocator.ForClassLoader.of(BadAdvice.getClassLoader())))
+          .withExceptionHandler(ExceptionHandlers.defaultExceptionHandler())
+          .advice(
+            isMethod().and(named("smallStack").or(named("largeStack"))),
+            BadAdvice.NoOpAdvice.getName()))
 
     ByteBuddyAgent.install()
-    builder.installOn(ByteBuddyAgent.getInstrumentation())
+    transformer = builder.installOn(ByteBuddyAgent.getInstrumentation())
 
     final Logger logger = (Logger) LoggerFactory.getLogger(ExceptionLogger)
     testAppender.setContext(logger.getLoggerContext())
@@ -53,6 +53,7 @@ class ExceptionHandlerTest extends Specification {
 
   def cleanupSpec() {
     testAppender.stop()
+    transformer.reset(ByteBuddyAgent.getInstrumentation(), AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
   }
 
   def "exception handler invoked"() {
@@ -65,14 +66,14 @@ class ExceptionHandlerTest extends Specification {
     // Make sure the log event came from our error handler.
     // If the log message changes in the future, it's fine to just
     // update the test's hardcoded message
-    testAppender.list.get(testAppender.list.size() - 1).getMessage() == "Failed to handle exception in instrumentation"
+    testAppender.list.get(testAppender.list.size() - 1).getMessage().startsWith("Failed to handle exception in instrumentation for")
   }
 
-  def "exception on non-delegating classloader" () {
+  def "exception on non-delegating classloader"() {
     setup:
     int initLogEvents = testAppender.list.size()
-    URL[] classpath = [ SomeClass.getProtectionDomain().getCodeSource().getLocation(),
-                         GroovyObject.getProtectionDomain().getCodeSource().getLocation() ]
+    URL[] classpath = [SomeClass.getProtectionDomain().getCodeSource().getLocation(),
+                       GroovyObject.getProtectionDomain().getCodeSource().getLocation()]
     URLClassLoader loader = new URLClassLoader(classpath, (ClassLoader) null)
     when:
     loader.loadClass(LoggerFactory.getName())
