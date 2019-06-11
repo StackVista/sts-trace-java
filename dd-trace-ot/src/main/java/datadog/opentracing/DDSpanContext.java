@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import datadog.opentracing.decorators.AbstractDecorator;
 import datadog.trace.api.DDTags;
 import datadog.trace.api.sampling.PrioritySampling;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +15,48 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
+
+class STSSpanContextPidProvider implements ISTSSpanContextPidProvider {
+
+  @Override
+  public long getPid() {
+    // The class ManagementFactory in the package java.lang.management provides access to the
+    // "managed bean for the runtime system of the Java virtual machine".
+    // The getName() method of this class is described as:
+    //  Returns the name representing the running Java virtual machine.
+    //  This name, as it happens, contains the process id in the Sun/Oracle JVM implementation
+    // of this methods in a format such as: PID@host ,
+    // Not guaranteed to work on all JVM implementations
+    // Further options:
+    // todo: support java 9 natively
+    // https://docs.oracle.com/javase/9/docs/api/java/lang/ProcessHandle.html
+    // public interface CLibrary extends Library {
+    //     CLibrary INSTANCE = (CLibrary)Native.loadLibrary("c", CLibrary.class);
+    //       int getpid ();
+    // }
+
+    String processName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+    return Long.parseLong(processName.split("@")[0]);
+  }
+}
+
+class STSSpanContextHostnameProvider implements ISTSSpanContextHostNameProvider {
+
+  @Override
+  public String getHostName() throws UnknownHostException {
+    return InetAddress.getLocalHost().getHostName();
+  }
+}
+
+class STSSpanContextStartTimeProvider implements ISTSSpanContextStartTimeProvider {
+
+  @Override
+  public long getStartTime() {
+    RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
+    long startTime = runtimeBean.getStartTime();
+    return startTime;
+  }
+}
 
 /**
  * SpanContext represents Span state that must propagate to descendant Spans and across process
@@ -42,6 +88,13 @@ public class DDSpanContext implements io.opentracing.SpanContext {
   private final String traceId;
   private final String spanId;
   private final String parentId;
+  private long pid = 0;
+  private String hostName = "";
+  private long starttime = 0;
+
+  private ISTSSpanContextPidProvider pidProvider;
+  private ISTSSpanContextHostNameProvider hostNameProvider;
+  private ISTSSpanContextStartTimeProvider startTimeProvider;
 
   /** Tags are associated to the current span, they will not propagate to the children span */
   private final Map<String, Object> tags = new ConcurrentHashMap<>();
@@ -117,6 +170,10 @@ public class DDSpanContext implements io.opentracing.SpanContext {
     this.spanType = spanType;
     this.origin = origin;
 
+    this.pidProvider = new STSSpanContextPidProvider();
+    this.hostNameProvider = new STSSpanContextHostnameProvider();
+    this.startTimeProvider = new STSSpanContextStartTimeProvider();
+
     if (samplingPriority != PrioritySampling.UNSET) {
       setSamplingPriority(samplingPriority);
     }
@@ -126,6 +183,10 @@ public class DDSpanContext implements io.opentracing.SpanContext {
     }
     this.tags.put(DDTags.THREAD_NAME, threadName);
     this.tags.put(DDTags.THREAD_ID, threadId);
+
+    this.tags.put(DDTags.SPAN_HOSTNAME, getHostName());
+    this.tags.put(DDTags.SPAN_PID, getPID());
+    this.tags.put(DDTags.SPAN_STARTTIME, getStartTime());
   }
 
   public String getTraceId() {
@@ -204,6 +265,18 @@ public class DDSpanContext implements io.opentracing.SpanContext {
         log.debug("Set sampling priority to {}", getMetrics().get(PRIORITY_SAMPLING_KEY));
       }
     }
+  }
+
+  public void setPidProvider(final ISTSSpanContextPidProvider provider) {
+    this.pidProvider = provider;
+  }
+
+  public void setHostNameProvider(final ISTSSpanContextHostNameProvider provider) {
+    this.hostNameProvider = provider;
+  }
+
+  public void setStartTimeProvider(final ISTSSpanContextStartTimeProvider provider) {
+    this.startTimeProvider = provider;
   }
 
   /** @return the sampling priority of this span's trace, or null if no priority has been set */
@@ -365,4 +438,38 @@ public class DDSpanContext implements io.opentracing.SpanContext {
     }
     return s.toString();
   }
+
+  private long getPID() {
+    if (this.pid == 0) {
+      try {
+        this.pid = this.pidProvider.getPid();
+      } catch (Exception e) {
+        log.debug("Failed to detect pid");
+      }
+    }
+    return this.pid;
+  }
+
+  private String getHostName() {
+    if (this.hostName.equals("")) {
+      try {
+        this.hostName = this.hostNameProvider.getHostName();
+      } catch (Exception e) {
+        log.debug("Failed to detect hostname");
+      }
+    }
+    return this.hostName;
+  }
+
+  private long getStartTime() {
+    if (this.starttime == 0) {
+      try {
+        this.starttime = this.startTimeProvider.getStartTime();
+      } catch (Exception e) {
+        log.debug("Failed to detect start time");
+      }
+    }
+    return this.starttime;
+  }
+
 }

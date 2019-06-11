@@ -457,6 +457,9 @@ public class DDTracer implements io.opentracing.Tracer, Closeable, datadog.trace
     // Builder attributes
     private final Map<String, Object> tags = new HashMap<String, Object>(defaultSpanTags);
     private long timestampMicro;
+    private ISTSSpanContextPidProvider pidProvider;
+    private ISTSSpanContextHostNameProvider hostNameProvider;
+    private ISTSSpanContextStartTimeProvider startTimeProvider;
     private SpanContext parent;
     private String serviceName;
     private String resourceName;
@@ -529,6 +532,31 @@ public class DDTracer implements io.opentracing.Tracer, Closeable, datadog.trace
       this.serviceName = serviceName;
       return this;
     }
+
+    public DDSpanBuilder withPidProvider(final ISTSSpanContextPidProvider provider) {
+      this.pidProvider = provider;
+      if (this.parent instanceof DDSpanContext) {
+        ((DDSpanContext) this.parent).setPidProvider(provider);
+      }
+      return this;
+    }
+
+    public DDSpanBuilder withHostNameProvider(final ISTSSpanContextHostNameProvider provider) {
+      this.hostNameProvider = provider;
+      if (this.parent instanceof DDSpanContext) {
+        ((DDSpanContext) this.parent).setHostNameProvider(provider);
+      }
+      return this;
+    }
+
+    public DDSpanBuilder withStartTimeProvider(final ISTSSpanContextStartTimeProvider provider) {
+      this.startTimeProvider = provider;
+      if (this.parent instanceof DDSpanContext) {
+        ((DDSpanContext) this.parent).setStartTimeProvider(provider);
+      }
+      return this;
+    }
+
 
     public DDSpanBuilder withResourceName(final String resourceName) {
       this.resourceName = resourceName;
@@ -719,6 +747,18 @@ public class DDTracer implements io.opentracing.Tracer, Closeable, datadog.trace
         if (!addTag) {
           context.setTag(tag.getKey(), null);
         }
+      }
+
+      if (this.pidProvider != null) {
+        context.setPidProvider(this.pidProvider);
+      }
+
+      if (this.hostNameProvider != null) {
+        context.setHostNameProvider(this.hostNameProvider);
+      }
+
+      if (this.startTimeProvider != null) {
+        context.setStartTimeProvider(this.startTimeProvider);
       }
 
       return context;
