@@ -404,7 +404,7 @@ class DDSpanBuilderTest extends Specification {
   def "ExtractedContext should populate new span details"() {
     setup:
     def thread = Thread.currentThread()
-    final DDSpan span = tracer.buildSpan("op name")
+    final DDSpan span = tracer.buildSpan("op name").withStartTimeProvider(fakeStartTimeProvider).withHostNameProvider(fakeHostNameProvider).withPidProvider(fakePidProvider)
       .asChildOf(extractedContext).start()
 
     expect:
@@ -415,7 +415,10 @@ class DDSpanBuilderTest extends Specification {
     span.context().baggageItems == extractedContext.baggage
     span.context().@tags == extractedContext.tags + [(Config.RUNTIME_ID_TAG)  : config.getRuntimeId(),
                                                      (Config.LANGUAGE_TAG_KEY): Config.LANGUAGE_TAG_VALUE,
-                                                     (DDTags.THREAD_NAME)     : thread.name, (DDTags.THREAD_ID): thread.id]
+                                                     (DDTags.THREAD_NAME)     : thread.name, (DDTags.THREAD_ID): thread.id,
+                                                     (DDTags.SPAN_HOSTNAME)   : fakeHostNameProvider.hostName,
+                                                     (DDTags.SPAN_PID)        : fakePidProvider.pid,
+                                                     (DDTags.SPAN_STARTTIME)  : fakeStartTimeProvider.startTime ]
 
     where:
     extractedContext                                                                                                  | _
@@ -426,7 +429,7 @@ class DDSpanBuilderTest extends Specification {
   def "TagContext should populate default span details"() {
     setup:
     def thread = Thread.currentThread()
-    final DDSpan span = tracer.buildSpan("op name").asChildOf(tagContext).start()
+    final DDSpan span = tracer.buildSpan("op name").withStartTimeProvider(fakeStartTimeProvider).withHostNameProvider(fakeHostNameProvider).withPidProvider(fakePidProvider).asChildOf(tagContext).start()
 
     expect:
     span.traceId != "0"
@@ -436,7 +439,10 @@ class DDSpanBuilderTest extends Specification {
     span.context().baggageItems == [:]
     span.context().@tags == tagContext.tags + [(Config.RUNTIME_ID_TAG)  : config.getRuntimeId(),
                                                (Config.LANGUAGE_TAG_KEY): Config.LANGUAGE_TAG_VALUE,
-                                               (DDTags.THREAD_NAME)     : thread.name, (DDTags.THREAD_ID): thread.id]
+                                               (DDTags.THREAD_NAME)     : thread.name, (DDTags.THREAD_ID): thread.id,
+                                               (DDTags.SPAN_HOSTNAME)   : fakeHostNameProvider.hostName,
+                                               (DDTags.SPAN_PID)        : fakePidProvider.pid,
+                                               (DDTags.SPAN_STARTTIME)  : fakeStartTimeProvider.startTime ]
 
     where:
     tagContext                                                                   | _
@@ -449,7 +455,7 @@ class DDSpanBuilderTest extends Specification {
     System.setProperty("dd.trace.span.tags", tagString)
     def config = new Config()
     tracer = new DDTracer(config, writer)
-    def span = tracer.buildSpan("op name").withServiceName("foo").start()
+    def span = tracer.buildSpan("op name").withServiceName("foo").withStartTimeProvider(fakeStartTimeProvider).withHostNameProvider(fakeHostNameProvider).withPidProvider(fakePidProvider).start()
 
     expect:
     span.tags == tags + [
@@ -457,6 +463,9 @@ class DDSpanBuilderTest extends Specification {
       (DDTags.THREAD_ID)       : Thread.currentThread().getId(),
       (Config.RUNTIME_ID_TAG)  : config.getRuntimeId(),
       (Config.LANGUAGE_TAG_KEY): Config.LANGUAGE_TAG_VALUE,
+      (DDTags.SPAN_HOSTNAME)   : fakeHostNameProvider.hostName,
+      (DDTags.SPAN_PID)        : fakePidProvider.pid,
+      (DDTags.SPAN_STARTTIME)  : fakeStartTimeProvider.startTime
     ]
 
     cleanup:

@@ -121,9 +121,9 @@ jobs:
     - image: *default_container
     - image: datadog/docker-dd-agent
       environment:
-      - DD_APM_ENABLED=true
-      - DD_BIND_HOST=0.0.0.0
-      - DD_API_KEY=invalid_key_but_this_is_fine
+      - STS_APM_ENABLED=true
+      - STS_BIND_HOST=0.0.0.0
+      - STS_API_KEY=invalid_key_but_this_is_fine
     steps:
     - checkout
 

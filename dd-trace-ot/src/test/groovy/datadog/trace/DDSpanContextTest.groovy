@@ -1,10 +1,17 @@
 package datadog.trace
 
+import datadog.opentracing.ISTSSpanContextHostNameProvider
+import datadog.opentracing.ISTSSpanContextPidProvider
+import datadog.opentracing.ISTSSpanContextStartTimeProvider
 import datadog.opentracing.SpanFactory
 import datadog.trace.api.DDTags
 import spock.lang.Specification
 
 class DDSpanContextTest extends Specification {
+
+  def fakePidProvider = [getPid: {-> return (Long)42}] as ISTSSpanContextPidProvider
+  def fakeHostNameProvider = [getHostName: {-> return "fakehost"}] as ISTSSpanContextHostNameProvider
+  def fakeStartTimeProvider = [getStartTime: {-> return  (Long)228650400}] as ISTSSpanContextStartTimeProvider
 
   def "null values for tags delete existing tags"() {
     setup:
@@ -12,30 +19,35 @@ class DDSpanContextTest extends Specification {
     context.setTag("some.tag", "asdf")
     context.setTag(name, null)
     context.setErrorFlag(true)
+    context.setPidProvider(fakePidProvider)
+    context.setHostNameProvider(fakeHostNameProvider)
+    context.setStartTimeProvider(fakeStartTimeProvider)
 
     expect:
     context.getTags() == tags
     context.serviceName == "fakeService"
     context.resourceName == "fakeResource"
     context.spanType == "fakeType"
-    context.toString() == "DDSpan [ t_id=1, s_id=1, p_id=0] trace=fakeService/fakeOperation/fakeResource metrics={} *errored* tags={${extra}${tags.containsKey(DDTags.SPAN_TYPE) ? "span.type=${context.getSpanType()}, " : ""}thread.id=${Thread.currentThread().id}, thread.name=${Thread.currentThread().name}}"
-
+    context.toString() == "DDSpan [ t_id=1, s_id=1, p_id=0] trace=fakeService/fakeOperation/fakeResource metrics={} *errored* tags={${extra}${tags.containsKey(DDTags.SPAN_TYPE) ? "span.type=${context.getSpanType()}, " : ""}span.hostname=${fakeHostNameProvider.hostName}, span.pid=${fakePidProvider.pid}, span.starttime=${fakeStartTimeProvider.startTime}, thread.id=${Thread.currentThread().id}, thread.name=${Thread.currentThread().name}}"
     where:
     name                 | extra             | tags
-    DDTags.SERVICE_NAME  | "some.tag=asdf, " | ["some.tag": "asdf", (DDTags.THREAD_NAME): Thread.currentThread().name, (DDTags.THREAD_ID): Thread.currentThread().id]
-    DDTags.RESOURCE_NAME | "some.tag=asdf, " | ["some.tag": "asdf", (DDTags.THREAD_NAME): Thread.currentThread().name, (DDTags.THREAD_ID): Thread.currentThread().id]
-    DDTags.SPAN_TYPE     | "some.tag=asdf, " | ["some.tag": "asdf", (DDTags.THREAD_NAME): Thread.currentThread().name, (DDTags.THREAD_ID): Thread.currentThread().id]
-    "some.tag"           | ""                | [(DDTags.THREAD_NAME): Thread.currentThread().name, (DDTags.THREAD_ID): Thread.currentThread().id]
+    DDTags.SERVICE_NAME  | "some.tag=asdf, " | ["some.tag": "asdf", (DDTags.THREAD_NAME): Thread.currentThread().name, (DDTags.THREAD_ID): Thread.currentThread().id, (DDTags.SPAN_HOSTNAME): "fakehost", (DDTags.SPAN_PID): 42, (DDTags.SPAN_STARTTIME): 228650400]
+    DDTags.RESOURCE_NAME | "some.tag=asdf, " | ["some.tag": "asdf", (DDTags.THREAD_NAME): Thread.currentThread().name, (DDTags.THREAD_ID): Thread.currentThread().id, (DDTags.SPAN_HOSTNAME): "fakehost", (DDTags.SPAN_PID): 42, (DDTags.SPAN_STARTTIME): 228650400]
+    DDTags.SPAN_TYPE     | "some.tag=asdf, " | ["some.tag": "asdf", (DDTags.THREAD_NAME): Thread.currentThread().name, (DDTags.THREAD_ID): Thread.currentThread().id, (DDTags.SPAN_HOSTNAME): "fakehost", (DDTags.SPAN_PID): 42, (DDTags.SPAN_STARTTIME): 228650400]
+    "some.tag"           | ""                | [(DDTags.THREAD_NAME): Thread.currentThread().name, (DDTags.THREAD_ID): Thread.currentThread().id, (DDTags.SPAN_HOSTNAME): "fakehost", (DDTags.SPAN_PID): 42, (DDTags.SPAN_STARTTIME): 228650400]
   }
 
   def "special tags set certain values"() {
     setup:
     def context = SpanFactory.newSpanOf(0).context
     context.setTag(name, value)
+    context.setPidProvider(fakePidProvider)
+    context.setHostNameProvider(fakeHostNameProvider)
+    context.setStartTimeProvider(fakeStartTimeProvider)
     def thread = Thread.currentThread()
 
-    def expectedTags = [(DDTags.THREAD_NAME): thread.name, (DDTags.THREAD_ID): thread.id]
-    def expectedTrace = "DDSpan [ t_id=1, s_id=1, p_id=0] trace=$details metrics={} tags={thread.id=$thread.id, thread.name=$thread.name}"
+    def expectedTags = [(DDTags.THREAD_NAME): thread.name, (DDTags.THREAD_ID): thread.id, (DDTags.SPAN_HOSTNAME): fakeHostNameProvider.hostName, (DDTags.SPAN_PID): fakePidProvider.pid, (DDTags.SPAN_STARTTIME): fakeStartTimeProvider.startTime]
+    def expectedTrace = "DDSpan [ t_id=1, s_id=1, p_id=0] trace=$details metrics={} tags={span.hostname=${fakeHostNameProvider.hostName}, span.pid=${fakePidProvider.pid}, span.starttime=${fakeStartTimeProvider.startTime}, thread.id=$thread.id, thread.name=$thread.name}"
 
     expect:
     context.getTags() == expectedTags
@@ -53,15 +65,21 @@ class DDSpanContextTest extends Specification {
     setup:
     def context = SpanFactory.newSpanOf(0).context
     context.setTag(name, value)
+    context.setPidProvider(fakePidProvider)
+    context.setHostNameProvider(fakeHostNameProvider)
+    context.setStartTimeProvider(fakeStartTimeProvider)
     def thread = Thread.currentThread()
 
     expect:
     context.getTags() == [
       (name)              : value,
       (DDTags.THREAD_NAME): thread.name,
-      (DDTags.THREAD_ID)  : thread.id
+      (DDTags.THREAD_ID)  : thread.id,
+      (DDTags.SPAN_HOSTNAME): fakeHostNameProvider.hostName,
+      (DDTags.SPAN_PID): fakePidProvider.pid,
+      (DDTags.SPAN_STARTTIME): fakeStartTimeProvider.startTime,
     ]
-    context.toString() == "DDSpan [ t_id=1, s_id=1, p_id=0] trace=fakeService/fakeOperation/fakeResource metrics={} tags={$name=$value, thread.id=$thread.id, thread.name=$thread.name}"
+    context.toString() == "DDSpan [ t_id=1, s_id=1, p_id=0] trace=fakeService/fakeOperation/fakeResource metrics={} tags={span.hostname=${fakeHostNameProvider.hostName}, span.pid=${fakePidProvider.pid}, span.starttime=${fakeStartTimeProvider.startTime}, $name=$value, thread.id=$thread.id, thread.name=$thread.name}"
 
     where:
     name             | value
