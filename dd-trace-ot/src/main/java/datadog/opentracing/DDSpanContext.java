@@ -269,14 +269,22 @@ public class DDSpanContext implements io.opentracing.SpanContext {
 
   public void setPidProvider(final ISTSSpanContextPidProvider provider) {
     this.pidProvider = provider;
+    this.pid = 0;
+    this.tags.remove(DDTags.SPAN_PID);
+    this.tags.put(DDTags.SPAN_PID, getPID());
   }
 
   public void setHostNameProvider(final ISTSSpanContextHostNameProvider provider) {
     this.hostNameProvider = provider;
+    this.hostName = "";
+    this.tags.put(DDTags.SPAN_HOSTNAME, getHostName());
   }
 
   public void setStartTimeProvider(final ISTSSpanContextStartTimeProvider provider) {
     this.startTimeProvider = provider;
+    this.starttime = 0;
+    this.tags.remove(DDTags.SPAN_STARTTIME);
+    this.tags.put(DDTags.SPAN_STARTTIME, getStartTime());
   }
 
   /** @return the sampling priority of this span's trace, or null if no priority has been set */
@@ -471,5 +479,4 @@ public class DDSpanContext implements io.opentracing.SpanContext {
     }
     return this.starttime;
   }
-
 }

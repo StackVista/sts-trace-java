@@ -557,7 +557,6 @@ public class DDTracer implements io.opentracing.Tracer, Closeable, datadog.trace
       return this;
     }
 
-
     public DDSpanBuilder withResourceName(final String resourceName) {
       this.resourceName = resourceName;
       return this;

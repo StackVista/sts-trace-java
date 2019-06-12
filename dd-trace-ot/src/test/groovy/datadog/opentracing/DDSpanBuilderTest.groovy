@@ -18,6 +18,10 @@ class DDSpanBuilderTest extends Specification {
   def config = Config.get()
   def tracer = new DDTracer(writer)
 
+  def fakePidProvider = [getPid: {-> return (Long)42}] as ISTSSpanContextPidProvider
+  def fakeHostNameProvider = [getHostName: {-> return "fakehost"}] as ISTSSpanContextHostNameProvider
+  def fakeStartTimeProvider = [getStartTime: {-> return  (Long)228650400}] as ISTSSpanContextStartTimeProvider
+
   def "build simple span"() {
     setup:
     final DDSpan span = tracer.buildSpan("op name").withServiceName("foo").start()
@@ -38,12 +42,19 @@ class DDSpanBuilderTest extends Specification {
     DDTracer.DDSpanBuilder builder = tracer
       .buildSpan(expectedName)
       .withServiceName("foo")
+      .withHostNameProvider(fakeHostNameProvider)
+      .withPidProvider(fakePidProvider)
+      .withStartTimeProvider(fakeStartTimeProvider)
     tags.each {
       builder = builder.withTag(it.key, it.value)
     }
 
     when:
-    DDSpan span = builder.start()
+    DDSpan span = builder
+      .withHostNameProvider(fakeHostNameProvider)
+      .withPidProvider(fakePidProvider)
+      .withStartTimeProvider(fakeStartTimeProvider)
+      .start()
 
     then:
     span.getOperationName() == expectedName
@@ -51,7 +62,8 @@ class DDSpanBuilderTest extends Specification {
 
 
     when:
-    span = tracer.buildSpan(expectedName).withServiceName("foo").start()
+    span = tracer.buildSpan(expectedName).withServiceName("foo")
+      .withHostNameProvider(fakeHostNameProvider).withPidProvider(fakePidProvider).withStartTimeProvider(fakeStartTimeProvider).start()
 
     then:
     span.getTags() == [
@@ -59,6 +71,9 @@ class DDSpanBuilderTest extends Specification {
       (DDTags.THREAD_ID)       : Thread.currentThread().getId(),
       (Config.RUNTIME_ID_TAG)  : config.getRuntimeId(),
       (Config.LANGUAGE_TAG_KEY): Config.LANGUAGE_TAG_VALUE,
+      (DDTags.SPAN_HOSTNAME)   : fakeHostNameProvider.getHostName(),
+      (DDTags.SPAN_PID)   : fakePidProvider.getPid(),
+      (DDTags.SPAN_STARTTIME)   : fakeStartTimeProvider.getStartTime(),
     ]
 
     when:
@@ -75,6 +90,9 @@ class DDSpanBuilderTest extends Specification {
         .withServiceName(expectedService)
         .withErrorFlag()
         .withSpanType(expectedType)
+        .withHostNameProvider(fakeHostNameProvider)
+        .withPidProvider(fakePidProvider)
+        .withStartTimeProvider(fakeStartTimeProvider)
         .start()
 
     final DDSpanContext context = span.context()
