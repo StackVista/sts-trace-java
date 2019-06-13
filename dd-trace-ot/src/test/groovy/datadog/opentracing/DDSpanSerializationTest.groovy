@@ -14,10 +14,17 @@ import spock.lang.Specification
 
 class DDSpanSerializationTest extends Specification {
 
+  def fakePidProvider = [getPid: {-> return (Long)42}] as ISTSSpanContextPidProvider
+  def fakeHostNameProvider = [getHostName: {-> return "fakehost"}] as ISTSSpanContextHostNameProvider
+  def fakeStartTimeProvider = [getStartTime: {-> return  (Long)228650400}] as ISTSSpanContextStartTimeProvider
+
   def "serialize spans with sampling #samplingPriority"() throws Exception {
     setup:
     final Map<String, String> baggage = new HashMap<>()
     baggage.put("a-baggage", "value")
+    baggage.put("span.hostname", fakeHostNameProvider.hostName)
+    baggage.put("span.pid", fakePidProvider.pid.toString())
+    baggage.put("span.starttime", fakeStartTimeProvider.startTime.toString())
     final Map<String, Object> tags = new HashMap<>()
     baggage.put("k1", "v1")
 
@@ -58,6 +65,10 @@ class DDSpanSerializationTest extends Specification {
         tags,
         new PendingTrace(tracer, "1", [:]),
         tracer)
+
+    context.setPidProvider(fakePidProvider)
+    context.setHostNameProvider(fakeHostNameProvider)
+    context.setStartTimeProvider(fakeStartTimeProvider)
 
     baggage.put(DDTags.THREAD_NAME, Thread.currentThread().getName())
     baggage.put(DDTags.THREAD_ID, String.valueOf(Thread.currentThread().getId()))
