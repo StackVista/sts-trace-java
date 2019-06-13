@@ -90,7 +90,7 @@ class DDApiTest extends Specification {
     [[SpanFactory.newSpanOf(1L).setTag("service.name", "my-service")]]     | [[new TreeMap<>([
       "duration" : 0,
       "error"    : 0,
-      "meta"     : ["thread.name": Thread.currentThread().getName(), "thread.id": "${Thread.currentThread().id}"],
+      "meta"     : ["thread.name": Thread.currentThread().getName(), "thread.id": "${Thread.currentThread().id}","span.hostname": "fakehost", "span.starttime": "228650400", "span.pid": "42"],
       "metrics"  : [:],
       "name"     : "fakeOperation",
       "parent_id": 0,
@@ -104,7 +104,7 @@ class DDApiTest extends Specification {
     [[SpanFactory.newSpanOf(100L).setTag("resource.name", "my-resource")]] | [[new TreeMap<>([
       "duration" : 0,
       "error"    : 0,
-      "meta"     : ["thread.name": Thread.currentThread().getName(), "thread.id": "${Thread.currentThread().id}"],
+      "meta"     : ["thread.name": Thread.currentThread().getName(), "thread.id": "${Thread.currentThread().id}", "span.hostname": "fakehost", "span.starttime": "228650400", "span.pid": "42"],
       "metrics"  : [:],
       "name"     : "fakeOperation",
       "parent_id": 0,

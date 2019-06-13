@@ -32,6 +32,9 @@ class TagsAssert {
    * @param distributedRootSpan set to true if current span has a parent span but still considered 'root' for current service
    */
   def defaultTags(boolean distributedRootSpan = false) {
+    assertedTags.add("span.hostname")
+    assertedTags.add("span.pid")
+    assertedTags.add("span.starttime")
     assertedTags.add("thread.name")
     assertedTags.add("thread.id")
     assertedTags.add(Config.RUNTIME_ID_TAG)
