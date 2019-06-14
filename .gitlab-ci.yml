@@ -2,12 +2,56 @@ image: stackstate/stackstate-agent-runner-circle:tracejava_base
 
 stages:
   - build
+  - test
 
-test:
+.default_test_job: &default_test_job
+  stage: test
+  script:
+    - echo Applying test task $TEST_TASK
+    - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --parallel --stacktrace --no-daemon --max-workers=6
+  after_script:
+    - .circleci/collect_results.sh
+
+
+build:
   stage: build
+  variables:
+    TEST_TASK: 'test latestDepTest jacocoTestReport jacocoTestCoverageVerification'
   script:
 #    - printenv && exit 1
     - GRADLE_OPTS="-Dorg.gradle.jvmargs='-Xmx1G -Xms64M' -Ddatadog.forkedMaxHeapSize=1G -Ddatadog.forkedMinHeapSize=64M" ./gradlew clean :dd-java-agent:shadowJar compileTestGroovy compileLatestDepTestGroovy compileTestScala compileLatestDepTestScala compileTestJava compileLatestDepTestJava --build-cache --parallel --stacktrace --no-daemon --max-workers=8
     - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --parallel --stacktrace --no-daemon --max-workers=6
-    - .circleci/collect_reports_gitlab.sh
+  after_script:
     - .circleci/collect_results.sh
+
+
+test_7:
+    <<: *default_test_job
+    variables:
+      - TEST_TASK: testJava7
+
+test_8:
+  <<: *default_test_job
+  variables:
+    # We are building on Java8, this is our default JVM so no need to set more homes
+     TEST_TASK: test latestDepTest jacocoTestReport jacocoTestCoverageVerification
+
+test_ibm8:
+  <<: *default_test_job
+  variables:
+    TEST_TASK: testJavaIBM8
+
+test_9:
+  <<: *default_test_job
+  variables:
+    TEST_TASK: testJava9
+
+test_10:
+  <<: *default_test_job
+  variables:
+     TEST_TASK: testJava10
+
+test_11:
+  <<: *default_test_job
+  variables:
+     TEST_TASK: testJava11
