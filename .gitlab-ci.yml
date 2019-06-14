@@ -1,0 +1,10 @@
+image: stackstate/stackstate-agent-runner-circle:tracejava_base
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    - GRADLE_OPTS="-Dorg.gradle.jvmargs= -Xms2048M -Xmx4096M" ./gradlew compileJava compileScala compileGroovy compileTestJava compileTestScala compileTestGroovy shadowJar --stacktrace --no-daemon && GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx2G -Xms512M" ./gradlew test --parallel --stacktrace --no-daemon --max-workers=3
+
