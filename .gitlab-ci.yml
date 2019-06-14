@@ -26,9 +26,9 @@ build:
 
 
 test_7:
-    <<: *default_test_job
-    variables:
-      - TEST_TASK: testJava7
+  <<: *default_test_job
+  variables:
+     TEST_TASK: testJava7
 
 test_8:
   <<: *default_test_job
