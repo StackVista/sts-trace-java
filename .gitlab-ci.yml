@@ -4,6 +4,12 @@ stages:
   - build
   - test
 
+services:
+  - docker:dind
+
+before_script:
+  - docker info
+
 .default_test_job: &default_test_job
   stage: test
   script:
