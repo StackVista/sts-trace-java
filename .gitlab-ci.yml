@@ -1,6 +1,7 @@
 image: stackstate/stackstate-agent-runner-circle:tracejava_base
 
 stages:
+  - prepare
   - build
   - test
 
