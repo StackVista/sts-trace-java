@@ -4,11 +4,11 @@ stages:
   - build
   - test
 
-services:
-  - docker:dind
+#services:
+#  - docker:dind
 
-before_script:
-  - docker info
+#before_script:
+#  - docker info
 
 .default_test_job: &default_test_job
   stage: test
@@ -24,11 +24,7 @@ build:
   variables:
     TEST_TASK: 'test latestDepTest jacocoTestReport jacocoTestCoverageVerification'
   script:
-#    - printenv && exit 1
-    - echo "================================================================="
     - GRADLE_OPTS="-Dorg.gradle.jvmargs='-Xmx1G -Xms64M' -Ddatadog.forkedMaxHeapSize=1G -Ddatadog.forkedMinHeapSize=64M" ./gradlew clean :dd-java-agent:shadowJar compileTestGroovy compileLatestDepTestGroovy compileTestScala compileLatestDepTestScala compileTestJava compileLatestDepTestJava --build-cache --parallel --stacktrace --no-daemon --max-workers=8
-    - echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --parallel --stacktrace --no-daemon --max-workers=6
   after_script:
     - .circleci/collect_results_gitlab.sh
   artifacts:
