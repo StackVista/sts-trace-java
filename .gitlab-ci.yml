@@ -10,7 +10,7 @@ stages:
     - echo Applying test task $TEST_TASK
     - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --parallel --stacktrace --no-daemon --max-workers=6
   after_script:
-    - .circleci/collect_results.sh
+    - .circleci/collect_results_gitlab.sh
 
 
 build:
@@ -24,7 +24,7 @@ build:
     - echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --parallel --stacktrace --no-daemon --max-workers=6
   after_script:
-    - .circleci/collect_results.sh
+    - .circleci/collect_results_gitlab.sh
   artifacts:
     paths:
       - build/libs/*.jar
