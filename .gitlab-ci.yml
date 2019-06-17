@@ -5,6 +5,9 @@ stages:
   - build
   - test
 
+variables:
+  RESTORE_CACHE_ATTEMPTS: 2
+
 .default_test_job: &default_test_job
   stage: test
   script:
@@ -19,6 +22,7 @@ stages:
 
 before_script:
   - export GRADLE_USER_HOME=$PWD/.gradle
+  - mkdir -p $PWD/.gradle
 
 
 clear_build_cache:

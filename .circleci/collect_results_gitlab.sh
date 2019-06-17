@@ -11,4 +11,4 @@ mkdir -p $TEST_RESULTS_DIR >/dev/null 2>&1
 echo "saving test results into $TEST_RESULTS_DIR/results"
 mkdir -p $TEST_RESULTS_DIR/results
 find $CI_PROJECT_DIR/**/build/test-results -name \*.xml -exec cp {} $TEST_RESULTS_DIR/results \; || true
-find $CI_PROJECT_DIR/**/build/test-results -name \*.xml || true
+echo find $CI_PROJECT_DIR/**/build/test-results -name \*.xml || true
