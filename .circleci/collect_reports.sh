@@ -3,7 +3,7 @@
 # Save all important reports into (project-root)/reports
 # This folder will be saved by circleci and available after test runs.
 
-set -e
+#set -e
 
 REPORTS_DIR=./reports
 mkdir -p $REPORTS_DIR >/dev/null 2>&1
