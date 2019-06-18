@@ -185,7 +185,10 @@ public class DDSpanContext implements io.opentracing.SpanContext {
     this.tags.put(DDTags.THREAD_ID, threadId);
 
     this.tags.put(DDTags.SPAN_HOSTNAME, getHostName());
-    this.tags.put(DDTags.SPAN_PID, getPID());
+    long pid = getPID();
+    if (pid != 0L) {
+      this.tags.put(DDTags.SPAN_PID, pid);
+    }
     this.tags.put(DDTags.SPAN_STARTTIME, getStartTime());
   }
 
