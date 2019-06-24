@@ -13,13 +13,15 @@ variables:
   script:
     - echo Applying test task $TEST_TASK
     - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --parallel --stacktrace --no-daemon --max-workers=6
+  after_script:
+    - .circleci/collect_results_gitlab.sh
+    - .circleci/collect_reports.sh
   artifacts:
     when: always
     paths:
       - ./reports/*
-  after_script:
-    - .circleci/collect_results_gitlab.sh
-    - .circleci/collect_reports.sh
+      - ./results/*
+    expire_in: 1 week
 
 before_script:
   - export GRADLE_USER_HOME=$PWD/.gradle
