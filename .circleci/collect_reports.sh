@@ -29,6 +29,7 @@ for report_path in workspace/**/build/reports; do
     save_reports $report_path
 done
 
+echo "Copying gitlab debug output to /tmp/gitlabrunner_out"
 mkdir -p /tmp/gitlabrunner_out >/dev/null 2>&1
 rm -rf /tmp/gitlabrunner_out/* >/dev/null 2>&1
 cp -a $REPORTS_DIR/. /tmp/gitlabrunner_out/ || true
