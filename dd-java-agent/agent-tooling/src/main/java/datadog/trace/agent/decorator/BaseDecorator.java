@@ -1,6 +1,7 @@
 package datadog.trace.agent.decorator;
 
 import static io.opentracing.log.Fields.ERROR_OBJECT;
+import static java.util.Collections.singletonMap;
 
 import datadog.trace.api.Config;
 import datadog.trace.api.DDTags;
@@ -13,8 +14,8 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
 
 public abstract class BaseDecorator {
 
@@ -22,16 +23,13 @@ public abstract class BaseDecorator {
   protected final float traceAnalyticsSampleRate;
 
   protected BaseDecorator() {
+    Config config = Config.get();
     final String[] instrumentationNames = instrumentationNames();
     traceAnalyticsEnabled =
         instrumentationNames.length > 0
-            && Config.traceAnalyticsIntegrationEnabled(
+            && config.isTraceAnalyticsIntegrationEnabled(
                 new TreeSet<>(Arrays.asList(instrumentationNames)), traceAnalyticsDefault());
-    float rate = 1.0f;
-    for (final String name : instrumentationNames) {
-      rate = Config.getFloatSettingFromEnvironment(name + ".analytics.sample-rate", rate);
-    }
-    traceAnalyticsSampleRate = rate;
+    traceAnalyticsSampleRate = config.getInstrumentationAnalyticsSampleRate(instrumentationNames);
   }
 
   protected abstract String[] instrumentationNames();
@@ -83,7 +81,10 @@ public abstract class BaseDecorator {
     assert span != null;
     if (throwable != null) {
       Tags.ERROR.set(span, true);
-      span.log(Collections.singletonMap(ERROR_OBJECT, throwable));
+      span.log(
+          singletonMap(
+              ERROR_OBJECT,
+              throwable instanceof ExecutionException ? throwable.getCause() : throwable));
     }
     return span;
   }

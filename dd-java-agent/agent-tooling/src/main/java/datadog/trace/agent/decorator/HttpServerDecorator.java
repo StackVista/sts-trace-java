@@ -35,7 +35,7 @@ public abstract class HttpServerDecorator<REQUEST, CONNECTION, RESPONSE> extends
 
   @Override
   protected boolean traceAnalyticsDefault() {
-    return Config.getBooleanSettingFromEnvironment(Config.TRACE_ANALYTICS_ENABLED, false);
+    return Config.get().isTraceAnalyticsEnabled();
   }
 
   public Span onRequest(final Span span, final REQUEST request) {
@@ -67,6 +67,11 @@ public abstract class HttpServerDecorator<REQUEST, CONNECTION, RESPONSE> extends
           }
 
           Tags.HTTP_URL.set(span, urlNoParams.toString());
+
+          if (Config.get().isHttpServerTagQueryString()) {
+            span.setTag("http.query.string", url.getQuery());
+            span.setTag("http.fragment.string", url.getFragment());
+          }
         }
       } catch (final Exception e) {
         log.debug("Error tagging url", e);

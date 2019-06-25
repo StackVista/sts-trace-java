@@ -1,5 +1,9 @@
 package datadog.trace.api;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -19,8 +23,8 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Config gives priority to system properties and falls back to environment variables. It also
- * includes default values to ensure a valid config.
+ * Config reads values with the following priority: 1) system properties, 2) environment variables,
+ * 3) optional configuration file. It also includes default values to ensure a valid config.
  *
  * <p>
  *
@@ -35,9 +39,11 @@ public class Config {
 
   private static final Pattern ENV_REPLACEMENT = Pattern.compile("[^a-zA-Z0-9_]");
 
+  public static final String CONFIGURATION_FILE = "trace.config";
   public static final String SERVICE_NAME = "service.name";
   public static final String SERVICE = "service";
   public static final String TRACE_ENABLED = "trace.enabled";
+  public static final String INTEGRATIONS_ENABLED = "integrations.enabled";
   public static final String WRITER_TYPE = "writer.type";
   public static final String AGENT_HOST = "agent.host";
   public static final String TRACE_AGENT_PORT = "trace.agent.port";
@@ -51,13 +57,18 @@ public class Config {
   public static final String JMX_TAGS = "trace.jmx.tags";
   public static final String TRACE_ANALYTICS_ENABLED = "trace.analytics.enabled";
   public static final String TRACE_ANNOTATIONS = "trace.annotations";
+  public static final String TRACE_EXECUTORS_ALL = "trace.executors.all";
+  public static final String TRACE_EXECUTORS = "trace.executors";
   public static final String TRACE_METHODS = "trace.methods";
   public static final String TRACE_CLASSES_EXCLUDE = "trace.classes.exclude";
   public static final String TRACE_REPORT_HOSTNAME = "trace.report-hostname";
   public static final String HEADER_TAGS = "trace.header.tags";
   public static final String HTTP_SERVER_ERROR_STATUSES = "http.server.error.statuses";
   public static final String HTTP_CLIENT_ERROR_STATUSES = "http.client.error.statuses";
+  public static final String HTTP_SERVER_TAG_QUERY_STRING = "http.server.tag.query-string";
+  public static final String HTTP_CLIENT_TAG_QUERY_STRING = "http.client.tag.query-string";
   public static final String HTTP_CLIENT_HOST_SPLIT_BY_DOMAIN = "trace.http.client.split-by-domain";
+  public static final String DB_CLIENT_HOST_SPLIT_BY_INSTANCE = "trace.db.client.split-by-instance";
   public static final String PARTIAL_FLUSH_MIN_SPANS = "trace.partial.flush.min.spans";
   public static final String RUNTIME_CONTEXT_FIELD_INJECTION =
       "trace.runtime.context.field.injection";
@@ -82,6 +93,7 @@ public class Config {
   public static final String DEFAULT_SERVICE_NAME = "unnamed-java-app";
 
   private static final boolean DEFAULT_TRACE_ENABLED = true;
+  public static final boolean DEFAULT_INTEGRATIONS_ENABLED = true;
   public static final String DD_AGENT_WRITER_TYPE = "DDAgentWriter";
   public static final String LOGGING_WRITER_TYPE = "LoggingWriter";
   private static final String DEFAULT_AGENT_WRITER_TYPE = DD_AGENT_WRITER_TYPE;
@@ -98,7 +110,10 @@ public class Config {
       parseIntegerRangeSet("500-599", "default");
   private static final Set<Integer> DEFAULT_HTTP_CLIENT_ERROR_STATUSES =
       parseIntegerRangeSet("400-499", "default");
+  private static final boolean DEFAULT_HTTP_SERVER_TAG_QUERY_STRING = false;
+  private static final boolean DEFAULT_HTTP_CLIENT_TAG_QUERY_STRING = false;
   private static final boolean DEFAULT_HTTP_CLIENT_SPLIT_BY_DOMAIN = false;
+  private static final boolean DEFAULT_DB_CLIENT_HOST_SPLIT_BY_INSTANCE = false;
   private static final int DEFAULT_PARTIAL_FLUSH_MIN_SPANS = 1000;
   private static final String DEFAULT_PROPAGATION_STYLE_EXTRACT = PropagationStyle.DATADOG.name();
   private static final String DEFAULT_PROPAGATION_STYLE_INJECT = PropagationStyle.DATADOG.name();
@@ -111,6 +126,12 @@ public class Config {
   private static final String SPLIT_BY_SPACE_OR_COMMA_REGEX = "[,\\s]+";
 
   private static final boolean DEFAULT_TRACE_REPORT_HOSTNAME = false;
+  private static final String DEFAULT_TRACE_ANNOTATIONS = null;
+  private static final boolean DEFAULT_TRACE_EXECUTORS_ALL = false;
+  private static final String DEFAULT_TRACE_EXECUTORS = "";
+  private static final String DEFAULT_TRACE_METHODS = null;
+  public static final boolean DEFAULT_TRACE_ANALYTICS_ENABLED = false;
+  public static final float DEFAULT_ANALYTICS_SAMPLE_RATE = 1.0f;
 
   public enum PropagationStyle {
     DATADOG,
@@ -128,6 +149,7 @@ public class Config {
 
   @Getter private final String serviceName;
   @Getter private final boolean traceEnabled;
+  @Getter private final boolean integrationsEnabled;
   @Getter private final String writerType;
   @Getter private final String agentHost;
   @Getter private final int agentPort;
@@ -142,7 +164,10 @@ public class Config {
   @Getter private final Map<String, String> headerTags;
   @Getter private final Set<Integer> httpServerErrorStatuses;
   @Getter private final Set<Integer> httpClientErrorStatuses;
+  @Getter private final boolean httpServerTagQueryString;
+  @Getter private final boolean httpClientTagQueryString;
   @Getter private final boolean httpClientSplitByDomain;
+  @Getter private final boolean dbClientSplitByInstance;
   @Getter private final Integer partialFlushMinSpans;
   @Getter private final boolean runtimeContextFieldInjection;
   @Getter private final Set<PropagationStyle> propagationStylesToExtract;
@@ -161,14 +186,30 @@ public class Config {
 
   @Getter private final boolean reportHostName;
 
-  // Read order: System Properties -> Env Variables, [-> default value]
+  @Getter private final String traceAnnotations;
+
+  @Getter private final String traceMethods;
+
+  @Getter private final boolean traceExecutorsAll;
+  @Getter private final List<String> traceExecutors;
+
+  @Getter private final boolean traceAnalyticsEnabled;
+
+  // Values from an optionally provided properties file
+  private static Properties propertiesFromConfigFile;
+
+  // Read order: System Properties -> Env Variables, [-> properties file], [-> default value]
   // Visible for testing
   Config() {
+    propertiesFromConfigFile = loadConfigurationFile();
+
     runtimeId = UUID.randomUUID().toString();
 
     serviceName = getSettingFromEnvironment(SERVICE_NAME, DEFAULT_SERVICE_NAME);
 
     traceEnabled = getBooleanSettingFromEnvironment(TRACE_ENABLED, DEFAULT_TRACE_ENABLED);
+    integrationsEnabled =
+        getBooleanSettingFromEnvironment(INTEGRATIONS_ENABLED, DEFAULT_INTEGRATIONS_ENABLED);
     writerType = getSettingFromEnvironment(WRITER_TYPE, DEFAULT_AGENT_WRITER_TYPE);
     agentHost = getSettingFromEnvironment(AGENT_HOST, DEFAULT_AGENT_HOST);
     agentPort =
@@ -198,9 +239,21 @@ public class Config {
         getIntegerRangeSettingFromEnvironment(
             HTTP_CLIENT_ERROR_STATUSES, DEFAULT_HTTP_CLIENT_ERROR_STATUSES);
 
+    httpServerTagQueryString =
+        getBooleanSettingFromEnvironment(
+            HTTP_SERVER_TAG_QUERY_STRING, DEFAULT_HTTP_SERVER_TAG_QUERY_STRING);
+
+    httpClientTagQueryString =
+        getBooleanSettingFromEnvironment(
+            HTTP_CLIENT_TAG_QUERY_STRING, DEFAULT_HTTP_CLIENT_TAG_QUERY_STRING);
+
     httpClientSplitByDomain =
         getBooleanSettingFromEnvironment(
             HTTP_CLIENT_HOST_SPLIT_BY_DOMAIN, DEFAULT_HTTP_CLIENT_SPLIT_BY_DOMAIN);
+
+    dbClientSplitByInstance =
+        getBooleanSettingFromEnvironment(
+            DB_CLIENT_HOST_SPLIT_BY_INSTANCE, DEFAULT_DB_CLIENT_HOST_SPLIT_BY_INSTANCE);
 
     partialFlushMinSpans =
         getIntegerSettingFromEnvironment(PARTIAL_FLUSH_MIN_SPANS, DEFAULT_PARTIAL_FLUSH_MIN_SPANS);
@@ -240,6 +293,18 @@ public class Config {
     reportHostName =
         getBooleanSettingFromEnvironment(TRACE_REPORT_HOSTNAME, DEFAULT_TRACE_REPORT_HOSTNAME);
 
+    traceAnnotations = getSettingFromEnvironment(TRACE_ANNOTATIONS, DEFAULT_TRACE_ANNOTATIONS);
+
+    traceMethods = getSettingFromEnvironment(TRACE_METHODS, DEFAULT_TRACE_METHODS);
+
+    traceExecutorsAll =
+        getBooleanSettingFromEnvironment(TRACE_EXECUTORS_ALL, DEFAULT_TRACE_EXECUTORS_ALL);
+
+    traceExecutors = getListSettingFromEnvironment(TRACE_EXECUTORS, DEFAULT_TRACE_EXECUTORS);
+
+    traceAnalyticsEnabled =
+        getBooleanSettingFromEnvironment(TRACE_ANALYTICS_ENABLED, DEFAULT_TRACE_ANALYTICS_ENABLED);
+
     log.debug("New instance: {}", this);
   }
 
@@ -250,6 +315,8 @@ public class Config {
     serviceName = properties.getProperty(SERVICE_NAME, parent.serviceName);
 
     traceEnabled = getPropertyBooleanValue(properties, TRACE_ENABLED, parent.traceEnabled);
+    integrationsEnabled =
+        getPropertyBooleanValue(properties, INTEGRATIONS_ENABLED, parent.integrationsEnabled);
     writerType = properties.getProperty(WRITER_TYPE, parent.writerType);
     agentHost = properties.getProperty(AGENT_HOST, parent.agentHost);
     agentPort =
@@ -280,9 +347,21 @@ public class Config {
         getPropertyIntegerRangeValue(
             properties, HTTP_CLIENT_ERROR_STATUSES, parent.httpClientErrorStatuses);
 
+    httpServerTagQueryString =
+        getPropertyBooleanValue(
+            properties, HTTP_SERVER_TAG_QUERY_STRING, parent.httpServerTagQueryString);
+
+    httpClientTagQueryString =
+        getPropertyBooleanValue(
+            properties, HTTP_CLIENT_TAG_QUERY_STRING, parent.httpClientTagQueryString);
+
     httpClientSplitByDomain =
         getPropertyBooleanValue(
             properties, HTTP_CLIENT_HOST_SPLIT_BY_DOMAIN, parent.httpClientSplitByDomain);
+
+    dbClientSplitByInstance =
+        getPropertyBooleanValue(
+            properties, DB_CLIENT_HOST_SPLIT_BY_INSTANCE, parent.dbClientSplitByInstance);
 
     partialFlushMinSpans =
         getPropertyIntegerValue(properties, PARTIAL_FLUSH_MIN_SPANS, parent.partialFlushMinSpans);
@@ -324,6 +403,17 @@ public class Config {
 
     reportHostName =
         getPropertyBooleanValue(properties, TRACE_REPORT_HOSTNAME, parent.reportHostName);
+
+    traceAnnotations = properties.getProperty(TRACE_ANNOTATIONS, parent.traceAnnotations);
+
+    traceMethods = properties.getProperty(TRACE_METHODS, parent.traceMethods);
+
+    traceExecutorsAll =
+        getPropertyBooleanValue(properties, TRACE_EXECUTORS_ALL, parent.traceExecutorsAll);
+    traceExecutors = getPropertyListValue(properties, TRACE_EXECUTORS, parent.traceExecutors);
+
+    traceAnalyticsEnabled =
+        getPropertyBooleanValue(properties, TRACE_ANALYTICS_ENABLED, parent.traceAnalyticsEnabled);
 
     log.debug("New instance: {}", this);
   }
@@ -367,6 +457,20 @@ public class Config {
   }
 
   /**
+   * Returns the sample rate for the specified instrumentation or {@link
+   * #DEFAULT_ANALYTICS_SAMPLE_RATE} if none specified.
+   */
+  public float getInstrumentationAnalyticsSampleRate(String... aliases) {
+    for (final String alias : aliases) {
+      Float rate = getFloatSettingFromEnvironment(alias + ".analytics.sample-rate", null);
+      if (null != rate) {
+        return rate;
+      }
+    }
+    return DEFAULT_ANALYTICS_SAMPLE_RATE;
+  }
+
+  /**
    * Return a map of tags required by the datadog backend to link runtime metrics (i.e. jmx) and
    * traces.
    *
@@ -382,6 +486,18 @@ public class Config {
     return Collections.unmodifiableMap(result);
   }
 
+  public boolean isIntegrationEnabled(
+      final SortedSet<String> integrationNames, final boolean defaultEnabled) {
+    return integrationEnabled(integrationNames, defaultEnabled);
+  }
+
+  /**
+   * @deprecated This method should only be used internally. Use the instance getter instead {@link
+   *     #isIntegrationEnabled(SortedSet, boolean)}.
+   * @param integrationNames
+   * @param defaultEnabled
+   * @return
+   */
   public static boolean integrationEnabled(
       final SortedSet<String> integrationNames, final boolean defaultEnabled) {
     // If default is enabled, we want to enable individually,
@@ -399,6 +515,18 @@ public class Config {
     return anyEnabled;
   }
 
+  public boolean isJmxFetchIntegrationEnabled(
+      final SortedSet<String> integrationNames, final boolean defaultEnabled) {
+    return jmxFetchIntegrationEnabled(integrationNames, defaultEnabled);
+  }
+
+  /**
+   * @deprecated This method should only be used internally. Use the instance getter instead {@link
+   *     #isJmxFetchIntegrationEnabled(SortedSet, boolean)}.
+   * @param integrationNames
+   * @param defaultEnabled
+   * @return
+   */
   public static boolean jmxFetchIntegrationEnabled(
       final SortedSet<String> integrationNames, final boolean defaultEnabled) {
     // If default is enabled, we want to enable individually,
@@ -416,6 +544,18 @@ public class Config {
     return anyEnabled;
   }
 
+  public boolean isTraceAnalyticsIntegrationEnabled(
+      final SortedSet<String> integrationNames, final boolean defaultEnabled) {
+    return traceAnalyticsIntegrationEnabled(integrationNames, defaultEnabled);
+  }
+
+  /**
+   * @deprecated This method should only be used internally. Use the instance getter instead {@link
+   *     #isTraceAnalyticsIntegrationEnabled(SortedSet, boolean)}.
+   * @param integrationNames
+   * @param defaultEnabled
+   * @return
+   */
   public static boolean traceAnalyticsIntegrationEnabled(
       final SortedSet<String> integrationNames, final boolean defaultEnabled) {
     // If default is enabled, we want to enable individually,
@@ -436,28 +576,50 @@ public class Config {
   /**
    * Helper method that takes the name, adds a "dd." prefix then checks for System Properties of
    * that name. If none found, the name is converted to an Environment Variable and used to check
-   * the env. If setting not configured in either location, defaultValue is returned.
+   * the env. If none of the above returns a value, then an optional properties file if checked. If
+   * setting is not configured in either location, <code>defaultValue</code> is returned.
    *
    * @param name
    * @param defaultValue
    * @return
+   * @deprecated This method should only be used internally. Use the explicit getter instead.
    */
   public static String getSettingFromEnvironment(final String name, final String defaultValue) {
-    final String completeName = PREFIX + name;
-    final String value =
-        System.getProperties()
-            .getProperty(completeName, System.getenv(propertyToEnvironmentName(completeName)));
-    return value == null ? defaultValue : value;
+    String value;
+
+    // System properties and properties provided from command line have the highest precedence
+    value = System.getProperties().getProperty(propertyNameToSystemPropertyName(name));
+    if (null != value) {
+      return value;
+    }
+
+    // If value not provided from system properties, looking at env variables
+    value = System.getenv(propertyNameToEnvironmentVariableName(name));
+    if (null != value) {
+      return value;
+    }
+
+    // If value is not defined yet, we look at properties optionally defined in a properties file
+    value = propertiesFromConfigFile.getProperty(propertyNameToSystemPropertyName(name));
+    if (null != value) {
+      return value;
+    }
+
+    return defaultValue;
   }
 
+  /** @deprecated This method should only be used internally. Use the explicit getter instead. */
   private static Map<String, String> getMapSettingFromEnvironment(
       final String name, final String defaultValue) {
-    return parseMap(getSettingFromEnvironment(name, defaultValue), PREFIX + name);
+    return parseMap(
+        getSettingFromEnvironment(name, defaultValue), propertyNameToSystemPropertyName(name));
   }
 
   /**
    * Calls {@link #getSettingFromEnvironment(String, String)} and converts the result to a list by
    * splitting on `,`.
+   *
+   * @deprecated This method should only be used internally. Use the explicit getter instead.
    */
   public static List<String> getListSettingFromEnvironment(
       final String name, final String defaultValue) {
@@ -466,6 +628,8 @@ public class Config {
 
   /**
    * Calls {@link #getSettingFromEnvironment(String, String)} and converts the result to a Boolean.
+   *
+   * @deprecated This method should only be used internally. Use the explicit getter instead.
    */
   public static Boolean getBooleanSettingFromEnvironment(
       final String name, final Boolean defaultValue) {
@@ -475,6 +639,8 @@ public class Config {
 
   /**
    * Calls {@link #getSettingFromEnvironment(String, String)} and converts the result to a Float.
+   *
+   * @deprecated This method should only be used internally. Use the explicit getter instead.
    */
   public static Float getFloatSettingFromEnvironment(final String name, final Float defaultValue) {
     final String value = getSettingFromEnvironment(name, null);
@@ -536,8 +702,28 @@ public class Config {
     }
   }
 
-  private static String propertyToEnvironmentName(final String name) {
-    return ENV_REPLACEMENT.matcher(name.toUpperCase()).replaceAll("_");
+  /**
+   * Converts the property name, e.g. 'service.name' into a public environment variable name, e.g.
+   * `DD_SERVICE_NAME`.
+   *
+   * @param setting The setting name, e.g. `service.name`
+   * @return The public facing environment variable name
+   */
+  private static String propertyNameToEnvironmentVariableName(final String setting) {
+    return ENV_REPLACEMENT
+        .matcher(propertyNameToSystemPropertyName(setting).toUpperCase())
+        .replaceAll("_");
+  }
+
+  /**
+   * Converts the property name, e.g. 'service.name' into a public system property name, e.g.
+   * `dd.service.name`.
+   *
+   * @param setting The setting name, e.g. `service.name`
+   * @return The public facing system property name
+   */
+  private static String propertyNameToSystemPropertyName(String setting) {
+    return PREFIX + setting;
   }
 
   private static Map<String, String> getPropertyMapValue(
@@ -690,6 +876,50 @@ public class Config {
       }
     }
     return Collections.unmodifiableSet(result);
+  }
+
+  /**
+   * Loads the optional configuration properties file into the global {@link Properties} object.
+   *
+   * @return The {@link Properties} object. the returned instance might be empty of file does not
+   *     exist or if it is in a wrong format.
+   */
+  private static Properties loadConfigurationFile() {
+    Properties properties = new Properties();
+
+    // Reading from system property first and from env after
+    String configurationFilePath =
+        System.getProperty(propertyNameToSystemPropertyName(CONFIGURATION_FILE));
+    if (null == configurationFilePath) {
+      configurationFilePath =
+          System.getenv(propertyNameToEnvironmentVariableName(CONFIGURATION_FILE));
+    }
+    if (null == configurationFilePath) {
+      return properties;
+    }
+
+    // Normalizing tilde (~) paths for unix systems
+    configurationFilePath =
+        configurationFilePath.replaceFirst("^~", System.getProperty("user.home"));
+
+    // Configuration properties file is optional
+    File configurationFile = new File(configurationFilePath);
+    if (!configurationFile.exists()) {
+      log.error("Configuration file '{}' not found.", configurationFilePath);
+      return properties;
+    }
+
+    try {
+      FileReader fileReader = new FileReader(configurationFile);
+      properties.load(fileReader);
+    } catch (FileNotFoundException fnf) {
+      log.error("Configuration file '{}' not found.", configurationFilePath);
+    } catch (IOException ioe) {
+      log.error(
+          "Configuration file '{}' cannot be accessed or correctly parsed.", configurationFilePath);
+    }
+
+    return properties;
   }
 
   /**
