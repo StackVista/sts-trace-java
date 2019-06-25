@@ -18,7 +18,7 @@ function save_reports () {
 
     report_path=$REPORTS_DIR/$project_to_save
     mkdir -p $report_path
-    cp -r workspace/$project_to_save/build/reports/* $report_path/
+    cp -r workspace/$project_to_save/build/reports/* $report_path/ || true
 }
 
 shopt -s globstar
@@ -28,3 +28,7 @@ for report_path in workspace/**/build/reports; do
     report_path=${report_path//\/build\/reports/}
     save_reports $report_path
 done
+
+mkdir -p /tmp/gitlabrunner_out >/dev/null 2>&1
+rm -rf /tmp/gitlabrunner_out/* >/dev/null 2>&1
+cp -a $REPORTS_DIR/. /tmp/gitlabrunner_out/ || true
