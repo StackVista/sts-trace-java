@@ -20,9 +20,9 @@ stages:
       - ./results/*
     expire_in: 1 week
 
-before_script:
-  - export GRADLE_USER_HOME=$PWD/.gradle
-  - mkdir -p $PWD/.gradle
+#before_script:
+#  - export GRADLE_USER_HOME=$PWD/.gradle
+#  - mkdir -p $PWD/.gradle
 
 
 clear_build_cache:
@@ -53,12 +53,14 @@ build:
 #    - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --parallel --stacktrace --no-daemon --max-workers=6
   after_script:
     - .circleci/collect_results_gitlab.sh
-  # cache:
-  #   key: "build-$CI_COMMIT_REF_SLUG"
-  #   paths:
-  #     - $GRADLE_USER_HOME/caches/
-  #     - $GRADLE_USER_HOME/wrapper/
-  #     - $GRADLE_USER_HOME/build-cache/
+#   [VS]
+#   cache:
+#     key: "build-$CI_COMMIT_REF_SLUG"
+#     paths:
+#       - $GRADLE_USER_HOME/caches/
+#       - $GRADLE_USER_HOME/wrapper/
+#       - $GRADLE_USER_HOME/build-cache/
+#   /[VS]
   artifacts:
     paths:
       - build/libs/*.jar
