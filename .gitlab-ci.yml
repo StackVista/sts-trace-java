@@ -49,6 +49,8 @@ build:
     DOCKER_DRIVER: overlay
   services:
     - docker:dind
+    - memcached
+    - rabbitmq
   script:
     - GRADLE_OPTS="-Dorg.gradle.jvmargs='-Xmx1G -Xms64M' -Ddatadog.forkedMaxHeapSize=1G -Ddatadog.forkedMinHeapSize=64M" ./gradlew clean :dd-java-agent:shadowJar compileTestGroovy compileLatestDepTestGroovy compileTestScala compileLatestDepTestScala compileTestJava compileLatestDepTestJava --build-cache --parallel --stacktrace --no-daemon --max-workers=8
     - .circleci/collect_libs.sh
