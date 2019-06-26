@@ -1,4 +1,5 @@
-image: stackstate/stackstate-agent-runner-circle:tracejava_base
+#image: stackstate/stackstate-agent-runner-circle:tracejava_base
+image: datadog/dd-trace-java-docker-build:latest
 
 stages:
   - prepare
