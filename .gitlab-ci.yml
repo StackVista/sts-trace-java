@@ -26,14 +26,12 @@ stages:
       - ./results/*
     expire_in: 1 week
 
-#before_script:
-#  - export GRADLE_USER_HOME=$PWD/.gradle
-#  - mkdir -p $PWD/.gradle
-
+before_script:
+  - export GRADLE_USER_HOME=$PWD/.gradle
+  - mkdir -p $PWD/.gradle
 
 clear_build_cache:
   stage: prepare
-  before_script: []
   cache:
     policy: push
     key: "build-$CI_COMMIT_REF_SLUG"
@@ -60,14 +58,10 @@ build:
 #    - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --parallel --stacktrace --no-daemon --max-workers=6
   after_script:
     - .circleci/collect_results_gitlab.sh
-#   [VS]
-#   cache:
-#     key: "build-$CI_COMMIT_REF_SLUG"
-#     paths:
-#       - $GRADLE_USER_HOME/caches/
-#       - $GRADLE_USER_HOME/wrapper/
-#       - $GRADLE_USER_HOME/build-cache/
-#   /[VS]
+  cache:
+    key: "build-$CI_COMMIT_REF_SLUG"
+    paths:
+      - $GRADLE_USER_HOME
   artifacts:
     paths:
       - build/libs/*.jar
@@ -78,7 +72,7 @@ test_8:
   <<: *default_test_job
   variables:
     # We are building on Java8, this is our default JVM so no need to set more homes
-    TEST_TASK: test latestDepTest jacocoTestReport jacocoTestCoverageVerification
+    TEST_TASK: test jacocoTestReport jacocoTestCoverageVerification
 #
 #test_7:
 #  <<: *default_test_job
