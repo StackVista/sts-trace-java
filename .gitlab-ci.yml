@@ -70,33 +70,34 @@ build:
       - libs/*.jar
     expire_in: 1 week
 
-test_7:
-  <<: *default_test_job
-  variables:
-     TEST_TASK: testJava7
-
 test_8:
   <<: *default_test_job
   variables:
     # We are building on Java8, this is our default JVM so no need to set more homes
-     TEST_TASK: test latestDepTest jacocoTestReport jacocoTestCoverageVerification
-
-test_ibm8:
-  <<: *default_test_job
-  variables:
-    TEST_TASK: testJavaIBM8
-
-test_9:
-  <<: *default_test_job
-  variables:
-    TEST_TASK: testJava9
-
-test_10:
-  <<: *default_test_job
-  variables:
-     TEST_TASK: testJava10
-
-test_11:
-  <<: *default_test_job
-  variables:
-     TEST_TASK: testJava11
+    TEST_TASK: test latestDepTest jacocoTestReport jacocoTestCoverageVerification
+#
+#test_7:
+#  <<: *default_test_job
+#  variables:
+#     TEST_TASK: testJava7
+#
+#
+#test_ibm8:
+#  <<: *default_test_job
+#  variables:
+#    TEST_TASK: testJavaIBM8
+#
+#test_9:
+#  <<: *default_test_job
+#  variables:
+#    TEST_TASK: testJava9
+#
+#test_10:
+#  <<: *default_test_job
+#  variables:
+#     TEST_TASK: testJava10
+#
+#test_11:
+#  <<: *default_test_job
+#  variables:
+#     TEST_TASK: testJava11
