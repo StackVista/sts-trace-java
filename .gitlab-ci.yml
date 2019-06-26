@@ -6,6 +6,8 @@ stages:
   - test
 
 .default_test_job: &default_test_job
+  dependencies:
+    - build
   stage: test
   script:
     - echo Applying test task $TEST_TASK
@@ -49,6 +51,7 @@ build:
     - docker:dind
   script:
     - GRADLE_OPTS="-Dorg.gradle.jvmargs='-Xmx1G -Xms64M' -Ddatadog.forkedMaxHeapSize=1G -Ddatadog.forkedMinHeapSize=64M" ./gradlew clean :dd-java-agent:shadowJar compileTestGroovy compileLatestDepTestGroovy compileTestScala compileLatestDepTestScala compileTestJava compileLatestDepTestJava --build-cache --parallel --stacktrace --no-daemon --max-workers=8
+    - .circleci/collect_libs.sh
     - ls -la ./build/libs/ || true
 #    - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --parallel --stacktrace --no-daemon --max-workers=6
   after_script:
@@ -64,6 +67,7 @@ build:
   artifacts:
     paths:
       - build/libs/*.jar
+      - libs/*.jar
     expire_in: 1 week
 
 test_7:
