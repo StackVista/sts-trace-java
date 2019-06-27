@@ -27,6 +27,29 @@ stages:
       - ./results/*
     expire_in: 1 week
 
+.default_test_job_debug: &default_test_job_debug
+  dependencies:
+    - build
+  stage: test
+  services:
+    - docker:dind
+    - memcached
+    - rabbitmq
+  script:
+    - echo Applying test task $TEST_TASK
+    - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --parallel --stacktrace --no-daemon --max-workers=6 --debug > gradle_log.txt 2> gradle_errorlog.txt
+  after_script:
+    - .circleci/collect_results_gitlab.sh
+    - .circleci/collect_reports.sh
+  artifacts:
+    when: always
+    paths:
+      - ./reports/*
+      - ./results/*
+      - gradle_log.txt
+      - gradle_errorlog.txt
+    expire_in: 1 week
+
 before_script:
   - export GRADLE_USER_HOME=$PWD/.gradle
   - mkdir -p $PWD/.gradle
@@ -70,10 +93,10 @@ build:
     expire_in: 1 week
 
 debug_test:
-  <<: *default_test_job
+  <<: *default_test_job_debug
   variables:
     # We are building on Java8, this is our default JVM so no need to set more homes
-    TEST_TASK: :dd-java-agent:test --debug
+    TEST_TASK: :dd-java-agent:test
 
 # test_8:
 #   <<: *default_test_job
