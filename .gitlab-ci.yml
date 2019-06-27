@@ -96,7 +96,7 @@ debug_test:
   <<: *default_test_job_debug
   variables:
     # We are building on Java8, this is our default JVM so no need to set more homes
-    TEST_TASK: :dd-java-agent:test
+    TEST_TASK: ":dd-java-agent:test"
 
 # test_8:
 #   <<: *default_test_job
