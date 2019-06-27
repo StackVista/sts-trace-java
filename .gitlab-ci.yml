@@ -45,7 +45,7 @@ before_script:
     - rabbitmq
   script:
     - echo Applying test task $TEST_TASK
-    - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --stacktrace --no-daemon --debug --scan > gradle_log.txt 2> gradle_errorlog.txt
+    - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --stacktrace --no-daemon --debug --scan > gradle_log.txt 2> gradle_errorlog.txt
   after_script:
     - .circleci/collect_results_gitlab.sh
     - .circleci/collect_reports.sh
