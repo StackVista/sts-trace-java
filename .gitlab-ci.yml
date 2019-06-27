@@ -69,11 +69,17 @@ build:
       - libs/*.jar
     expire_in: 1 week
 
-test_8:
+debug_test:
   <<: *default_test_job
   variables:
     # We are building on Java8, this is our default JVM so no need to set more homes
-    TEST_TASK: test jacocoTestReport jacocoTestCoverageVerification
+    TEST_TASK: :dd-java-agent:test --debug
+
+# test_8:
+#   <<: *default_test_job
+#   variables:
+#     # We are building on Java8, this is our default JVM so no need to set more homes
+#     TEST_TASK: test jacocoTestReport jacocoTestCoverageVerification
 #
 #test_7:
 #  <<: *default_test_job
