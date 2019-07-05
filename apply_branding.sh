@@ -38,6 +38,7 @@ find . -type f -name '*Test.groovy' -exec sed -i 's/"DD_ENV_FLOAT_TEST"/"STS_ENV
 find . -type f -name '*Test.groovy' -exec sed -i 's/"DD_INTEGRATIONS_ENABLED"/"STS_INTEGRATIONS_ENABLED"/g' {} \;
 find . -type f -name '*Test.groovy' -exec sed -i 's/"DD_INTEGRATION_\${value}_ENABLED"/"STS_INTEGRATION_\${value}_ENABLED"/g' {} \;
 find . -type f -name '*Test.groovy' -exec sed -i 's/"DD_FLOAT_TEST"/"STS_FLOAT_TEST"/g' {} \;
+find . -type f -name '*Test.groovy' -exec sed -i 's/"DD_"/"STS_"/g' {} \;
 find . -type f -name '*Test.groovy' -exec sed -i 's/"dd."/"sts."/g' {} \;
 
 find . -type f -name '*Test.groovy' -exec sed -i 's/"dd.trace.span.tags"/"sts.trace.span.tags"/g' {} \;
