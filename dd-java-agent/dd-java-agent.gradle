@@ -72,7 +72,6 @@ jar {
       "Can-Retransform-Classes": true,
     )
   }
-  baseName 'sts-java-agent'
 }
 
 shadowJar {
@@ -83,6 +82,8 @@ shadowJar {
   dependencies {
     exclude(dependency("org.projectlombok:lombok:$versions.lombok"))
   }
+
+  baseName 'sts-java-agent'
 }
 
 // We don't want bundled dependencies to show up in the pom.
