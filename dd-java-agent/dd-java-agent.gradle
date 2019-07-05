@@ -72,6 +72,7 @@ jar {
       "Can-Retransform-Classes": true,
     )
   }
+  baseName 'sts-java-agent'
 }
 
 shadowJar {
