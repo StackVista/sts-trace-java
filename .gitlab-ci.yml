@@ -81,6 +81,7 @@ build:
   services:
     - docker:dind
   script:
+    - ./apply_branding.sh
     - GRADLE_OPTS="-Dorg.gradle.jvmargs='-Xmx1G -Xms64M' -Ddatadog.forkedMaxHeapSize=1G -Ddatadog.forkedMinHeapSize=64M" ./gradlew clean :dd-java-agent:shadowJar compileTestGroovy compileLatestDepTestGroovy compileTestScala compileLatestDepTestScala compileTestJava compileLatestDepTestJava --build-cache --parallel --stacktrace --no-daemon --max-workers=8
     - .circleci/collect_libs.sh
     - ls -la ./libs/ || true
