@@ -20,8 +20,8 @@ jobs:
     steps:
     - checkout
 
-#    - restore_cache:
-#        <<: *cache_keys
+    - restore_cache:
+        <<: *cache_keys
 
     - run:
         name: Brand Project
@@ -45,9 +45,9 @@ jobs:
         - .gradle
         - workspace
 
-#    - save_cache:
-#        key: dd-trace-java-{{ checksum "dd-trace-java.gradle" }}-{{ .Branch }}-{{ .Revision }}
-#        paths: ~/.gradle
+    - save_cache:
+        key: dd-trace-java-{{ checksum "dd-trace-java.gradle" }}-{{ .Branch }}-{{ .Revision }}
+        paths: ~/.gradle
 
 
   default_test_job: &default_test_job
@@ -66,8 +66,8 @@ jobs:
     - attach_workspace:
         at: .
 
-#    - restore_cache:
-#        <<: *cache_keys
+    - restore_cache:
+        <<: *cache_keys
 
     - run:
         name: Run Tests
@@ -146,8 +146,8 @@ jobs:
     - attach_workspace:
         at: .
 
-#    - restore_cache:
-#        <<: *cache_keys
+    - restore_cache:
+        <<: *cache_keys
 
     - run:
         name: Run Trace Agent Tests
