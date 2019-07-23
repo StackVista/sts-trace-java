@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 @ToString(includeFieldNames = true)
 public class Config {
   /** Config keys below */
-  private static final String PREFIX = "dd.";
+  private static final String PREFIX = "sts.";
 
   private static final Pattern ENV_REPLACEMENT = Pattern.compile("[^a-zA-Z0-9_]");
 
@@ -574,7 +574,7 @@ public class Config {
   }
 
   /**
-   * Helper method that takes the name, adds a "dd." prefix then checks for System Properties of
+   * Helper method that takes the name, adds a "sts." prefix then checks for System Properties of
    * that name. If none found, the name is converted to an Environment Variable and used to check
    * the env. If none of the above returns a value, then an optional properties file if checked. If
    * setting is not configured in either location, <code>defaultValue</code> is returned.

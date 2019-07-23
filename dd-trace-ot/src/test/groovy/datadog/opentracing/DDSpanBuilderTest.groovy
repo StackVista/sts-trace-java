@@ -452,7 +452,7 @@ class DDSpanBuilderTest extends Specification {
 
   def "global span tags populated on each span"() {
     setup:
-    System.setProperty("dd.trace.span.tags", tagString)
+    System.setProperty("sts.trace.span.tags", tagString)
     def config = new Config()
     tracer = new DDTracer(config, writer)
     def span = tracer.buildSpan("op name").withServiceName("foo").withStartTimeProvider(fakeStartTimeProvider).withHostNameProvider(fakeHostNameProvider).withPidProvider(fakePidProvider).start()
@@ -469,7 +469,7 @@ class DDSpanBuilderTest extends Specification {
     ]
 
     cleanup:
-    System.clearProperty("dd.trace.span.tags")
+    System.clearProperty("sts.trace.span.tags")
 
     where:
     tagString     | tags

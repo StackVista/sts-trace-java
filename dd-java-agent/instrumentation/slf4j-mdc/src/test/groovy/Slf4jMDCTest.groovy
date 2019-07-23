@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference
 class Slf4jMDCTest extends AgentTestRunner {
   static {
     ConfigUtils.updateConfig {
-      System.setProperty("dd.logs.injection", "true")
+      System.setProperty("sts.logs.injection", "true")
     }
   }
 

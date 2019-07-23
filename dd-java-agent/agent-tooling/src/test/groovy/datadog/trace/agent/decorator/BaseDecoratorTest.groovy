@@ -170,8 +170,8 @@ class BaseDecoratorTest extends Specification {
   def "test analytics rate enabled:#enabled, integration:#integName, sampleRate:#sampleRate"() {
     setup:
     ConfigUtils.updateConfig {
-      System.properties.setProperty("dd.${integName}.analytics.enabled", "true")
-      System.properties.setProperty("dd.${integName}.analytics.sample-rate", "$sampleRate")
+      System.properties.setProperty("sts.${integName}.analytics.enabled", "true")
+      System.properties.setProperty("sts.${integName}.analytics.sample-rate", "$sampleRate")
     }
 
     when:
@@ -182,8 +182,8 @@ class BaseDecoratorTest extends Specification {
     dec.traceAnalyticsSampleRate == (Float) expectedRate
 
     cleanup:
-    System.clearProperty("dd.${integName}.analytics.enabled")
-    System.clearProperty("dd.${integName}.analytics.sample-rate")
+    System.clearProperty("sts.${integName}.analytics.enabled")
+    System.clearProperty("sts.${integName}.analytics.sample-rate")
 
     where:
     enabled | integName | sampleRate | expectedEnabled | expectedRate

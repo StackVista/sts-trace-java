@@ -61,7 +61,7 @@ includeShadowJar(project(':dd-java-agent:instrumentation'), 'agent-tooling-and-i
 includeShadowJar(project(':dd-java-agent:agent-jmxfetch'), 'agent-jmxfetch.jar.zip')
 
 jar {
-  classifier = 'unbundled'
+  archiveClassifier = ''
 
   manifest {
     attributes(
@@ -95,15 +95,14 @@ dependencies {
   testCompile project(':dd-trace-api')
   testCompile project(':dd-trace-ot')
   testCompile project(':utils:gc-utils')
-
   testCompile deps.opentracingMock
   testCompile deps.testLogging
   testCompile deps.guava
 }
 
 tasks.withType(Test).configureEach {
-  jvmArgs "-Ddd.service.name=java-agent-tests"
-  jvmArgs "-Ddd.writer.type=LoggingWriter"
+  jvmArgs "-Dsts.service.name=java-agent-tests"
+  jvmArgs "-Dsts.writer.type=LoggingWriter"
   // Multi-threaded logging seems to be causing deadlocks with Gradle's log capture.
 //  jvmArgs "-Ddatadog.slf4j.simpleLogger.defaultLogLevel=debug"
 //  jvmArgs "-Dorg.slf4j.simpleLogger.defaultLogLevel=debug"

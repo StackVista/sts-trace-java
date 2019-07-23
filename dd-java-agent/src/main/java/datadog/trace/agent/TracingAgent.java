@@ -230,7 +230,7 @@ public class TracingAgent {
     final boolean debugEnabled =
         "debug".equalsIgnoreCase(System.getProperty("datadog.slf4j.simpleLogger.defaultLogLevel"));
 
-    final String tracerCustomLogManSysprop = "dd.app.customlogmanager";
+    final String tracerCustomLogManSysprop = "sts.app.customlogmanager";
     final String customLogManagerProp = System.getProperty(tracerCustomLogManSysprop);
     final String customLogManagerEnv =
         System.getenv(tracerCustomLogManSysprop.replace('.', '_').toUpperCase());

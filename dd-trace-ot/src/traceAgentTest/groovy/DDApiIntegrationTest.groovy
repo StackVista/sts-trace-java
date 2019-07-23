@@ -78,10 +78,10 @@ class DDApiIntegrationTest {
        */
       if ("true" != System.getenv("CI")) {
         agentContainer = new GenericContainer("datadog/docker-dd-agent:latest")
-          .withEnv(["DD_APM_ENABLED": "true",
-                    "DD_BIND_HOST"  : "0.0.0.0",
-                    "DD_API_KEY"    : "invalid_key_but_this_is_fine",
-                    "DD_LOGS_STDOUT": "yes"])
+          .withEnv(["STS_APM_ENABLED": "true",
+                    "STS_BIND_HOST"  : "0.0.0.0",
+                    "STS_API_KEY"    : "invalid_key_but_this_is_fine",
+                    "STS_LOGS_STDOUT": "yes"])
           .withExposedPorts(datadog.trace.api.Config.DEFAULT_TRACE_AGENT_PORT)
           .withStartupTimeout(Duration.ofSeconds(120))
         // Apparently we need to sleep for a bit so agent's response `{"service:,env:":1}` in rate_by_service.

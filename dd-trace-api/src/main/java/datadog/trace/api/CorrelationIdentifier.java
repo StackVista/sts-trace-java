@@ -7,7 +7,7 @@ package datadog.trace.api;
  */
 public class CorrelationIdentifier {
   private static final String TRACE_ID_KEY = "dd.trace_id";
-  private static final String SPAN_ID_KEY = "dd.span_id";
+  private static final String SPAN_ID_KEY = "sts.span_id";
 
   /** @return The trace-id key to use with datadog logs integration */
   public static String getTraceIdKey() {

@@ -19,7 +19,7 @@ class DDTracerResolverTest extends Specification {
 
   def "test disable DDTracerResolver"() {
     setup:
-    System.setProperty("dd.trace.resolver.enabled", "false")
+    System.setProperty("sts.trace.resolver.enabled", "false")
 
     when:
     def tracer = resolver.resolve(new Config())
@@ -28,7 +28,7 @@ class DDTracerResolverTest extends Specification {
     tracer == null
 
     cleanup:
-    System.clearProperty("dd.trace.resolver.enabled")
+    System.clearProperty("sts.trace.resolver.enabled")
   }
 
 }

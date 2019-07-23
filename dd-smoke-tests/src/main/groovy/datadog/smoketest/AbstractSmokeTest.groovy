@@ -25,8 +25,8 @@ abstract class AbstractSmokeTest extends Specification {
 
     defaultJavaProperties = [
       "-javaagent:${shadowJarPath}",
-      "-Ddd.writer.type=LoggingWriter",
-      "-Ddd.service.name=smoke-test-java-app",
+      "-Dsts.writer.type=LoggingWriter",
+      "-Dsts.service.name=smoke-test-java-app",
       "-Ddatadog.slf4j.simpleLogger.defaultLogLevel=debug",
       "-Dorg.slf4j.simpleLogger.defaultLogLevel=debug"
     ]

@@ -10,8 +10,8 @@ import spock.lang.Shared
 class SparkJavaBasedTest extends AgentTestRunner {
 
   static {
-    System.setProperty("dd.integration.jetty.enabled", "true")
-    System.setProperty("dd.integration.sparkjava.enabled", "true")
+    System.setProperty("sts.integration.jetty.enabled", "true")
+    System.setProperty("sts.integration.sparkjava.enabled", "true")
   }
 
   @Shared
