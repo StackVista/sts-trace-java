@@ -48,18 +48,18 @@ class ConfigTest extends Specification {
   @Rule
   public final EnvironmentVariables environmentVariables = new EnvironmentVariables()
 
-  private static final DD_SERVICE_NAME_ENV = "STS_SERVICE_NAME"
-  private static final DD_TRACE_ENABLED_ENV = "STS_TRACE_ENABLED"
-  private static final DD_WRITER_TYPE_ENV = "STS_WRITER_TYPE"
-  private static final DD_SERVICE_MAPPING_ENV = "STS_SERVICE_MAPPING"
-  private static final DD_SPAN_TAGS_ENV = "STS_SPAN_TAGS"
-  private static final DD_HEADER_TAGS_ENV = "STS_HEADER_TAGS"
-  private static final DD_PROPAGATION_STYLE_EXTRACT = "STS_PROPAGATION_STYLE_EXTRACT"
-  private static final DD_PROPAGATION_STYLE_INJECT = "STS_PROPAGATION_STYLE_INJECT"
-  private static final DD_JMXFETCH_METRICS_CONFIGS_ENV = "STS_JMXFETCH_METRICS_CONFIGS"
-  private static final DD_TRACE_AGENT_PORT_ENV = "STS_TRACE_AGENT_PORT"
-  private static final DD_AGENT_PORT_LEGACY_ENV = "STS_AGENT_PORT"
-  private static final DD_TRACE_REPORT_HOSTNAME = "STS_TRACE_REPORT_HOSTNAME"
+  private static final DD_SERVICE_NAME_ENV = "DD_SERVICE_NAME"
+  private static final DD_TRACE_ENABLED_ENV = "DD_TRACE_ENABLED"
+  private static final DD_WRITER_TYPE_ENV = "DD_WRITER_TYPE"
+  private static final DD_SERVICE_MAPPING_ENV = "DD_SERVICE_MAPPING"
+  private static final DD_SPAN_TAGS_ENV = "DD_SPAN_TAGS"
+  private static final DD_HEADER_TAGS_ENV = "DD_HEADER_TAGS"
+  private static final DD_PROPAGATION_STYLE_EXTRACT = "DD_PROPAGATION_STYLE_EXTRACT"
+  private static final DD_PROPAGATION_STYLE_INJECT = "DD_PROPAGATION_STYLE_INJECT"
+  private static final DD_JMXFETCH_METRICS_CONFIGS_ENV = "DD_JMXFETCH_METRICS_CONFIGS"
+  private static final DD_TRACE_AGENT_PORT_ENV = "DD_TRACE_AGENT_PORT"
+  private static final DD_AGENT_PORT_LEGACY_ENV = "DD_AGENT_PORT"
+  private static final DD_TRACE_REPORT_HOSTNAME = "DD_TRACE_REPORT_HOSTNAME"
 
   def "verify defaults"() {
     when:
@@ -457,13 +457,13 @@ class ConfigTest extends Specification {
 
   def "verify integration config"() {
     setup:
-    environmentVariables.set("STS_INTEGRATION_ORDER_ENABLED", "false")
-    environmentVariables.set("STS_INTEGRATION_TEST_ENV_ENABLED", "true")
-    environmentVariables.set("STS_INTEGRATION_DISABLED_ENV_ENABLED", "false")
+    environmentVariables.set("DD_INTEGRATION_ORDER_ENABLED", "false")
+    environmentVariables.set("DD_INTEGRATION_TEST_ENV_ENABLED", "true")
+    environmentVariables.set("DD_INTEGRATION_DISABLED_ENV_ENABLED", "false")
 
-    System.setProperty("sts.integration.order.enabled", "true")
-    System.setProperty("sts.integration.test-prop.enabled", "true")
-    System.setProperty("sts.integration.disabled-prop.enabled", "false")
+    System.setProperty("dd.integration.order.enabled", "true")
+    System.setProperty("dd.integration.test-prop.enabled", "true")
+    System.setProperty("dd.integration.disabled-prop.enabled", "false")
 
     expect:
     Config.get().isIntegrationEnabled(integrationNames, defaultEnabled) == expected
@@ -491,13 +491,13 @@ class ConfigTest extends Specification {
 
   def "verify integration jmxfetch config"() {
     setup:
-    environmentVariables.set("STS_JMXFETCH_ORDER_ENABLED", "false")
-    environmentVariables.set("STS_JMXFETCH_TEST_ENV_ENABLED", "true")
-    environmentVariables.set("STS_JMXFETCH_DISABLED_ENV_ENABLED", "false")
+    environmentVariables.set("DD_JMXFETCH_ORDER_ENABLED", "false")
+    environmentVariables.set("DD_JMXFETCH_TEST_ENV_ENABLED", "true")
+    environmentVariables.set("DD_JMXFETCH_DISABLED_ENV_ENABLED", "false")
 
-    System.setProperty("sts.jmxfetch.order.enabled", "true")
-    System.setProperty("sts.jmxfetch.test-prop.enabled", "true")
-    System.setProperty("sts.jmxfetch.disabled-prop.enabled", "false")
+    System.setProperty("dd.jmxfetch.order.enabled", "true")
+    System.setProperty("dd.jmxfetch.test-prop.enabled", "true")
+    System.setProperty("dd.jmxfetch.disabled-prop.enabled", "false")
 
     expect:
     Config.get().isJmxFetchIntegrationEnabled(integrationNames, defaultEnabled) == expected
@@ -525,13 +525,13 @@ class ConfigTest extends Specification {
 
   def "verify integration trace analytics config"() {
     setup:
-    environmentVariables.set("STS_ORDER_ANALYTICS_ENABLED", "false")
-    environmentVariables.set("STS_TEST_ENV_ANALYTICS_ENABLED", "true")
-    environmentVariables.set("STS_DISABLED_ENV_ANALYTICS_ENABLED", "false")
+    environmentVariables.set("DD_ORDER_ANALYTICS_ENABLED", "false")
+    environmentVariables.set("DD_TEST_ENV_ANALYTICS_ENABLED", "true")
+    environmentVariables.set("DD_DISABLED_ENV_ANALYTICS_ENABLED", "false")
 
-    System.setProperty("sts.order.analytics.enabled", "true")
-    System.setProperty("sts.test-prop.analytics.enabled", "true")
-    System.setProperty("sts.disabled-prop.analytics.enabled", "false")
+    System.setProperty("dd.order.analytics.enabled", "true")
+    System.setProperty("dd.test-prop.analytics.enabled", "true")
+    System.setProperty("dd.disabled-prop.analytics.enabled", "false")
 
     expect:
     Config.get().isTraceAnalyticsIntegrationEnabled(integrationNames, defaultEnabled) == expected
@@ -559,15 +559,15 @@ class ConfigTest extends Specification {
 
   def "test getFloatSettingFromEnvironment(#name)"() {
     setup:
-    environmentVariables.set("STS_ENV_ZERO_TEST", "0.0")
-    environmentVariables.set("STS_ENV_FLOAT_TEST", "1.0")
-    environmentVariables.set("STS_FLOAT_TEST", "0.2")
+    environmentVariables.set("DD_ENV_ZERO_TEST", "0.0")
+    environmentVariables.set("DD_ENV_FLOAT_TEST", "1.0")
+    environmentVariables.set("DD_FLOAT_TEST", "0.2")
 
-    System.setProperty("sts.prop.zero.test", "0")
-    System.setProperty("sts.prop.float.test", "0.3")
-    System.setProperty("sts.float.test", "0.4")
-    System.setProperty("sts.garbage.test", "garbage")
-    System.setProperty("sts.negative.test", "-1")
+    System.setProperty("dd.prop.zero.test", "0")
+    System.setProperty("dd.prop.float.test", "0.3")
+    System.setProperty("dd.float.test", "0.4")
+    System.setProperty("dd.garbage.test", "garbage")
+    System.setProperty("dd.negative.test", "-1")
 
     expect:
     Config.getFloatSettingFromEnvironment(name, defaultValue) == (float) expected
@@ -760,7 +760,7 @@ class ConfigTest extends Specification {
   def "verify fallback to properties file has lower priority than env var"() {
     setup:
     System.setProperty(PREFIX + CONFIGURATION_FILE, "src/test/resources/dd-java-tracer.properties")
-    environmentVariables.set("STS_SERVICE_NAME", "set-in-env")
+    environmentVariables.set("DD_SERVICE_NAME", "set-in-env")
 
     when:
     def config = new Config()
@@ -771,7 +771,7 @@ class ConfigTest extends Specification {
     cleanup:
     System.clearProperty(PREFIX + CONFIGURATION_FILE)
     System.clearProperty(PREFIX + SERVICE_NAME)
-    environmentVariables.clear("STS_SERVICE_NAME")
+    environmentVariables.clear("DD_SERVICE_NAME")
   }
 
   def "verify fallback to properties file that does not exist does not crash app"() {

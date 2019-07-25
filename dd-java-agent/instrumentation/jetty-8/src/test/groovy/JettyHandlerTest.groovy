@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 class JettyHandlerTest extends AgentTestRunner {
 
   static {
-    System.setProperty("sts.integration.jetty.enabled", "true")
+    System.setProperty("dd.integration.jetty.enabled", "true")
   }
 
   int port = PortUtils.randomOpenPort()

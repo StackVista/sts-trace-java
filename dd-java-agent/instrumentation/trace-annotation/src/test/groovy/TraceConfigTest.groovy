@@ -8,13 +8,13 @@ class TraceConfigTest extends AgentTestRunner {
 
   static {
     ConfigUtils.updateConfig {
-      System.setProperty("sts.trace.methods", "package.ClassName[method1,method2];${ConfigTracedCallable.name}[call]")
+      System.setProperty("dd.trace.methods", "package.ClassName[method1,method2];${ConfigTracedCallable.name}[call]")
     }
   }
 
   def specCleanup() {
     ConfigUtils.updateConfig {
-      System.clearProperty("sts.trace.methods")
+      System.clearProperty("dd.trace.methods")
     }
   }
 
@@ -47,9 +47,9 @@ class TraceConfigTest extends AgentTestRunner {
     setup:
     ConfigUtils.updateConfig {
       if (value) {
-        System.properties.setProperty("sts.trace.methods", value)
+        System.properties.setProperty("dd.trace.methods", value)
       } else {
-        System.clearProperty("sts.trace.methods")
+        System.clearProperty("dd.trace.methods")
       }
     }
 
@@ -57,7 +57,7 @@ class TraceConfigTest extends AgentTestRunner {
     new TraceConfigInstrumentation().classMethodsToTrace == expected
 
     cleanup:
-    System.clearProperty("sts.trace.methods")
+    System.clearProperty("dd.trace.methods")
 
     where:
     value                                                           | expected

@@ -24,7 +24,7 @@ class AgentTestRunnerTest extends AgentTestRunner {
 
   static {
     ConfigUtils.updateConfig {
-      System.setProperty("sts." + TRACE_CLASSES_EXCLUDE, "config.exclude.packagename.*, config.exclude.SomeClass,config.exclude.SomeClass\$NestedClass")
+      System.setProperty("dd." + TRACE_CLASSES_EXCLUDE, "config.exclude.packagename.*, config.exclude.SomeClass,config.exclude.SomeClass\$NestedClass")
     }
 
     // when test class initializes, opentracing should be set up, but not the agent.
