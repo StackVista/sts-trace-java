@@ -61,7 +61,7 @@ includeShadowJar(project(':dd-java-agent:instrumentation'), 'agent-tooling-and-i
 includeShadowJar(project(':dd-java-agent:agent-jmxfetch'), 'agent-jmxfetch.jar.zip')
 
 jar {
-  classifier = 'unbundled'
+  archiveClassifier = ''
 
   manifest {
     attributes(
@@ -95,7 +95,6 @@ dependencies {
   testCompile project(':dd-trace-api')
   testCompile project(':dd-trace-ot')
   testCompile project(':utils:gc-utils')
-
   testCompile deps.opentracingMock
   testCompile deps.testLogging
   testCompile deps.guava

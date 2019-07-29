@@ -19,6 +19,7 @@
 apply plugin: "maven"
 apply plugin: "com.jfrog.artifactory"
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
 
 afterEvaluate {
   assert description: "Project $project.path is published, must have a description"
@@ -144,6 +145,25 @@ bintray {
   }
 }
 
+publishing {
+  repositories {
+   maven {
+      url "s3://stackstate-trace-java/sts-trace-java"
+      credentials(AwsCredentials) {
+        accessKey "${System.getenv('TF_VAR_AWS_ACCESS_KEY_ID')}"
+        secretKey "${System.getenv('TF_VAR_AWS_SECRET_ACCESS_KEY')}"
+      }
+    } 
+  }
+
+  publications {
+    mavenJava(MavenPublication) {
+      from components.java
+      groupId 'com.stackstate'
+      artifactId 'sts-trace-java'
+    }
+  }
+}
 if (!isSnapshot && isCIandTagged) {
   artifactoryPublish.finalizedBy bintrayUpload
 }
