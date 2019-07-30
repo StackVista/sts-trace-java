@@ -99,12 +99,12 @@ jobs:
     environment:
     # We are building on Java8, this is our default JVM so no need to set more homes
     - TEST_TASK: test jacocoTestReport jacocoTestCoverageVerification
-#TODO:
-  # test_latest8:
-  #   <<: *default_test_job
-  #   environment:
-  #   # We are building on Java8, this is our default JVM so no need to set more homes
-  #   - TEST_TASK: latestDepTest
+
+  test_latest8:
+    <<: *default_test_job
+    environment:
+    # We are building on Java8, this is our default JVM so no need to set more homes
+    - TEST_TASK: latestDepTest
 
   test_ibm8:
     <<: *default_test_job
@@ -140,18 +140,18 @@ jobs:
     <<: *default_test_job
     environment:
     - TEST_TASK: testJava12
-# TODO:
-  # agent_integration_tests:
-  #   <<: *defaults
-  #   docker:
-  #   - image: *default_container
-  #   - image: datadog/docker-dd-agent
-  #     environment:
-  #     - STS_APM_ENABLED=true
-  #     - STS_BIND_HOST=0.0.0.0
-  #     - STS_API_KEY=invalid_key_but_this_is_fine
-  #   steps:
-  #   - checkout
+
+  agent_integration_tests:
+    <<: *defaults
+    docker:
+    - image: *default_container
+    - image: datadog/docker-dd-agent
+      environment:
+      - STS_APM_ENABLED=true
+      - STS_BIND_HOST=0.0.0.0
+      - STS_API_KEY=invalid_key_but_this_is_fine
+    steps:
+    - checkout
 
     - attach_workspace:
         at: .
@@ -270,12 +270,12 @@ workflows:
         filters:
           tags:
             only: /.*/
-    - test_latest8:
-        requires:
-        - build
-        filters:
-          tags:
-            only: /.*/
+    # - test_latest8: # TODO: [VS]
+    #     requires:
+    #     - build
+    #     filters:
+    #       tags:
+    #         only: /.*/
     - test_ibm8:
         requires:
         - build
@@ -319,12 +319,12 @@ workflows:
           tags:
             only: /.*/
 
-    - agent_integration_tests:
-        requires:
-        - build
-        filters:
-          tags:
-            only: /.*/
+    # - agent_integration_tests: # TODO: [VS]
+    #     requires:
+    #     - build
+    #     filters:
+    #       tags:
+    #         only: /.*/
 
     - check:
         requires:
