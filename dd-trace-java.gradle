@@ -16,7 +16,7 @@ def isCI = System.getenv("CI") != null
 
 allprojects {
   group = 'com.datadoghq'
-  version = '0.30.0'
+  version = '0.31.0'
 
   if (isCI) {
     buildDir = "${rootDir}/workspace/${projectDir.path.replace(rootDir.path, '')}/build/"
@@ -54,7 +54,6 @@ buildScan {
 
 wrapper {
   distributionType = Wrapper.DistributionType.ALL
-  version = '5.4.1'
 }
 
 allprojects {

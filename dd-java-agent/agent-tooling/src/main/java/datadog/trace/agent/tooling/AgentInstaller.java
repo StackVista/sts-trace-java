@@ -107,7 +107,12 @@ public class AgentInstaller {
                                         // Working around until a long-term fix for modules can be
                                         // put in place.
                                         .and(not(named("java.util.logging.LogManager$Cleaner")))))))
-            .or(nameStartsWith("com.sun.").and(not(nameStartsWith("com.sun.messaging."))))
+            .or(
+                nameStartsWith("com.sun.")
+                    .and(
+                        not(
+                            nameStartsWith("com.sun.messaging.")
+                                .or(nameStartsWith("com.sun.jersey.api.client")))))
             .or(
                 nameStartsWith("sun.")
                     .and(
@@ -127,7 +132,7 @@ public class AgentInstaller {
             .or(nameStartsWith("com.singularity."))
             .or(nameStartsWith("com.jinspired."))
             .or(nameStartsWith("org.jinspired."))
-            .or(nameStartsWith("org.apache.log4j."))
+            .or(nameStartsWith("org.apache.log4j.").and(not(named("org.apache.log4j.MDC"))))
             .or(nameStartsWith("org.slf4j.").and(not(named("org.slf4j.MDC"))))
             .or(nameContains("$JaxbAccessor"))
             .or(nameContains("CGLIB$$"))
