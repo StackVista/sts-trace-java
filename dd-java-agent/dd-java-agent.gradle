@@ -1,26 +1,24 @@
 plugins {
-  id "com.github.johnrengelman.shadow" version "2.0.3"
+  id "com.github.johnrengelman.shadow" version "4.0.4"
+}
+
+// Set properties before any plugins get loaded
+project.ext {
+  // Execute tests on all JVMs, even rare and outdated ones
+  integrationTests = true
 }
 
 description = 'dd-java-agent'
 
 apply from: "${rootDir}/gradle/java.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
-apply from: "${rootDir}/gradle/jacoco.gradle"
-jacocoTestReport.dependsOn ':dd-java-agent-ittests:test'
-
-whitelistedInstructionClasses += whitelistedBranchClasses += [
-  'datadog.agent.*',
-  'datadog.agent.decorators.*',
-  'io.opentracing.contrib.*',
-  'dd.opentracing.contrib.*',
-]
 
 /*
  * Include subproject's shadowJar in the dd-java-agent jar.
  * Note jarname must end in .zip, or its classes will be on the classpath of
  * the dd-java-agent jar.
  */
+
 def includeShadowJar(subproject, jarname) {
   def agent_project = project
   subproject.afterEvaluate {
@@ -38,8 +36,10 @@ def includeShadowJar(subproject, jarname) {
 
       mergeServiceFiles()
 
+      exclude '**/module-info.class'
+
       dependencies {
-        exclude(dependency('org.projectlombok:lombok:1.16.20'))
+        exclude(dependency("org.projectlombok:lombok:$versions.lombok"))
       }
 
       // Prevents conflict with other SLF4J instances. Important for premain.
@@ -48,20 +48,9 @@ def includeShadowJar(subproject, jarname) {
       relocate 'java.util.logging.Logger', 'datadog.trace.bootstrap.PatchLogger'
 
       if (!project.hasProperty("disableShadowRelocate") || !disableShadowRelocate) {
+        // shadow OT impl to prevent casts to implementation
         relocate 'datadog.trace.common', 'datadog.trace.agent.common'
         relocate 'datadog.opentracing', 'datadog.trace.agent.ot'
-
-        relocate 'io.opentracing.contrib', 'datadog.trace.agent.opentracing.contrib'
-
-        relocate 'org.yaml', 'datadog.trace.agent.deps.yaml'
-        relocate 'org.msgpack', 'datadog.trace.agent.deps.msgpack'
-        relocate 'com.fasterxml', 'datadog.trace.agent.deps.fasterxml'
-
-        relocate 'net.bytebuddy', 'datadog.trace.agent.deps.bytebuddy'
-        relocate('com.google', 'datadog.trace.agent.deps.google') {
-          // This is used in the Cassandra Cluster.connectAsync signature so we can't relocate it. :fingers_crossed:
-          exclude 'com.google.common.util.concurrent.ListenableFuture'
-        }
       }
     }
   }
@@ -69,10 +58,10 @@ def includeShadowJar(subproject, jarname) {
 
 includeShadowJar(project(':dd-java-agent:agent-bootstrap'), 'agent-bootstrap.jar.zip')
 includeShadowJar(project(':dd-java-agent:instrumentation'), 'agent-tooling-and-instrumentation.jar.zip')
-
+includeShadowJar(project(':dd-java-agent:agent-jmxfetch'), 'agent-jmxfetch.jar.zip')
 
 jar {
-  classifier = 'unbundled'
+  archiveClassifier = ''
 
   manifest {
     attributes(
@@ -91,11 +80,45 @@ shadowJar {
   mergeServiceFiles()
 
   dependencies {
-    exclude(dependency('org.projectlombok:lombok:1.16.20'))
+    exclude(dependency("org.projectlombok:lombok:$versions.lombok"))
   }
+
+  baseName 'sts-java-agent'
 }
 
 // We don't want bundled dependencies to show up in the pom.
 modifyPom {
   dependencies.removeAll { true }
+}
+
+dependencies {
+  testCompile project(':dd-trace-api')
+  testCompile project(':dd-trace-ot')
+  testCompile project(':utils:gc-utils')
+  testCompile deps.opentracingMock
+  testCompile deps.testLogging
+  testCompile deps.guava
+}
+
+tasks.withType(Test).configureEach {
+  jvmArgs "-Ddd.service.name=java-agent-tests"
+  jvmArgs "-Ddd.writer.type=LoggingWriter"
+  // Multi-threaded logging seems to be causing deadlocks with Gradle's log capture.
+//  jvmArgs "-Ddatadog.slf4j.simpleLogger.defaultLogLevel=debug"
+//  jvmArgs "-Dorg.slf4j.simpleLogger.defaultLogLevel=debug"
+
+  doFirst {
+    // Defining here to allow jacoco to be first on the command line.
+    jvmArgs "-javaagent:${shadowJar.archivePath}"
+  }
+
+  testLogging {
+    events "started"
+  }
+
+  if (project.hasProperty("disableShadowRelocate") && disableShadowRelocate) {
+    exclude 'datadog/trace/agent/integration/classloading/ShadowPackageRenamingTest.class'
+  }
+
+  dependsOn shadowJar
 }

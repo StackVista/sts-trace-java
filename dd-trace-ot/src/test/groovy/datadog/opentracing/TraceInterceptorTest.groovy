@@ -1,10 +1,10 @@
 package datadog.opentracing
 
+import datadog.trace.api.GlobalTracer
 import datadog.trace.api.interceptor.MutableSpan
 import datadog.trace.api.interceptor.TraceInterceptor
 import datadog.trace.common.writer.ListWriter
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -65,7 +65,6 @@ class TraceInterceptorTest extends Specification {
     1     | true
   }
 
-  @Unroll
   def "interceptor can discard a trace (p=#score)"() {
     setup:
     def called = new AtomicBoolean(false)
@@ -96,7 +95,6 @@ class TraceInterceptorTest extends Specification {
     1     | _
   }
 
-  @Unroll
   def "interceptor can modify a span"() {
     setup:
     tracer.interceptors.add(new TraceInterceptor() {
@@ -141,9 +139,30 @@ class TraceInterceptorTest extends Specification {
     tags["number-tag"] == 5.0
     tags["string-tag"] == "howdy"
 
-    tags["span.type"] == "modifiedST-null"
     tags["thread.name"] != null
     tags["thread.id"] != null
-    tags.size() == 6
+    tags["runtime-id"] != null
+    tags["language"] != null
+    tags.size() == 10
+  }
+
+  def "register interceptor through bridge"() {
+    setup:
+    GlobalTracer.registerIfAbsent(tracer)
+    def interceptor = new TraceInterceptor() {
+      @Override
+      Collection<? extends MutableSpan> onTraceComplete(Collection<? extends MutableSpan> trace) {
+        return trace
+      }
+
+      @Override
+      int priority() {
+        return 38
+      }
+    }
+
+    expect:
+    GlobalTracer.get().addTraceInterceptor(interceptor)
+    tracer.interceptors.contains(interceptor)
   }
 }

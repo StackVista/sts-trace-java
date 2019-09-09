@@ -3,14 +3,12 @@ package datadog.opentracing.decorators
 import datadog.opentracing.DDSpanContext
 import datadog.opentracing.DDTracer
 import datadog.opentracing.PendingTrace
-import datadog.trace.common.sampling.PrioritySampling
+import datadog.trace.api.sampling.PrioritySampling
 import datadog.trace.common.writer.ListWriter
 import io.opentracing.tag.Tags
 import spock.lang.Specification
 import spock.lang.Subject
-import spock.lang.Timeout
 
-@Timeout(1)
 class URLAsResourceNameTest extends Specification {
   def writer = new ListWriter()
   def tracer = new DDTracer(writer)
@@ -27,6 +25,9 @@ class URLAsResourceNameTest extends Specification {
 
     where:
     input                          | output
+    ""                             | "/"
+    " "                            | "/"
+    "\t"                           | "/"
     "/"                            | "/"
     "/?asdf"                       | "/"
     "/search"                      | "/search"
@@ -89,22 +90,23 @@ class URLAsResourceNameTest extends Specification {
     when:
     final DDSpanContext context =
       new DDSpanContext(
-        1L,
-        1L,
-        0L,
+        "1",
+        "1",
+        "0",
         "fakeService",
         "fakeOperation",
         "fakeResource",
         PrioritySampling.UNSET,
+        null,
         Collections.<String, String> emptyMap(),
         false,
         "fakeType",
         tags,
-        new PendingTrace(tracer, 1L),
+        new PendingTrace(tracer, "1", [:]),
         tracer)
 
     then:
-    decorator.afterSetTag(context, Tags.HTTP_URL.getKey(), value)
+    decorator.shouldSetTag(context, Tags.HTTP_URL.getKey(), value)
     context.resourceName == resourceName
 
     where:

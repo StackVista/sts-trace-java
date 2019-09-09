@@ -1,30 +1,26 @@
 package datadog.trace.agent.tooling;
 
-import java.lang.reflect.InvocationTargetException;
+import static net.bytebuddy.matcher.ElementMatchers.named;
+
+import datadog.trace.bootstrap.DatadogClassLoader;
+import datadog.trace.bootstrap.DatadogClassLoader.BootstrapClassLoaderProxy;
 import java.lang.reflect.Method;
+import java.net.URL;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDefinition;
 
 public class Utils {
-  /* packages which will be loaded on the bootstrap classloader*/
-  public static final String[] BOOTSTRAP_PACKAGE_PREFIXES = {
-    "io.opentracing",
-    "datadog.slf4j",
-    "datadog.trace.bootstrap",
-    "datadog.trace.api",
-    "datadog.trace.context"
-  };
-  public static final String[] AGENT_PACKAGE_PREFIXES = {
-    "datadog.trace.agent",
-    "datadog.opentracing",
-    "datadog.trace.common",
-    "datadog.trace.instrumentation"
-  };
 
+  // This is used in HelperInjectionTest.groovy
   private static Method findLoadedClassMethod = null;
+
+  private static final BootstrapClassLoaderProxy unitTestBootstrapProxy =
+      new BootstrapClassLoaderProxy(new URL[0], null);
 
   static {
     try {
       findLoadedClassMethod = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
-    } catch (NoSuchMethodException | SecurityException e) {
+    } catch (final NoSuchMethodException | SecurityException e) {
       throw new IllegalStateException(e);
     }
   }
@@ -34,28 +30,70 @@ public class Utils {
     return AgentInstaller.class.getClassLoader();
   }
 
-  /** com.foo.Bar -> com/foo/Bar.class */
-  public static String getResourceName(final String className) {
-    return className.replace('.', '/') + ".class";
-  }
-
-  public static boolean isClassLoaded(final String className, final ClassLoader classLoader) {
-    try {
-      findLoadedClassMethod.setAccessible(true);
-      final Class<?> loadedClass = (Class<?>) findLoadedClassMethod.invoke(classLoader, className);
-      return null != loadedClass && loadedClass.getClassLoader() == classLoader;
-    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-      throw new IllegalStateException(e);
-    } finally {
-      findLoadedClassMethod.setAccessible(false);
+  /** Return a classloader which can be used to look up bootstrap resources. */
+  public static BootstrapClassLoaderProxy getBootstrapProxy() {
+    if (getAgentClassLoader() instanceof DatadogClassLoader) {
+      return ((DatadogClassLoader) getAgentClassLoader()).getBootstrapProxy();
+    } else {
+      // in a unit test
+      return unitTestBootstrapProxy;
     }
   }
 
-  static boolean getConfigEnabled(final String name, final boolean fallback) {
-    final String property =
-        System.getProperty(
-            name, System.getenv(name.toUpperCase().replaceAll("[^a-zA-Z0-9_]", "_")));
-    return property == null ? fallback : Boolean.parseBoolean(property);
+  /** com.foo.Bar -> com/foo/Bar.class */
+  public static String getResourceName(final String className) {
+    if (!className.endsWith(".class")) {
+      return className.replace('.', '/') + ".class";
+    } else {
+      return className;
+    }
+  }
+
+  /** com/foo/Bar.class -> com.foo.Bar */
+  public static String getClassName(final String resourceName) {
+    return resourceName.replaceAll("\\.class\\$", "").replace('/', '.');
+  }
+
+  /** com.foo.Bar -> com/foo/Bar */
+  public static String getInternalName(final String resourceName) {
+    return resourceName.replaceAll("\\.class\\$", "").replace('.', '/');
+  }
+
+  /**
+   * Convert class name to a format that can be used as part of inner class name by replacing all
+   * '.'s with '$'s.
+   *
+   * @param className class named to be converted
+   * @return convertd name
+   */
+  public static String converToInnerClassName(final String className) {
+    return className.replaceAll("\\.", "\\$");
+  }
+
+  /**
+   * Get method definition for given {@link TypeDefinition} and method name.
+   *
+   * @param type type
+   * @param methodName method name
+   * @return {@link MethodDescription} for given method
+   * @throws IllegalStateException if more then one method matches (i.e. in case of overloaded
+   *     methods) or if no method found
+   */
+  public static MethodDescription getMethodDefinition(
+      final TypeDefinition type, final String methodName) {
+    return type.getDeclaredMethods().filter(named(methodName)).getOnly();
+  }
+
+  /** @return The current stack trace with multiple entries on new lines. */
+  public static String getStackTraceAsString() {
+    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+    StringBuilder stringBuilder = new StringBuilder();
+    String lineSeparator = System.getProperty("line.separator");
+    for (StackTraceElement element : stackTrace) {
+      stringBuilder.append(element.toString());
+      stringBuilder.append(lineSeparator);
+    }
+    return stringBuilder.toString();
   }
 
   private Utils() {}

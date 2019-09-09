@@ -1,22 +1,30 @@
 package datadog.opentracing
 
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.Maps
 import datadog.trace.api.DDTags
-import datadog.trace.common.sampling.PrioritySampling
+import datadog.trace.api.sampling.PrioritySampling
 import datadog.trace.common.writer.ListWriter
+import org.msgpack.core.MessagePack
+import org.msgpack.core.buffer.ArrayBufferInput
+import org.msgpack.jackson.dataformat.MessagePackFactory
+import org.msgpack.value.ValueType
 import spock.lang.Specification
-import spock.lang.Timeout
-import spock.lang.Unroll
 
-@Timeout(5)
 class DDSpanSerializationTest extends Specification {
 
-  @Unroll
-  def "serialize spans"() throws Exception {
+  def fakePidProvider = [getPid: {-> return (Long)42}] as ISTSSpanContextPidProvider
+  def fakeHostNameProvider = [getHostName: {-> return "fakehost"}] as ISTSSpanContextHostNameProvider
+  def fakeStartTimeProvider = [getStartTime: {-> return  (Long)228650400}] as ISTSSpanContextStartTimeProvider
+
+  def "serialize spans with sampling #samplingPriority"() throws Exception {
     setup:
     final Map<String, String> baggage = new HashMap<>()
     baggage.put("a-baggage", "value")
+    baggage.put("span.hostname", fakeHostNameProvider.hostName)
+    baggage.put("span.pid", fakePidProvider.pid.toString())
+    baggage.put("span.starttime", fakeStartTimeProvider.startTime.toString())
     final Map<String, Object> tags = new HashMap<>()
     baggage.put("k1", "v1")
 
@@ -28,9 +36,12 @@ class DDSpanSerializationTest extends Specification {
     expected.put("name", "operation")
     expected.put("duration", 33000)
     expected.put("resource", "operation")
+    final Map<String, Number> metrics = new HashMap<>()
     if (samplingPriority != PrioritySampling.UNSET) {
-      expected.put("sampling_priority", samplingPriority)
+      metrics.put("_sampling_priority_v1", Integer.valueOf(samplingPriority))
+      metrics.put("_sample_rate", Double.valueOf(1.0))
     }
+    expected.put("metrics", metrics)
     expected.put("start", 100000)
     expected.put("span_id", 2l)
     expected.put("parent_id", 0l)
@@ -40,34 +51,91 @@ class DDSpanSerializationTest extends Specification {
     def tracer = new DDTracer(writer)
     final DDSpanContext context =
       new DDSpanContext(
-        1L,
-        2L,
-        0L,
+        "1",
+        "2",
+        "0",
         "service",
         "operation",
         null,
         samplingPriority,
+        null,
         new HashMap<>(baggage),
         false,
         "type",
         tags,
-        new PendingTrace(tracer, 1L),
+        new PendingTrace(tracer, "1", [:]),
         tracer)
+
+    context.setPidProvider(fakePidProvider)
+    context.setHostNameProvider(fakeHostNameProvider)
+    context.setStartTimeProvider(fakeStartTimeProvider)
 
     baggage.put(DDTags.THREAD_NAME, Thread.currentThread().getName())
     baggage.put(DDTags.THREAD_ID, String.valueOf(Thread.currentThread().getId()))
-    baggage.put(DDTags.SPAN_TYPE, context.getSpanType())
 
     DDSpan span = new DDSpan(100L, context)
+    if (samplingPriority != PrioritySampling.UNSET) {
+      span.context().setMetric("_sample_rate", Double.valueOf(1.0))
+    }
     span.finish(133L)
     ObjectMapper serializer = new ObjectMapper()
 
+    def actualTree = serializer.readTree(serializer.writeValueAsString(span))
+    def expectedTree = serializer.readTree(serializer.writeValueAsString(expected))
     expect:
-    serializer.readTree(serializer.writeValueAsString(span)) == serializer.readTree(serializer.writeValueAsString(expected))
+    actualTree == expectedTree
 
     where:
-    samplingPriority               | _
-    PrioritySampling.SAMPLER_KEEP  | _
-    PrioritySampling.UNSET         | _
+    samplingPriority              | _
+    PrioritySampling.SAMPLER_KEEP | _
+    PrioritySampling.UNSET        | _
+  }
+
+  def "serialize trace/span with id #value as int"() {
+    setup:
+    def objectMapper = new ObjectMapper(new MessagePackFactory())
+    def writer = new ListWriter()
+    def tracer = new DDTracer(writer)
+    def context = new DDSpanContext(
+      value.toString(),
+      value.toString(),
+      "0",
+      "fakeService",
+      "fakeOperation",
+      "fakeResource",
+      PrioritySampling.UNSET,
+      null,
+      Collections.emptyMap(),
+      false,
+      "fakeType",
+      Collections.emptyMap(),
+      new PendingTrace(tracer, "1", [:]),
+      tracer)
+    def span = new DDSpan(0, context)
+    byte[] bytes = objectMapper.writeValueAsBytes(span)
+    def unpacker = MessagePack.newDefaultUnpacker(new ArrayBufferInput(bytes))
+    int size = unpacker.unpackMapHeader()
+
+    expect:
+    for (int i = 0; i < size; i++) {
+      String key = unpacker.unpackString()
+
+      switch (key) {
+        case "trace_id":
+        case "span_id":
+          assert unpacker.nextFormat.valueType == ValueType.INTEGER
+          assert unpacker.unpackBigInteger() == value
+          break
+        default:
+          unpacker.unpackValue()
+      }
+    }
+
+    where:
+    value                                                       | _
+    BigInteger.ZERO                                             | _
+    BigInteger.ONE                                              | _
+    BigInteger.valueOf(Long.MAX_VALUE).subtract(BigInteger.ONE) | _
+    BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE)      | _
   }
 }

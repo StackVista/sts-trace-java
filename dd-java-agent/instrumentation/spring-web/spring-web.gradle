@@ -1,15 +1,11 @@
-//apply plugin: 'version-scan'
-//
-//versionScan {
-//  group = 'org.springframework'
-//  module = 'spring-webmvc'
-//  legacyModule = "servlet-api"
-//  versions = "[3.0,)"
-//  verifyPresent = [
-//    "javax.servlet.AsyncEvent"   : null,
-//    "javax.servlet.AsyncListener": null,
-//  ]
-//}
+muzzle {
+  pass {
+    group = 'org.springframework'
+    module = 'javax.servlet.api'
+    versions = "[3.0.0.RELEASE,)"
+    extraDependency "javax.servlet:javax.servlet.api:3.0.0"
+  }
+}
 
 apply from: "${rootDir}/gradle/java.gradle"
 
@@ -23,20 +19,22 @@ dependencies {
 
   compile deps.bytebuddy
   compile deps.opentracing
-  compile deps.autoservice
+  annotationProcessor deps.autoservice
+  implementation deps.autoservice
 
-  testCompile project(':dd-java-agent:testing')
+  testCompile(project(':dd-java-agent:testing')){
+    exclude(module: 'jetty-server') // incompatable servlet api
+  }
 
   // Include servlet instrumentation for verifying the tomcat requests
   testCompile project(':dd-java-agent:instrumentation:servlet-3')
 
   testCompile group: 'javax.validation', name: 'validation-api', version: '1.1.0.Final'
   testCompile group: 'org.hibernate', name: 'hibernate-validator', version: '5.4.2.Final'
-  
-  testCompile group: 'org.spockframework', name: 'spock-spring', version: '1.1-groovy-2.4'
 
-  testCompile group: 'org.springframework', name: 'spring-web', version: '4.3.14.RELEASE'
-  testCompile group: 'org.springframework', name: 'spring-webmvc', version: '4.3.14.RELEASE'
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.5.10.RELEASE'
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-tomcat', version: '1.5.10.RELEASE'
+  testCompile group: 'org.spockframework', name: 'spock-spring', version: "$versions.spock"
+
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.5.17.RELEASE'
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '1.5.17.RELEASE'
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '1.5.17.RELEASE'
 }

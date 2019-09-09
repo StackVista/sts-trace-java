@@ -1,12 +1,27 @@
 apply from: "${rootDir}/gradle/java.gradle"
 
+minimumBranchCoverage = 0.6
+excludedClassesCoverage += ['datadog.trace.agent.tooling.*']
+
+configurations {
+  // classpath used by the instrumentation muzzle plugin
+  instrumentationMuzzle
+}
+
 dependencies {
   compile project(':dd-java-agent:agent-bootstrap')
+  compile group: 'com.blogspot.mydailyjava', name: 'weak-lock-free', version: '0.15'
   compile deps.bytebuddy
   compile deps.bytebuddyagent
-  compile deps.autoservice
+  annotationProcessor deps.autoservice
+  implementation deps.autoservice
 
-  compileOnly project(':dd-trace-ot')
+  compile project(':dd-trace-ot')
 
   testCompile deps.opentracing
+  testCompile project(':dd-java-agent:testing')
+  testCompile project(':utils:gc-utils')
+
+  instrumentationMuzzle sourceSets.main.output
+  instrumentationMuzzle configurations.compile
 }

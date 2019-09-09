@@ -1,87 +1,125 @@
-import datadog.trace.agent.test.AgentTestRunner
+import datadog.opentracing.DDSpan
+import datadog.trace.agent.test.asserts.TraceAssert
+import datadog.trace.agent.test.base.HttpClientTest
+import datadog.trace.api.DDSpanTypes
 import datadog.trace.api.DDTags
+import datadog.trace.instrumentation.okhttp3.OkHttpClientDecorator
 import io.opentracing.tag.Tags
+import okhttp3.Headers
+import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import ratpack.http.Headers
-import spock.lang.Timeout
+import okhttp3.RequestBody
+import okhttp3.internal.http.HttpMethod
 
-import java.util.concurrent.atomic.AtomicReference
+import static datadog.trace.instrumentation.okhttp3.OkHttpClientDecorator.NETWORK_DECORATE
 
-import static ratpack.groovy.test.embed.GroovyEmbeddedApp.ratpack
+class OkHttp3Test extends HttpClientTest<OkHttpClientDecorator> {
 
-@Timeout(10)
-class OkHttp3Test extends AgentTestRunner {
+  def client = new OkHttpClient()
 
-  def "sending a request creates spans and sends headers"() {
-    setup:
-    def receivedHeaders = new AtomicReference<Headers>()
-    def server = ratpack {
-      handlers {
-        all {
-          receivedHeaders.set(request.headers)
-          response.status(200).send("pong")
+  @Override
+  int doRequest(String method, URI uri, Map<String, String> headers, Closure callback) {
+    def body = HttpMethod.requiresRequestBody(method) ? RequestBody.create(MediaType.parse("text/plain"), "") : null
+    def request = new Request.Builder()
+      .url(uri.toURL())
+      .method(method, body)
+      .headers(Headers.of(headers)).build()
+    def response = client.newCall(request).execute()
+    callback?.call()
+    return response.code()
+  }
+
+  @Override
+  OkHttpClientDecorator decorator() {
+    return OkHttpClientDecorator.DECORATE
+  }
+
+  @Override
+  // parent span must be cast otherwise it breaks debugging classloading (junit loads it early)
+  void clientSpan(TraceAssert trace, int index, Object parentSpan, String method = "GET", boolean renameService = false, boolean tagQueryString = false, URI uri = server.address.resolve("/success"), Integer status = 200, Throwable exception = null) {
+    trace.span(index) {
+      if (parentSpan == null) {
+        parent()
+      } else {
+        childOf((DDSpan) parentSpan)
+      }
+      serviceName decorator().service()
+      operationName "okhttp.http"
+      resourceName "okhttp.http"
+//      resourceName "GET $uri.path"
+      spanType DDSpanTypes.HTTP_CLIENT
+      errored exception != null
+      tags {
+        defaultTags()
+        if (exception) {
+          errorTags(exception.class, exception.message)
+        }
+        "$Tags.COMPONENT.key" decorator.component()
+        "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
+      }
+    }
+    if (!exception) {
+      trace.span(index + 1) {
+        serviceName renameService ? "localhost" : decorator().service()
+        operationName "okhttp.http"
+        resourceName "$method $uri.path"
+        childOf trace.span(index)
+        spanType DDSpanTypes.HTTP_CLIENT
+        errored exception != null
+        tags {
+          defaultTags()
+          if (exception) {
+            errorTags(exception.class, exception.message)
+          }
+          "$Tags.COMPONENT.key" NETWORK_DECORATE.component()
+          if (status) {
+            "$Tags.HTTP_STATUS.key" status
+          }
+          "$Tags.HTTP_URL.key" "${uri.resolve(uri.path)}"
+          if (tagQueryString) {
+            "$DDTags.HTTP_QUERY" uri.query
+            "$DDTags.HTTP_FRAGMENT" uri.fragment
+          }
+          "$Tags.PEER_HOSTNAME.key" "localhost"
+          "$Tags.PEER_PORT.key" server.address.port
+          "$Tags.PEER_HOST_IPV4.key" "127.0.0.1"
+          "$Tags.HTTP_METHOD.key" method
+          "$Tags.SPAN_KIND.key" Tags.SPAN_KIND_CLIENT
         }
       }
     }
-    def client = new OkHttpClient()
-    def request = new Request.Builder()
-      .url("http://localhost:$server.address.port/ping")
-      .build()
+  }
 
-    def response = client.newCall(request).execute()
+  @Override
+  int size(int size) {
+    return size + 1
+  }
 
-    expect:
-    response.body.string() == "pong"
-    TEST_WRITER.size() == 1
+  boolean testRedirects() {
+    false
+  }
 
-    def trace = TEST_WRITER.firstTrace()
-    trace.size() == 2
+  def "request to agent not traced"() {
+    when:
+    def status = doRequest(method, url, ["Datadog-Meta-Lang": "java"])
 
-    and: // span 0
-    def span1 = trace[0]
+    then:
+    status == 200
+    assertTraces(1) {
+      server.distributedRequestTrace(it, 0)
+    }
 
-    span1.context().operationName == "GET"
-    span1.serviceName == "unnamed-java-app"
-    span1.resourceName == "GET"
-    span1.type == null
-    !span1.context().getErrorFlag()
-    span1.context().parentId == 0
+    where:
+    path                                | tagQueryString
+    "/success"                          | false
+    "/success"                          | true
+    "/success?with=params"              | false
+    "/success?with=params"              | true
+    "/success#with+fragment"            | true
+    "/success?with=params#and=fragment" | true
 
-
-    def tags1 = span1.context().tags
-    tags1["component"] == "okhttp"
-    tags1["thread.name"] != null
-    tags1["thread.id"] != null
-    tags1.size() == 3
-
-    and: // span 1
-    def span2 = trace[1]
-
-    span2.context().operationName == "okhttp.http"
-    span2.serviceName == "okhttp"
-    span2.resourceName == "GET /ping"
-    span2.type == "web"
-    !span2.context().getErrorFlag()
-    span2.context().parentId == span1.spanId
-
-
-    def tags2 = span2.context().tags
-    tags2[Tags.COMPONENT.key] == "okhttp"
-    tags2[Tags.SPAN_KIND.key] == Tags.SPAN_KIND_CLIENT
-    tags2[Tags.HTTP_METHOD.key] == "GET"
-    tags2[Tags.HTTP_URL.key] == "http://localhost:$server.address.port/ping"
-    tags2[Tags.PEER_HOSTNAME.key] == "localhost"
-    tags2[Tags.PEER_PORT.key] == server.address.port
-    tags2[Tags.PEER_HOST_IPV4.key] != null
-    tags2[DDTags.THREAD_NAME] != null
-    tags2[DDTags.THREAD_ID] != null
-    tags2.size() == 11
-
-    receivedHeaders.get().get("x-datadog-trace-id") == "$span2.traceId"
-    receivedHeaders.get().get("x-datadog-parent-id") == "$span2.spanId"
-
-    cleanup:
-    server.close()
+    method = "GET"
+    url = server.address.resolve(path)
   }
 }

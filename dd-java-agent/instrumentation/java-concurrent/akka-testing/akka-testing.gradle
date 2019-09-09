@@ -1,12 +1,19 @@
+// Set properties before any plugins get loaded
+ext {
+  // Execute tests on all JVMs, even rare and outdated ones
+  coreJavaInstrumentation = true
+}
+
 apply from: "${rootDir}/gradle/java.gradle"
-apply plugin: 'scala'
+apply from: "${rootDir}/gradle/test-with-scala.gradle"
 
 dependencies {
-  compile project(':dd-trace-api')
-  compile project(':dd-trace-ot')
-  compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.12'
-  compile group: 'com.typesafe.akka', name: 'akka-actor_2.11', version: '2.3.16'
-  compile group: 'com.typesafe.akka', name: 'akka-testkit_2.11', version: '2.3.16'
+  compileOnly deps.scala
+
+  testCompile project(':dd-trace-api')
+  testCompile deps.scala
+  testCompile group: 'com.typesafe.akka', name: 'akka-actor_2.11', version: '2.3.16'
+  testCompile group: 'com.typesafe.akka', name: 'akka-testkit_2.11', version: '2.3.16'
 
   testCompile project(':dd-java-agent:testing')
   testCompile project(':dd-java-agent:instrumentation:java-concurrent')

@@ -1,19 +1,9 @@
 import datadog.opentracing.DDSpan
 import datadog.trace.agent.test.AgentTestRunner
-import spock.lang.Unroll
 
 class AkkaActorTest extends AgentTestRunner {
-  static {
-    System.setProperty("dd.integration.java_concurrent.enabled", "true")
-  }
 
-  @Override
-  void afterTest() {
-    // Ignore failures to instrument sun proxy classes
-  }
-
-  @Unroll
-  def "akka #testMethod" () {
+  def "akka #testMethod"() {
     setup:
     AkkaActors akkaTester = new AkkaActors()
     akkaTester."$testMethod"()
@@ -28,10 +18,10 @@ class AkkaActorTest extends AgentTestRunner {
     findSpan(trace, "$expectedGreeting, Akka").context().getParentId() == trace[0].getSpanId()
 
     where:
-    testMethod         | expectedGreeting
-    "basicTell"        | "Howdy"
-    "basicAsk"         | "Howdy"
-    "basicForward"     | "Hello"
+    testMethod     | expectedGreeting
+    "basicTell"    | "Howdy"
+    "basicAsk"     | "Howdy"
+    "basicForward" | "Hello"
   }
 
   private DDSpan findSpan(List<DDSpan> trace, String opName) {

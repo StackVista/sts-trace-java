@@ -3,14 +3,60 @@ package datadog.opentracing;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import datadog.opentracing.decorators.AbstractDecorator;
 import datadog.trace.api.DDTags;
-import datadog.trace.common.sampling.PrioritySampling;
-import io.opentracing.tag.Tags;
+import datadog.trace.api.sampling.PrioritySampling;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
+
+class STSSpanContextPidProvider implements ISTSSpanContextPidProvider {
+
+  @Override
+  public long getPid() {
+    // The class ManagementFactory in the package java.lang.management provides access to the
+    // "managed bean for the runtime system of the Java virtual machine".
+    // The getName() method of this class is described as:
+    //  Returns the name representing the running Java virtual machine.
+    //  This name, as it happens, contains the process id in the Sun/Oracle JVM implementation
+    // of this methods in a format such as: PID@host ,
+    // Not guaranteed to work on all JVM implementations
+    // Further options:
+    // todo: support java 9 natively
+    // https://docs.oracle.com/javase/9/docs/api/java/lang/ProcessHandle.html
+    // public interface CLibrary extends Library {
+    //     CLibrary INSTANCE = (CLibrary)Native.loadLibrary("c", CLibrary.class);
+    //       int getpid ();
+    // }
+
+    String processName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+    return Long.parseLong(processName.split("@")[0]);
+  }
+}
+
+class STSSpanContextHostnameProvider implements ISTSSpanContextHostNameProvider {
+
+  @Override
+  public String getHostName() throws UnknownHostException {
+    return InetAddress.getLocalHost().getHostName();
+  }
+}
+
+class STSSpanContextStartTimeProvider implements ISTSSpanContextStartTimeProvider {
+
+  @Override
+  public long getStartTime() {
+    RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
+    long startTime = runtimeBean.getStartTime();
+    return startTime;
+  }
+}
 
 /**
  * SpanContext represents Span state that must propagate to descendant Spans and across process
@@ -22,6 +68,11 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class DDSpanContext implements io.opentracing.SpanContext {
+  public static final String PRIORITY_SAMPLING_KEY = "_sampling_priority_v1";
+  public static final String SAMPLE_RATE_KEY = "_sample_rate";
+  public static final String ORIGIN_KEY = "_dd.origin";
+
+  private static final Map<String, Number> EMPTY_METRICS = Collections.emptyMap();
 
   // Shared with other span contexts
   /** For technical reasons, the ref to the original tracer */
@@ -34,9 +85,16 @@ public class DDSpanContext implements io.opentracing.SpanContext {
   private final Map<String, String> baggageItems;
 
   // Not Shared with other span contexts
-  private final long traceId;
-  private final long spanId;
-  private final long parentId;
+  private final String traceId;
+  private final String spanId;
+  private final String parentId;
+  private long pid = 0;
+  private String hostName = "";
+  private long starttime = 0;
+
+  private ISTSSpanContextPidProvider pidProvider;
+  private ISTSSpanContextHostNameProvider hostNameProvider;
+  private ISTSSpanContextStartTimeProvider startTimeProvider;
 
   /** Tags are associated to the current span, they will not propagate to the children span */
   private final Map<String, Object> tags = new ConcurrentHashMap<>();
@@ -51,23 +109,31 @@ public class DDSpanContext implements io.opentracing.SpanContext {
   private volatile String spanType;
   /** True indicates that the span reports an error */
   private volatile boolean errorFlag;
-  /** The sampling priority of the trace */
-  private volatile int samplingPriority = PrioritySampling.UNSET;
-  /** When true, the samplingPriority cannot be changed. */
-  private volatile boolean samplingPriorityLocked = false;
+  /**
+   * When true, the samplingPriority cannot be changed. This prevents the sampling flag from
+   * changing after the context has propagated.
+   *
+   * <p>For thread safety, this boolean is only modified or accessed under instance lock.
+   */
+  private boolean samplingPriorityLocked = false;
+  /** The origin of the trace. (eg. Synthetics) */
+  private final String origin;
+  /** Metrics on the span */
+  private final AtomicReference<Map<String, Number>> metrics = new AtomicReference<>();
 
   // Additional Metadata
   private final String threadName = Thread.currentThread().getName();
   private final long threadId = Thread.currentThread().getId();
 
   public DDSpanContext(
-      final long traceId,
-      final long spanId,
-      final long parentId,
+      final String traceId,
+      final String spanId,
+      final String parentId,
       final String serviceName,
       final String operationName,
       final String resourceName,
       final int samplingPriority,
+      final String origin,
       final Map<String, String> baggageItems,
       final boolean errorFlag,
       final String spanType,
@@ -80,6 +146,9 @@ public class DDSpanContext implements io.opentracing.SpanContext {
     this.tracer = tracer;
     this.trace = trace;
 
+    assert traceId != null;
+    assert spanId != null;
+    assert parentId != null;
     this.traceId = traceId;
     this.spanId = spanId;
     this.parentId = parentId;
@@ -97,21 +166,42 @@ public class DDSpanContext implements io.opentracing.SpanContext {
     this.serviceName = serviceName;
     this.operationName = operationName;
     this.resourceName = resourceName;
-    this.samplingPriority = samplingPriority;
     this.errorFlag = errorFlag;
     this.spanType = spanType;
+    this.origin = origin;
+
+    this.pidProvider = new STSSpanContextPidProvider();
+    this.hostNameProvider = new STSSpanContextHostnameProvider();
+    this.startTimeProvider = new STSSpanContextStartTimeProvider();
+
+    if (samplingPriority != PrioritySampling.UNSET) {
+      setSamplingPriority(samplingPriority);
+    }
+
+    if (origin != null) {
+      this.tags.put(ORIGIN_KEY, origin);
+    }
+    this.tags.put(DDTags.THREAD_NAME, threadName);
+    this.tags.put(DDTags.THREAD_ID, threadId);
+
+    this.tags.put(DDTags.SPAN_HOSTNAME, getHostName());
+    long pid = getPID();
+    if (pid != 0L) {
+      this.tags.put(DDTags.SPAN_PID, pid);
+    }
+    this.tags.put(DDTags.SPAN_STARTTIME, getStartTime());
   }
 
-  public long getTraceId() {
-    return this.traceId;
+  public String getTraceId() {
+    return traceId;
   }
 
-  public long getParentId() {
-    return this.parentId;
+  public String getParentId() {
+    return parentId;
   }
 
-  public long getSpanId() {
-    return this.spanId;
+  public String getSpanId() {
+    return spanId;
   }
 
   public String getServiceName() {
@@ -123,9 +213,7 @@ public class DDSpanContext implements io.opentracing.SpanContext {
   }
 
   public String getResourceName() {
-    return this.resourceName == null || this.resourceName.isEmpty()
-        ? this.operationName
-        : this.resourceName;
+    return resourceName == null || resourceName.isEmpty() ? operationName : resourceName;
   }
 
   public void setResourceName(final String resourceName) {
@@ -157,19 +245,61 @@ public class DDSpanContext implements io.opentracing.SpanContext {
   }
 
   public void setSamplingPriority(final int newPriority) {
-    if (samplingPriorityLocked) {
-      log.warn(
-          "samplingPriority locked at {}. Refusing to set to {}", samplingPriority, newPriority);
-    } else {
-      synchronized (this) {
-        // sync with lockSamplingPriority
-        this.samplingPriority = newPriority;
+    if (trace != null) {
+      final DDSpan rootSpan = trace.getRootSpan();
+      if (null != rootSpan && rootSpan.context() != this) {
+        rootSpan.context().setSamplingPriority(newPriority);
+        return;
+      }
+    }
+    if (newPriority == PrioritySampling.UNSET) {
+      log.debug("{}: Refusing to set samplingPriority to UNSET", this);
+      return;
+    }
+    // sync with lockSamplingPriority
+    synchronized (this) {
+      if (samplingPriorityLocked) {
+        log.debug(
+            "samplingPriority locked at {}. Refusing to set to {}",
+            getMetrics().get(PRIORITY_SAMPLING_KEY),
+            newPriority);
+      } else {
+        setMetric(PRIORITY_SAMPLING_KEY, newPriority);
+        log.debug("Set sampling priority to {}", getMetrics().get(PRIORITY_SAMPLING_KEY));
       }
     }
   }
 
+  public void setPidProvider(final ISTSSpanContextPidProvider provider) {
+    this.pidProvider = provider;
+    this.pid = 0;
+    this.tags.remove(DDTags.SPAN_PID);
+    this.tags.put(DDTags.SPAN_PID, getPID());
+  }
+
+  public void setHostNameProvider(final ISTSSpanContextHostNameProvider provider) {
+    this.hostNameProvider = provider;
+    this.hostName = "";
+    this.tags.put(DDTags.SPAN_HOSTNAME, getHostName());
+  }
+
+  public void setStartTimeProvider(final ISTSSpanContextStartTimeProvider provider) {
+    this.startTimeProvider = provider;
+    this.starttime = 0;
+    this.tags.remove(DDTags.SPAN_STARTTIME);
+    this.tags.put(DDTags.SPAN_STARTTIME, getStartTime());
+  }
+
+  /** @return the sampling priority of this span's trace, or null if no priority has been set */
   public int getSamplingPriority() {
-    return samplingPriority;
+    if (trace != null) {
+      final DDSpan rootSpan = trace.getRootSpan();
+      if (null != rootSpan && rootSpan.context() != this) {
+        return rootSpan.context().getSamplingPriority();
+      }
+    }
+    final Number val = getMetrics().get(PRIORITY_SAMPLING_KEY);
+    return null == val ? PrioritySampling.UNSET : val.intValue();
   }
 
   /**
@@ -182,26 +312,40 @@ public class DDSpanContext implements io.opentracing.SpanContext {
    * @return true if the sampling priority was locked.
    */
   public boolean lockSamplingPriority() {
-    if (!samplingPriorityLocked) {
-      synchronized (this) {
-        // sync with setSamplingPriority
-        if (samplingPriority == PrioritySampling.UNSET) {
-          log.debug("{} : refusing to lock unset samplingPriority", this);
-        } else {
-          this.samplingPriorityLocked = true;
-          log.debug("{} : locked samplingPriority to {}", this, this.samplingPriority);
-        }
+    if (trace != null) {
+      final DDSpan rootSpan = trace.getRootSpan();
+      if (null != rootSpan && rootSpan.context() != this) {
+        return rootSpan.context().lockSamplingPriority();
       }
     }
-    return samplingPriorityLocked;
+    // sync with setSamplingPriority
+    synchronized (this) {
+      if (getMetrics().get(PRIORITY_SAMPLING_KEY) == null) {
+        log.debug("{} : refusing to lock unset samplingPriority", this);
+      } else if (samplingPriorityLocked == false) {
+        samplingPriorityLocked = true;
+        log.debug(
+            "{} : locked samplingPriority to {}", this, getMetrics().get(PRIORITY_SAMPLING_KEY));
+      }
+      return samplingPriorityLocked;
+    }
+  }
+
+  public String getOrigin() {
+    final DDSpan rootSpan = trace.getRootSpan();
+    if (null != rootSpan) {
+      return rootSpan.context().origin;
+    } else {
+      return origin;
+    }
   }
 
   public void setBaggageItem(final String key, final String value) {
-    this.baggageItems.put(key, value);
+    baggageItems.put(key, value);
   }
 
   public String getBaggageItem(final String key) {
-    return this.baggageItems.get(key);
+    return baggageItems.get(key);
   }
 
   public Map<String, String> getBaggageItems() {
@@ -213,19 +357,34 @@ public class DDSpanContext implements io.opentracing.SpanContext {
    */
   @Override
   public Iterable<Map.Entry<String, String>> baggageItems() {
-    return this.baggageItems.entrySet();
+    return baggageItems.entrySet();
   }
 
   @JsonIgnore
   public PendingTrace getTrace() {
-    return this.trace;
+    return trace;
   }
 
   @JsonIgnore
   public DDTracer getTracer() {
-    return this.tracer;
+    return tracer;
   }
 
+  public Map<String, Number> getMetrics() {
+    final Map<String, Number> metrics = this.metrics.get();
+    return metrics == null ? EMPTY_METRICS : metrics;
+  }
+
+  public void setMetric(final String key, final Number value) {
+    if (metrics.get() == null) {
+      metrics.compareAndSet(null, new ConcurrentHashMap<String, Number>());
+    }
+    if (value instanceof Float) {
+      metrics.get().put(key, value.doubleValue());
+    } else {
+      metrics.get().put(key, value);
+    }
+  }
   /**
    * Add a tag to the span. Tags are not propagated to the children
    *
@@ -233,52 +392,34 @@ public class DDSpanContext implements io.opentracing.SpanContext {
    * @param value the value of the tag. tags with null values are ignored.
    */
   public synchronized void setTag(final String tag, final Object value) {
-    if (value == null) {
+    if (value == null || (value instanceof String && ((String) value).isEmpty())) {
       tags.remove(tag);
       return;
     }
 
-    if (tag.equals(DDTags.SERVICE_NAME)) {
-      setServiceName(value.toString());
-      return;
-    } else if (tag.equals(DDTags.RESOURCE_NAME)) {
-      setResourceName(value.toString());
-      return;
-    } else if (tag.equals(DDTags.SPAN_TYPE)) {
-      setSpanType(value.toString());
-      return;
-    }
-
-    this.tags.put(tag, value);
+    boolean addTag = true;
 
     // Call decorators
     final List<AbstractDecorator> decorators = tracer.getSpanContextDecorators(tag);
-    if (decorators != null && value != null) {
+    if (decorators != null) {
       for (final AbstractDecorator decorator : decorators) {
         try {
-          decorator.afterSetTag(this, tag, value);
+          addTag &= decorator.shouldSetTag(this, tag, value);
         } catch (final Throwable ex) {
-          log.warn(
+          log.debug(
               "Could not decorate the span decorator={}: {}",
               decorator.getClass().getSimpleName(),
               ex.getMessage());
         }
       }
     }
-    // Error management
-    if (Tags.ERROR.getKey().equals(tag)
-        && Boolean.TRUE.equals(value instanceof String ? Boolean.valueOf((String) value) : value)) {
-      this.errorFlag = true;
+
+    if (addTag) {
+      tags.put(tag, value);
     }
   }
 
   public synchronized Map<String, Object> getTags() {
-    tags.put(DDTags.THREAD_NAME, threadName);
-    tags.put(DDTags.THREAD_ID, threadId);
-    final String spanType = getSpanType();
-    if (spanType != null) {
-      tags.put(DDTags.SPAN_TYPE, spanType);
-    }
     return Collections.unmodifiableMap(tags);
   }
 
@@ -286,7 +427,7 @@ public class DDSpanContext implements io.opentracing.SpanContext {
   public String toString() {
     final StringBuilder s =
         new StringBuilder()
-            .append("Span [ t_id=")
+            .append("DDSpan [ t_id=")
             .append(traceId)
             .append(", s_id=")
             .append(spanId)
@@ -297,10 +438,9 @@ public class DDSpanContext implements io.opentracing.SpanContext {
             .append("/")
             .append(getOperationName())
             .append("/")
-            .append(getResourceName());
-    if (getSamplingPriority() != PrioritySampling.UNSET) {
-      s.append(" samplingPriority=").append(getSamplingPriority());
-    }
+            .append(getResourceName())
+            .append(" metrics=")
+            .append(new TreeMap(getMetrics()));
     if (errorFlag) {
       s.append(" *errored*");
     }
@@ -308,5 +448,38 @@ public class DDSpanContext implements io.opentracing.SpanContext {
       s.append(" tags=").append(new TreeMap(tags));
     }
     return s.toString();
+  }
+
+  private long getPID() {
+    if (this.pid == 0) {
+      try {
+        this.pid = this.pidProvider.getPid();
+      } catch (Exception e) {
+        log.debug("Failed to detect pid");
+      }
+    }
+    return this.pid;
+  }
+
+  private String getHostName() {
+    if (this.hostName.equals("")) {
+      try {
+        this.hostName = this.hostNameProvider.getHostName();
+      } catch (Exception e) {
+        log.debug("Failed to detect hostname");
+      }
+    }
+    return this.hostName;
+  }
+
+  private long getStartTime() {
+    if (this.starttime == 0) {
+      try {
+        this.starttime = this.startTimeProvider.getStartTime();
+      } catch (Exception e) {
+        log.debug("Failed to detect start time");
+      }
+    }
+    return this.starttime;
   }
 }

@@ -19,13 +19,13 @@
 apply plugin: "maven"
 apply plugin: "com.jfrog.artifactory"
 apply plugin: 'com.jfrog.bintray'
-apply plugin: "signing"
+apply plugin: 'maven-publish'
 
 afterEvaluate {
   assert description: "Project $project.path is published, must have a description"
 }
 
-tasks.withType(Upload).matching { it.name != "install" }.all {
+tasks.withType(Upload).matching { it.name != "install" }.configureEach {
   rootProject.subprojects {
     mustRunAfter tasks.matching { it instanceof VerificationTask }
   }
@@ -35,13 +35,6 @@ def isRoot = project.rootProject == project
 if (!isRoot) {
   apply from: "$rootDir/gradle/version.gradle"
   apply from: "${rootDir}/gradle/pom.gradle"
-
-  def isCI = Boolean.parseBoolean("$System.env.CI")
-
-  signing {
-    required = isCI
-    sign configurations.archives
-  }
 
   configurations {
     configurations {
@@ -138,20 +131,39 @@ bintray {
 
   //Package configuration. The plugin will use the repo and name properties to check if the package already exists. In that case, there's no need to configure the other package properties (like userOrg, desc, etc).
   pkg {
-    repo = 'datadog-maven'
-    name = 'dd-trace-java'
-    userOrg = 'datadog' //An optional organization name when the repo belongs to one of the user's orgs
-    desc = 'Client libraries for Datadog APM'
-    websiteUrl = 'https://github.com/datadog/dd-trace-java'
-    issueTrackerUrl = 'https://github.com/datadog/dd-trace-java/issues'
-    vcsUrl = 'https://github.com/datadog/dd-trace-java.git'
+    repo = 'stackstate-maven'
+    name = 'sts-trace-java'
+    userOrg = 'stackstate' //An optional organization name when the repo belongs to one of the user's orgs
+    desc = 'Client libraries for StackState APM'
+    websiteUrl = 'https://github.com/StackVista/sts-trace-java'
+    issueTrackerUrl = 'https://github.com/StackVista/sts-trace-java/issues'
+    vcsUrl = 'https://github.com/StackVista/sts-trace-java.git'
     licenses = ['Apache-2.0']
 
-    githubRepo = 'datadog/dd-trace-java' //Optional Github repository
+    githubRepo = 'StackVista/sts-trace-java' //Optional Github repository
     githubReleaseNotesFile = 'README.md' //Optional Github readme file
   }
 }
 
+publishing {
+  repositories {
+   maven {
+      url "s3://stackstate-trace-java/sts-trace-java"
+      credentials(AwsCredentials) {
+        accessKey "${System.getenv('TF_VAR_AWS_ACCESS_KEY_ID')}"
+        secretKey "${System.getenv('TF_VAR_AWS_SECRET_ACCESS_KEY')}"
+      }
+    } 
+  }
+
+  publications {
+    mavenJava(MavenPublication) {
+      from components.java
+      groupId 'com.stackstate'
+      artifactId 'sts-trace-java'
+    }
+  }
+}
 if (!isSnapshot && isCIandTagged) {
   artifactoryPublish.finalizedBy bintrayUpload
 }

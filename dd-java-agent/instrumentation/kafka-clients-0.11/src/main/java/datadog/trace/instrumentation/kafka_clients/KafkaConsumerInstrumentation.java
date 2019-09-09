@@ -1,6 +1,6 @@
 package datadog.trace.instrumentation.kafka_clients;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
+import static datadog.trace.instrumentation.kafka_clients.KafkaDecorator.CONSUMER_DECORATE;
 import static net.bytebuddy.matcher.ElementMatchers.isMethod;
 import static net.bytebuddy.matcher.ElementMatchers.isPublic;
 import static net.bytebuddy.matcher.ElementMatchers.named;
@@ -9,69 +9,88 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.DDAdvice;
-import datadog.trace.agent.tooling.DDTransformers;
-import datadog.trace.agent.tooling.HelperInjector;
 import datadog.trace.agent.tooling.Instrumenter;
-import datadog.trace.api.DDSpanTypes;
-import datadog.trace.api.DDTags;
-import io.opentracing.SpanContext;
-import io.opentracing.Tracer;
-import io.opentracing.propagation.Format;
-import io.opentracing.tag.Tags;
-import io.opentracing.util.GlobalTracer;
+import java.util.HashMap;
 import java.util.Iterator;
-import net.bytebuddy.agent.builder.AgentBuilder;
+import java.util.List;
+import java.util.Map;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.matcher.ElementMatcher;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 @AutoService(Instrumenter.class)
-public final class KafkaConsumerInstrumentation extends Instrumenter.Configurable {
-  public static final HelperInjector HELPER_INJECTOR =
-      new HelperInjector(
-          "datadog.trace.instrumentation.kafka_clients.TextMapExtractAdapter",
-          "datadog.trace.instrumentation.kafka_clients.TracingIterable",
-          "datadog.trace.instrumentation.kafka_clients.TracingIterable$TracingIterator",
-          "datadog.trace.instrumentation.kafka_clients.TracingIterable$SpanBuilderDecorator",
-          "datadog.trace.instrumentation.kafka_clients.KafkaConsumerInstrumentation$ConsumeScopeAction");
+public final class KafkaConsumerInstrumentation extends Instrumenter.Default {
 
   public KafkaConsumerInstrumentation() {
     super("kafka");
   }
 
   @Override
-  public AgentBuilder apply(final AgentBuilder agentBuilder) {
-    return agentBuilder
-        .type(
-            named("org.apache.kafka.clients.consumer.ConsumerRecords"),
-            classLoaderHasClasses(
-                "org.apache.kafka.common.header.Header", "org.apache.kafka.common.header.Headers"))
-        .transform(HELPER_INJECTOR)
-        .transform(DDTransformers.defaultTransformers())
-        .transform(
-            DDAdvice.create()
-                .advice(
-                    isMethod()
-                        .and(isPublic())
-                        .and(named("records"))
-                        .and(takesArgument(0, String.class))
-                        .and(returns(Iterable.class)),
-                    IterableAdvice.class.getName())
-                .advice(
-                    isMethod()
-                        .and(isPublic())
-                        .and(named("iterator"))
-                        .and(takesArguments(0))
-                        .and(returns(Iterator.class)),
-                    IteratorAdvice.class.getName()))
-        .asDecorator();
+  public ElementMatcher<TypeDescription> typeMatcher() {
+    return named("org.apache.kafka.clients.consumer.ConsumerRecords");
+  }
+
+  @Override
+  public String[] helperClassNames() {
+    return new String[] {
+      "datadog.trace.agent.decorator.BaseDecorator",
+      "datadog.trace.agent.decorator.ClientDecorator",
+      packageName + ".KafkaDecorator",
+      packageName + ".KafkaDecorator$1",
+      packageName + ".KafkaDecorator$2",
+      packageName + ".TextMapExtractAdapter",
+      packageName + ".TracingIterable",
+      packageName + ".TracingIterator",
+      packageName + ".TracingList",
+    };
+  }
+
+  @Override
+  public Map<? extends ElementMatcher<? super MethodDescription>, String> transformers() {
+    final Map<ElementMatcher<? super MethodDescription>, String> transformers = new HashMap<>();
+    transformers.put(
+        isMethod()
+            .and(isPublic())
+            .and(named("records"))
+            .and(takesArgument(0, String.class))
+            .and(returns(Iterable.class)),
+        IterableAdvice.class.getName());
+    transformers.put(
+        isMethod()
+            .and(isPublic())
+            .and(named("records"))
+            .and(takesArgument(0, named("org.apache.kafka.common.TopicPartition")))
+            .and(returns(List.class)),
+        ListAdvice.class.getName());
+    transformers.put(
+        isMethod()
+            .and(isPublic())
+            .and(named("iterator"))
+            .and(takesArguments(0))
+            .and(returns(Iterator.class)),
+        IteratorAdvice.class.getName());
+    return transformers;
   }
 
   public static class IterableAdvice {
 
     @Advice.OnMethodExit(suppress = Throwable.class)
     public static void wrap(@Advice.Return(readOnly = false) Iterable<ConsumerRecord> iterable) {
-      iterable = new TracingIterable(iterable, "kafka.consume", ConsumeScopeAction.INSTANCE);
+      if (iterable != null) {
+        iterable = new TracingIterable(iterable, "kafka.consume", CONSUMER_DECORATE);
+      }
+    }
+  }
+
+  public static class ListAdvice {
+
+    @Advice.OnMethodExit(suppress = Throwable.class)
+    public static void wrap(@Advice.Return(readOnly = false) List<ConsumerRecord> iterable) {
+      if (iterable != null) {
+        iterable = new TracingList(iterable, "kafka.consume", CONSUMER_DECORATE);
+      }
     }
   }
 
@@ -79,31 +98,9 @@ public final class KafkaConsumerInstrumentation extends Instrumenter.Configurabl
 
     @Advice.OnMethodExit(suppress = Throwable.class)
     public static void wrap(@Advice.Return(readOnly = false) Iterator<ConsumerRecord> iterator) {
-      iterator =
-          new TracingIterable.TracingIterator(
-              iterator, "kafka.consume", ConsumeScopeAction.INSTANCE);
-    }
-  }
-
-  public static class ConsumeScopeAction
-      implements TracingIterable.SpanBuilderDecorator<ConsumerRecord> {
-    public static final ConsumeScopeAction INSTANCE = new ConsumeScopeAction();
-
-    @Override
-    public void decorate(final Tracer.SpanBuilder spanBuilder, final ConsumerRecord record) {
-      final String topic = record.topic() == null ? "unknown" : record.topic();
-      final SpanContext spanContext =
-          GlobalTracer.get()
-              .extract(Format.Builtin.TEXT_MAP, new TextMapExtractAdapter(record.headers()));
-      spanBuilder
-          .asChildOf(spanContext)
-          .withTag(DDTags.SERVICE_NAME, "kafka")
-          .withTag(DDTags.RESOURCE_NAME, "Consume Topic " + topic)
-          .withTag(DDTags.SPAN_TYPE, DDSpanTypes.MESSAGE_CONSUMER)
-          .withTag(Tags.COMPONENT.getKey(), "java-kafka")
-          .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CONSUMER)
-          .withTag("partition", record.partition())
-          .withTag("offset", record.offset());
+      if (iterator != null) {
+        iterator = new TracingIterator(iterator, "kafka.consume", CONSUMER_DECORATE);
+      }
     }
   }
 }

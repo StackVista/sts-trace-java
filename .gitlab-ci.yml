@@ -1,0 +1,137 @@
+#image: stackstate/stackstate-agent-runner-circle:tracejava_base
+image: datadog/dd-trace-java-docker-build:latest
+
+stages:
+  - prepare
+  - build
+  - test
+
+variables:
+   GRADLE_USER_HOME: $PWD/.gradle_home
+
+before_script:
+  - export GRADLE_USER_HOME=$PWD/.gradle_home
+  - mkdir -p $PWD/.gradle_home
+
+
+.default_test_job: &default_test_job
+  dependencies:
+    - build
+  stage: test
+  services:
+    - docker:dind
+    - memcached
+    - rabbitmq
+  script:
+    - echo Applying test task $TEST_TASK
+    - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --parallel --stacktrace --no-daemon --max-workers=6
+  after_script:
+    - .circleci/collect_results_gitlab.sh
+    - .circleci/collect_reports.sh
+  artifacts:
+    when: always
+    paths:
+      - ./reports/*
+      - ./results/*
+    expire_in: 1 week
+
+.default_test_job_debug: &default_test_job_debug
+  dependencies:
+    - build
+  stage: test
+  services:
+    - docker:dind
+    - memcached
+    - rabbitmq
+  script:
+    - echo Applying test task $TEST_TASK
+    - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --stacktrace --no-daemon --debug --scan # > gradle_log.txt 2> gradle_errorlog.txt
+  after_script:
+    - .circleci/collect_results_gitlab.sh
+    - .circleci/collect_reports.sh
+  artifacts:
+    when: always
+    paths:
+      - ./reports/*
+      - ./results/*
+      - gradle_log.txt
+      - gradle_errorlog.txt
+    expire_in: 1 week
+
+clear_build_cache:
+  stage: prepare
+  cache:
+    policy: push
+    key: "build-$CI_COMMIT_REF_SLUG"
+    paths:
+      - $GRADLE_USER_HOME/caches/
+      - $GRADLE_USER_HOME/wrapper/
+      - $GRADLE_USER_HOME/build-cache/
+  when: manual
+  script:
+    - rm -rf $GRADLE_USER_HOME/caches/*
+    - rm -rf $GRADLE_USER_HOME/wrapper/*
+    - rm -rf $GRADLE_USER_HOME/build-cache/*
+
+build:
+  stage: build
+  variables:
+    TEST_TASK: 'test latestDepTest jacocoTestReport jacocoTestCoverageVerification'
+    DOCKER_DRIVER: overlay
+  services:
+    - docker:dind
+  script:
+    - ./apply_branding.sh
+    - GRADLE_OPTS="-Dorg.gradle.jvmargs='-Xmx1G -Xms64M' -Ddatadog.forkedMaxHeapSize=1G -Ddatadog.forkedMinHeapSize=64M" ./gradlew clean :dd-java-agent:shadowJar compileTestGroovy compileLatestDepTestGroovy compileTestScala compileLatestDepTestScala compileTestJava compileLatestDepTestJava --build-cache --parallel --stacktrace --no-daemon --max-workers=8
+    - .circleci/collect_libs.sh
+    - ls -la ./libs/ || true
+#    - GRADLE_OPTS="-Ddatadog.forkedMaxHeapSize=4G -Ddatadog.forkedMinHeapSize=64M" ./gradlew $TEST_TASK --build-cache --parallel --stacktrace --no-daemon --max-workers=6
+  after_script:
+    - .circleci/collect_results_gitlab.sh
+  cache:
+    key: "build-$CI_COMMIT_REF_SLUG"
+    paths:
+      - $GRADLE_USER_HOME
+  artifacts:
+    paths:
+      - build/libs/*.jar
+      - libs/*.jar
+    expire_in: 1 week
+
+debug_test:
+  <<: *default_test_job_debug
+  variables:
+    # We are building on Java8, this is our default JVM so no need to set more homes
+    TEST_TASK: "test jacocoTestReport jacocoTestCoverageVerification"
+
+test_8:
+  <<: *default_test_job
+  variables:
+    # We are building on Java8, this is our default JVM so no need to set more homes
+    TEST_TASK: test jacocoTestReport jacocoTestCoverageVerification
+
+#test_7:
+#  <<: *default_test_job
+#  variables:
+#     TEST_TASK: testJava7
+#
+#
+#test_ibm8:
+#  <<: *default_test_job
+#  variables:
+#    TEST_TASK: testJavaIBM8
+#
+#test_9:
+#  <<: *default_test_job
+#  variables:
+#    TEST_TASK: testJava9
+#
+#test_10:
+#  <<: *default_test_job
+#  variables:
+#     TEST_TASK: testJava10
+#
+#test_11:
+#  <<: *default_test_job
+#  variables:
+#     TEST_TASK: testJava11

@@ -1,60 +1,54 @@
 package datadog.trace.instrumentation.okhttp3;
 
-import static datadog.trace.agent.tooling.ClassLoaderMatcher.classLoaderHasClasses;
-import static io.opentracing.contrib.okhttp3.OkHttpClientSpanDecorator.STANDARD_TAGS;
+import static java.util.Collections.singletonMap;
 import static net.bytebuddy.matcher.ElementMatchers.isConstructor;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
 import com.google.auto.service.AutoService;
-import datadog.trace.agent.tooling.DDAdvice;
-import datadog.trace.agent.tooling.DDTransformers;
-import datadog.trace.agent.tooling.HelperInjector;
 import datadog.trace.agent.tooling.Instrumenter;
-import io.opentracing.contrib.okhttp3.TracingInterceptor;
-import io.opentracing.util.GlobalTracer;
-import java.util.Collections;
-import net.bytebuddy.agent.builder.AgentBuilder;
+import java.util.Map;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.matcher.ElementMatcher;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
 @AutoService(Instrumenter.class)
-public class OkHttp3Instrumentation extends Instrumenter.Configurable {
+public class OkHttp3Instrumentation extends Instrumenter.Default {
 
   public OkHttp3Instrumentation() {
     super("okhttp", "okhttp-3");
   }
 
   @Override
-  public AgentBuilder apply(final AgentBuilder agentBuilder) {
-    return agentBuilder
-        .type(
-            named("okhttp3.OkHttpClient"),
-            classLoaderHasClasses(
-                "okhttp3.Request",
-                "okhttp3.Response",
-                "okhttp3.Connection",
-                "okhttp3.Cookie",
-                "okhttp3.ConnectionPool",
-                "okhttp3.Headers"))
-        .transform(
-            new HelperInjector(
-                "io.opentracing.contrib.okhttp3.OkHttpClientSpanDecorator",
-                "io.opentracing.contrib.okhttp3.OkHttpClientSpanDecorator$1",
-                "io.opentracing.contrib.okhttp3.TagWrapper",
-                "io.opentracing.contrib.okhttp3.TracingInterceptor",
-                "io.opentracing.contrib.okhttp3.RequestBuilderInjectAdapter",
-                "io.opentracing.contrib.okhttp3.TracingCallFactory",
-                "io.opentracing.contrib.okhttp3.TracingCallFactory$NetworkInterceptor",
-                "io.opentracing.contrib.okhttp3.TracingCallFactory$1"))
-        .transform(DDTransformers.defaultTransformers())
-        .transform(
-            DDAdvice.create()
-                .advice(
-                    isConstructor().and(takesArgument(0, named("okhttp3.OkHttpClient$Builder"))),
-                    OkHttp3Advice.class.getName()))
-        .asDecorator();
+  public ElementMatcher<TypeDescription> typeMatcher() {
+    return named("okhttp3.OkHttpClient");
+  }
+
+  @Override
+  public String[] helperClassNames() {
+    return new String[] {
+      "datadog.trace.agent.decorator.BaseDecorator",
+      "datadog.trace.agent.decorator.ClientDecorator",
+      "datadog.trace.agent.decorator.HttpClientDecorator",
+      packageName + ".OkHttpClientDecorator",
+      packageName + ".OkHttpClientDecorator$1",
+      packageName + ".RequestBuilderInjectAdapter",
+      packageName + ".TagWrapper",
+      packageName + ".TracingInterceptor",
+      packageName + ".TracingCallFactory",
+      packageName + ".TracingCallFactory$NetworkInterceptor",
+      packageName + ".TracingCallFactory$1",
+    };
+  }
+
+  @Override
+  public Map<? extends ElementMatcher<? super MethodDescription>, String> transformers() {
+    return singletonMap(
+        isConstructor().and(takesArgument(0, named("okhttp3.OkHttpClient$Builder"))),
+        OkHttp3Advice.class.getName());
   }
 
   public static class OkHttp3Advice {
@@ -66,8 +60,7 @@ public class OkHttp3Instrumentation extends Instrumenter.Configurable {
           return;
         }
       }
-      final TracingInterceptor interceptor =
-          new TracingInterceptor(GlobalTracer.get(), Collections.singletonList(STANDARD_TAGS));
+      final TracingInterceptor interceptor = new TracingInterceptor();
       builder.addInterceptor(interceptor);
       builder.addNetworkInterceptor(interceptor);
     }

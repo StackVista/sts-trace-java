@@ -1,10 +1,8 @@
 package datadog.trace.common.writer;
 
 import datadog.opentracing.DDSpan;
-import datadog.trace.common.Service;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -12,7 +10,7 @@ import java.util.concurrent.TimeoutException;
 
 /** List writer used by tests mostly */
 public class ListWriter extends CopyOnWriteArrayList<List<DDSpan>> implements Writer {
-  private final List<CountDownLatch> latches = new LinkedList<>();
+  private final List<CountDownLatch> latches = new ArrayList<>();
 
   public List<DDSpan> firstTrace() {
     return get(0);
@@ -40,15 +38,14 @@ public class ListWriter extends CopyOnWriteArrayList<List<DDSpan>> implements Wr
       }
       latches.add(latch);
     }
-    if (!latch.await(5, TimeUnit.SECONDS)) {
-      throw new TimeoutException("Timeout waiting for " + number + " trace(s).");
+    if (!latch.await(20, TimeUnit.SECONDS)) {
+      throw new TimeoutException(
+          "Timeout waiting for " + number + " trace(s). ListWriter.size() == " + size());
     }
   }
 
   @Override
-  public void writeServices(final Map<String, Service> services) {
-    throw new UnsupportedOperationException();
-  }
+  public void incrementTraceCount() {}
 
   @Override
   public void start() {
@@ -70,6 +67,6 @@ public class ListWriter extends CopyOnWriteArrayList<List<DDSpan>> implements Wr
 
   @Override
   public String toString() {
-    return "ListWriter { size=" + this.size() + " }";
+    return "ListWriter { size=" + size() + " }";
   }
 }
