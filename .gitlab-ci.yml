@@ -115,6 +115,7 @@ publish:
   dependencies:
     - build
   script:
+    - printenv
     - GRADLE_OPTS="-Dorg.gradle.jvmargs='-Xmx1G -Xms64M' -Ddatadog.forkedMaxHeapSize=1G -Ddatadog.forkedMinHeapSize=64M" ./gradlew publish --build-cache --parallel --stacktrace --no-daemon --max-workers=8
   cache:
     key: "build-$CI_COMMIT_REF_SLUG"

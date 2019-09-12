@@ -150,10 +150,10 @@ publishing {
    maven {
       url "s3://stackstate-trace-java/sts-trace-java"
       credentials(AwsCredentials) {
-        accessKey "${System.getenv('TF_VAR_AWS_ACCESS_KEY_ID')}"
-        secretKey "${System.getenv('TF_VAR_AWS_SECRET_ACCESS_KEY')}"
+        accessKey "${System.getenv('AWS_ACCESS_KEY_ID')}"
+        secretKey "${System.getenv('AWS_SECRET_ACCESS_KEY')}"
       }
-    } 
+    }
   }
 
   publications {
