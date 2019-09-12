@@ -4,7 +4,7 @@ image: datadog/dd-trace-java-docker-build:latest
 stages:
   - prepare
   - build
-  - test
+#  - test
   - publish
 variables:
    GRADLE_USER_HOME: $PWD/.gradle_home
@@ -98,17 +98,17 @@ build:
       - libs/*.jar
     expire_in: 1 week
 
-debug_test:
-  <<: *default_test_job_debug
-  variables:
-    # We are building on Java8, this is our default JVM so no need to set more homes
-    TEST_TASK: "test jacocoTestReport jacocoTestCoverageVerification"
+# debug_test:
+#   <<: *default_test_job_debug
+#   variables:
+#     # We are building on Java8, this is our default JVM so no need to set more homes
+#     TEST_TASK: "test jacocoTestReport jacocoTestCoverageVerification"
 
-test_8:
-  <<: *default_test_job
-  variables:
-    # We are building on Java8, this is our default JVM so no need to set more homes
-    TEST_TASK: test jacocoTestReport jacocoTestCoverageVerification
+# test_8:
+#   <<: *default_test_job
+#   variables:
+#     # We are building on Java8, this is our default JVM so no need to set more homes
+#     TEST_TASK: test jacocoTestReport jacocoTestCoverageVerification
 
 publish:
   stage: publish
