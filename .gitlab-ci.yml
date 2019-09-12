@@ -5,7 +5,7 @@ stages:
   - prepare
   - build
   - test
-
+  - publish
 variables:
    GRADLE_USER_HOME: $PWD/.gradle_home
 
@@ -109,6 +109,18 @@ test_8:
   variables:
     # We are building on Java8, this is our default JVM so no need to set more homes
     TEST_TASK: test jacocoTestReport jacocoTestCoverageVerification
+
+publish:
+  stage: publish
+  dependencies:
+    - build
+  script:
+    - GRADLE_OPTS="-Dorg.gradle.jvmargs='-Xmx1G -Xms64M' -Ddatadog.forkedMaxHeapSize=1G -Ddatadog.forkedMinHeapSize=64M" ./gradlew publish --build-cache --parallel --stacktrace --no-daemon --max-workers=8
+  cache:
+    key: "build-$CI_COMMIT_REF_SLUG"
+    paths:
+      - $GRADLE_USER_HOME
+
 
 #test_7:
 #  <<: *default_test_job
